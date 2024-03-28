@@ -1,36 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ConfigFile.hpp                                     :+:      :+:    :+:   */
+/*   ParsingException.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/03/27 18:16:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/03/28 11:59:23 by mguerga          ###   ########.fr       */
+/*   Created: 2024/03/28 11:48:07 by mguerga           #+#    #+#             */
+/*   Updated: 2024/03/28 12:05:44 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef __ConfigFile_hpp__
-# define __ConfigFile_hpp__
+#ifndef __ParsingException_hpp__
+# define __ParsingException_hpp__
 
 # include <iostream>
-# include "ParsingException.hpp"
 
-class ConfigFile
+class ParsingException : public std::exception	
 {
 	private:
-
-		int exit_status;
-		std::string file_name;
-
-		ConfigFile(const ConfigFile& o);
-		ConfigFile& operator=(const ConfigFile& o);
+		int ern;
+		ParsingException();
 
 	public:
-		ConfigFile(const std::string);
-		~ConfigFile();
-		int getExit_status() const;
-
+		ParsingException(int _ern);				
+		const char *what() const throw ();
 };
 
 #endif

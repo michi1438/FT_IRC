@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:03:13 by mguerga           #+#    #+#             */
-/*   Updated: 2024/03/27 18:31:24 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/03/28 11:59:51 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,17 @@
 
 int	main(int ac, char** av)
 {
-	if (ac != 2)
+	try
 	{
-		std::cout << "ERR: 1 config_file.conf is expected" << std::endl;
-		return (1);
+		if (ac != 2)
+			throw ParsingException(0);
+		ConfigFile conf(av[1]);
 	}
-	ConfigFile conf(av[1]);
-	return conf.getExit_status();
+
+	catch (std::exception& e)
+	{
+		return (std::cout << e.what() << std::endl && 1);
+	}
+	return 0;
 }
 

@@ -6,7 +6,7 @@
 #    By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/27 16:42:52 by mguerga           #+#    #+#              #
-#    Updated: 2024/03/27 18:37:44 by mguerga          ###   ########.fr        #
+#    Updated: 2024/03/28 12:00:27 by mguerga          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ CXX = g++
 
 CXXFLAGS = -Werror -Wall -Wextra -std=c++98
 
-SRCS = main.cpp ConfigFile.cpp
+SRCS = main.cpp ConfigFile.cpp ParsingException.cpp
 
 OBJS = $(SRCS:cpp=o)
 
