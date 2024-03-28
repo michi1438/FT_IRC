@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/03/28 12:43:12 by robin            ###   ########.fr       */
+/*   Updated: 2024/03/28 13:09:12 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include <string>
 #include <fstream>
 
-std::string readHtmlFile(const std::string& filename) {
+std::string readHtmlFile(const char *filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         return ""; // Ou une erreur appropriée
