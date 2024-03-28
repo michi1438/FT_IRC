@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 18:16:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/03/28 11:59:23 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/03/28 19:27:50 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 # define __ConfigFile_hpp__
 
 # include <iostream>
+# include <fstream>
+# include <string>
 # include "ParsingException.hpp"
 
 class ConfigFile

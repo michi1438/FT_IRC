@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/28 11:56:33 by mguerga           #+#    #+#             */
-/*   Updated: 2024/03/28 12:17:52 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/03/28 19:29:32 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ const char* ParsingException::what() const throw ()
 			return ("ERR: Need 1 arg");
 		case 1:
 			return ("ERR: arg is expected in the form EXAMPLE.conf");
+		case 2:
+			return ("ERR: The configuration file does'nt open.");
 		default:
 			return ("ERR: Unspecified parsing error");
 	}
