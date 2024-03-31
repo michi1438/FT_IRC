@@ -59,7 +59,7 @@ int main() {
         }
 
         for (int i = 0; i < num_events; ++i) {
-            if ((int)events[i].ident == server_fd) {
+            if (events[i].ident == server_fd) {
                 // Accept new connection
                 struct sockaddr_in client_addr;
                 socklen_t client_len = sizeof(client_addr);
@@ -92,13 +92,25 @@ int main() {
                 }
             } else {
                 // Handle client request
-                // Here you would implement the logic to handle incoming requests
-                // and send responses asynchronously
-                std::cout << "Request received from client" << std::endl;
+				char response_header[] = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+				send(events[i].ident, response_header, strlen(response_header), 0);
+
+				FILE *file = fopen("index.html", "r");
+				if (file == NULL) {
+					perror("Error opening file");
+					exit(EXIT_FAILURE);
+				}
+
+				char buffer[1024];
+				size_t bytes_read;
+				while ((bytes_read = fread(buffer, 1, sizeof(buffer), file)) > 0) {
+					send(events[i].ident, buffer, bytes_read, 0);
+				}
+				fclose(file);
+//				close(events[i].ident);
             }
         }
     }
-
     close(server_fd);
     close(kq);
 
