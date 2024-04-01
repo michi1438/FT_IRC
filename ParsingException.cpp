@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/28 11:56:33 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/01 11:35:08 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/01 16:30:01 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ const char* ParsingException::what() const throw ()
 		}
 		case 4:
 			return ("ERR: The configuration file has too many lines.");
+		case 5:
+			return (".");
 		default:
 			return ("ERR: Unspecified parsing error");
 	}
