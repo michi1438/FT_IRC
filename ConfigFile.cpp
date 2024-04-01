@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/01 16:36:28 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/01 21:51:36 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,7 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 	while (std::getline(conf_file, line) && i++ < CONFIG_FILE_MAX_SIZE)
 	{
 		std::string sub = line.substr(0, line.find(" "));	
-		
 		_map[sub.substr(0, 4)] = line.substr(line.rfind(" ") + 1, line.size());
-		//std::cout << _map[sub.substr(0, 4)] << std::endl;
 	}
 	this->checker();
 	if (i == CONFIG_FILE_MAX_SIZE)
