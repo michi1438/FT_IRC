@@ -22,15 +22,16 @@
 #define MAX_EVENTS 64
 #define PORT 8080
 
-std::string readHtmlFile(const char *filename) {
+std::string readHtmlFile(const char *filename)
+{
     std::ifstream file(filename);
-    if (!file.is_open()) {
+    if (!file.is_open())
+	{
         return ""; // Ou une erreur appropriée
     }
 
     std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     file.close();
-
     return content;
 }
 
