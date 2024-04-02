@@ -13,16 +13,28 @@
 #include "ConfigFile.hpp"
 #include <iostream>
 
+int testconffile(int, char**, std::string*);
+
 int	main(int ac, char** av)
+{
+	std::string conf_file;
+	testconffile(ac, av, &conf_file);
+	ConfigFile conf(conf_file);
+	//init_ws(conf);
+	//std::cout << conf.getMap("srvr") << std::endl;
+	return 0;
+}
+
+int testconffile(int ac, char** av, std::string* conf_file)
 {
 	try
 	{
 		if (ac > 2)
 			throw ParsingException(0);
 		else if (ac == 2)
-			ConfigFile conf(av[1]);
+			*conf_file = av[1];
 		else
-			ConfigFile conf("Conf/default.conf");
+			*conf_file = "Conf/default.conf";
 	}
 	catch (std::exception& e)
 	{
@@ -30,4 +42,3 @@ int	main(int ac, char** av)
 	}
 	return 0;
 }
-
