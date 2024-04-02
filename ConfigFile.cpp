@@ -52,3 +52,8 @@ void ConfigFile::checker(void)
 		}
 	}
 }
+
+std::string ConfigFile::getMap(std::string key)
+{
+	return this->_map[key];
+}

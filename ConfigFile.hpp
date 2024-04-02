@@ -36,6 +36,7 @@ class ConfigFile
 		void checker();
 		ConfigFile(const std::string);
 		~ConfigFile();
+		std::string getMap(std::string);		
 
 };
 
