@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/01 21:51:36 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/03 10:58:46 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ void ConfigFile::checker(void)
 	{
 		if (_map.find(must_have[i]) == _map.end())
 		{
-			std::cout << "ERR: Could'nt find" << must_have[i] << "in the config file";
+			std::cout << "ERR: Could'nt find " << must_have[i] << " in the config file";
 			throw ParsingException(5);
 		}
 	}
