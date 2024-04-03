@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 18:16:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/01 16:09:03 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/03 13:28:15 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@
 # include <fstream>
 # include <string>
 # include <map>
-# include <vector>
 # include "ParsingException.hpp"
 
 class ConfigFile
@@ -33,10 +32,10 @@ class ConfigFile
 		ConfigFile& operator=(const ConfigFile& o);
 
 	public:
-		void checker();
+		void checker() const;
 		ConfigFile(const std::string);
 		~ConfigFile();
-		std::string getMap(std::string);		
+		const char* getMap(std::string);		
 
 };
 

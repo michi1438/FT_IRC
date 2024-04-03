@@ -1,26 +1,16 @@
-#include <sys/event.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <fstream>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   webserv.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/03 11:15:52 by mguerga           #+#    #+#             */
+/*   Updated: 2024/04/03 13:32:34 by mguerga          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#define RED     "\033[31m"
-#define RESET   "\033[0m"
-#define RED     "\033[31m"      // Rouge
-#define GREEN   "\033[32m"      // Vert
-#define YELLOW  "\033[33m"      // Jaune
-#define BLUE    "\033[34m"      // Bleu
-#define MAGENTA "\033[35m"      // Magenta
-#define CYAN    "\033[36m"      // Cyan
-
-#define MAX_EVENTS 64
-#define PORT 8080
+#include "Centralinclude.hpp"
 
 std::string readHtmlFile(const char *filename)
 {
@@ -35,7 +25,9 @@ std::string readHtmlFile(const char *filename)
     return content;
 }
 
-ilt init_ws() {
+int init_ws(ConfigFile& conf) 
+{
+	(void)conf;
     int kq = kqueue();
     if (kq == -1)
 	{
@@ -53,7 +45,7 @@ ilt init_ws() {
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(PORT);
+    server_addr.sin_port = htons(std::atoi(conf.getMap("prtn")));
 
     if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
 	{
@@ -76,7 +68,7 @@ ilt init_ws() {
         exit(EXIT_FAILURE);
     }
 
-    std::cout << "Server started. Listening on port " << PORT << std::endl;
+    std::cout << "Server started. Listening on port " << conf.getMap("prtn") << std::endl;
 
     while (true)
 	{

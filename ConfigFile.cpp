@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/03 10:58:46 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/03 13:27:48 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 	while (std::getline(conf_file, line) && i++ < CONFIG_FILE_MAX_SIZE)
 	{
 		std::string sub = line.substr(0, line.find(" "));	
-		_map[sub.substr(0, 4)] = line.substr(line.rfind(" ") + 1, line.size());
+		_map[sub.substr(0, 4)] = (line.substr(line.rfind(" ") + 1, line.size()));
 	}
 	this->checker();
 	if (i == CONFIG_FILE_MAX_SIZE)
@@ -36,11 +36,11 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 ConfigFile::~ConfigFile(void)
 {}
 
-void ConfigFile::checker(void)
+void ConfigFile::checker(void) const
 {
 	int must_have_size = 4;
 	int i = -1;
-	std::map<std::string, std::string>::iterator it = _map.begin();
+	std::map<std::string, std::string>::const_iterator it = _map.begin();
 	std::string must_have[must_have_size] = {"srvr", "prtn", "root", "lcbs"}; // TODO add all the must_have elements...
 
 	while (it != _map.end() && i++ < must_have_size - 1)
@@ -53,7 +53,7 @@ void ConfigFile::checker(void)
 	}
 }
 
-std::string ConfigFile::getMap(std::string key)
+const char *ConfigFile::getMap(std::string key)
 {
-	return this->_map[key];
+	return this->_map[key].c_str();
 }

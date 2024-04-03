@@ -6,12 +6,11 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:03:13 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/03 10:59:20 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/03 12:33:14 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ConfigFile.hpp"
-#include <iostream>
+#include "Centralinclude.hpp"
 
 int testconffile(int, char**, std::string*);
 
