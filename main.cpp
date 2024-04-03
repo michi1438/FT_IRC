@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/03/28 14:55:10 by robin            ###   ########.fr       */
+/*   Updated: 2024/03/30 15:41:19 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,11 +71,12 @@ int main() {
         return 1;
     }
 
-    std::cout << YELLOW << "Server listening on port 8000 ..." << RESET << std::endl;
+    std::cout << YELLOW << "Server listening on port " << ntohs(server_addr.sin_port) << " ..." << RESET << std::endl;
+
 
     std::vector<pollfd> fds(1); // Initialise le tableau de pollfd avec une seule entrée pour le descripteur de fichier du socket d'écoute
     fds[0].fd = listener;
-    fds[0].events = POLLIN;
+    fds[0].events = POLLIN | POLLOUT;
 
     while (true) {
         int pollResult = poll(fds.data(), fds.size(), -1); // Attend indéfiniment les événements d'E/S
@@ -85,24 +86,26 @@ int main() {
             return 1;
         }
 
-        for (size_t i = 0; i < fds.size(); ++i) {
-            if (fds[i].revents & POLLIN) {
-                if (fds[i].fd == listener) {
-                    // Nouvelle connexion entrante
-                    int client_socket = accept(listener, NULL, NULL);
-                    if (client_socket == -1) {
-                        perror("accept");
-                        return 1;
-                    }
-                    
-                    // Ajouter une nouvelle entrée à fds
-                    pollfd new_fd;
-                    new_fd.fd = client_socket;
-                    new_fd.events = POLLIN | POLLOUT;
-                    fds.push_back(new_fd);
-                } else {
-                    // Connexion existante a des données à lire
-                    int client_socket = fds[i].fd;
+        if (fds[0].revents & POLLIN) {
+            // Nouvelle connexion entrante
+            int client_socket = accept(listener, NULL, NULL);
+            if (client_socket == -1) {
+                perror("accept");
+                return 1;
+            }
+            
+            // Ajouter une nouvelle entrée à fds
+            pollfd new_fd;
+            new_fd.fd = client_socket;
+            new_fd.events = POLLIN | POLLOUT;
+            fds.push_back(new_fd);
+        }
+
+        for (size_t i = 1; i < fds.size(); ++i) {
+            if (fds[i].revents & (POLLIN | POLLOUT)) {
+                // Connexion existante a des données à lire ou à écrire
+                int client_socket = fds[i].fd;
+                if (fds[i].revents & POLLIN) {
                     std::cout << GREEN << "Client connected." << RESET << std::endl;
 
                     // Réponse HTTP avec le contenu de socket.html
@@ -114,19 +117,17 @@ int main() {
                         close(client_socket);
                         return 1;
                     }
-
-                    // Ferme le socket client
-                    close(client_socket);
-                    std::cout << BLUE << "Response sent." << RESET << std::endl;
-
-                    // Supprime le descripteur de fichier du tableau fds
-                    fds.erase(fds.begin() + i);
                 }
+
+                // Ferme le socket client
+                close(client_socket);
+                std::cout << BLUE << "Response sent." << RESET << std::endl;
+
+                // Supprime le descripteur de fichier du tableau fds
+                fds.erase(fds.begin() + i);
             }
         }
     }
 
     return 0;
 }
-
-
