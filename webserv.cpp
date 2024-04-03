@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:15:52 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/03 13:32:34 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/03 17:35:51 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,8 @@ int init_ws(ConfigFile& conf)
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(std::atoi(conf.getMap("prtn")));
 
+	const int enable = 1;
+	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)); // TODO cleanup
     if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
 	{
         perror("Error in bind");
@@ -109,7 +111,7 @@ int init_ws(ConfigFile& conf)
                 std::cout << "New connection accepted" << std::endl;
 
                 // Add client socket to kqueue
-                EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+				EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
                 if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1)
 				{
                     perror("Error in kevent");
@@ -118,8 +120,10 @@ int init_ws(ConfigFile& conf)
             }
 			else
 			{
+				char buffer[4096];
                 int client_socket = events[i].ident;
-
+				
+				recv(client_socket, buffer, sizeof(buffer), 0);
 				// Réponse HTTP avec le contenu de socket.html
 				std::string htmlContent = readHtmlFile("index.html");
 				std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
@@ -127,10 +131,8 @@ int init_ws(ConfigFile& conf)
 				if (send(client_socket, response.c_str(), response.size(), 0) == -1)
 				{
 					perror("Error in send");
-					close(client_socket);
 					return 1;
 				}
-
 				close(client_socket);
 				std::cout << BLUE << "Response sent." << RESET << std::endl;
             }
