@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/04/04 16:45:37 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/04 17:01:02 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ std::string readHttpRequest(int client_socket) {
     std::string request;
     char buffer[1024];
     ssize_t bytes_read;
-    
+
     // Lire les données du socket jusqu'à ce que la requête soit complètement reçue
     while ((bytes_read = recv(client_socket, buffer, sizeof(buffer), 0)) > 0) {
         std::cout << "Bytes read: " << bytes_read << std::endl;
@@ -54,7 +54,7 @@ std::string readHttpRequest(int client_socket) {
     }
 
     std::cout << "Final request:\n" << request << std::endl;
-    
+
     // Vérifier si la requête est une requête POST et si elle contient des données de formulaire multipart
     size_t post_index = request.find("POST");
     if (post_index != std::string::npos) {
@@ -70,13 +70,9 @@ std::string readHttpRequest(int client_socket) {
     return "";
 }
 
-
-
-std::string readHtmlFile(const char *filename)
-{
+std::string readHtmlFile(const char *filename) {
     std::ifstream file(filename);
-    if (!file.is_open())
-    {
+    if (!file.is_open()) {
         return ""; // Ou une erreur appropriée
     }
 
@@ -89,52 +85,55 @@ std::string readHtmlFile(const char *filename)
     return content;
 }
 
-void handleFileUpload(const std::string& request_body) {
-    std::cout << RED << "DU CON" << RESET << std::endl;
-    // Trouver les limites de chaque partie du formulaire multipart
-    std::string boundary = request_body.substr(request_body.find("boundary=") + 9);
-    boundary = "--" + boundary;
+void handleFileUpload(int client_socket, const std::string& request_body) {
+    (void)client_socket;
+    std::cout << RED << "Handling file upload request" << RESET << std::endl;
 
-    // Trouver les délimiteurs entre les parties
-    std::vector<std::string> parts;
-    size_t pos = 0;
-    while ((pos = request_body.find(boundary, pos)) != std::string::npos) {
-        parts.push_back(request_body.substr(pos));
-        pos += boundary.length();
+    // Trouver le début de la partie du corps de la requête contenant les données du fichier
+    std::string boundary = "boundary=";
+    size_t boundary_pos = request_body.find(boundary);
+    if (boundary_pos == std::string::npos) {
+        std::cerr << "Boundary not found in request body" << std::endl;
+        return;
     }
 
-    // Parcourir chaque partie pour extraire les données du fichier
-    for (size_t i = 0; i < parts.size(); ++i) {
-        // Trouver le nom de fichier
-        size_t filename_start = parts[i].find("filename=\"") + 10;
-        size_t filename_end = parts[i].find("\"", filename_start);
-        std::string filename = parts[i].substr(filename_start, filename_end - filename_start);
-
-        // Trouver le début des données binaires
-        size_t data_start = parts[i].find("\r\n\r\n") + 4;
-        std::string filedata = parts[i].substr(data_start);
-
-        // Enregistrer les données dans un fichier
-        std::ofstream outfile(filename.c_str(), std::ios::binary);
-        outfile.write(filedata.c_str(), filedata.size());
-        outfile.close();
-
-        std::cout << MAGENTA <<"File uploaded: " << filename << RESET << std::endl;
+    // Extraire le délimiteur de la requête multipart
+    boundary = "--" + request_body.substr(boundary_pos + boundary.length());
+    size_t file_start = request_body.find(boundary);
+    if (file_start == std::string::npos) {
+        std::cerr << "File data not found in request body" << std::endl;
+        return;
     }
+
+    // Trouver la position de début et de fin des données binaires du fichier
+    size_t data_start = request_body.find("\r\n\r\n", file_start);
+    if (data_start == std::string::npos) {
+        std::cerr << "Invalid file data format" << std::endl;
+        return;
+    }
+    data_start += 4; // Passer les caractères de séparation
+
+    // Extraire les données du fichier
+    std::string file_data = request_body.substr(data_start);
+
+    // Vous pouvez maintenant traiter les données du fichier
+    // Par exemple, les enregistrer sur le serveur
+    // ou les traiter selon vos besoins
+
+    // Pour l'instant, nous affichons simplement les données du fichier
+    std::cout << "File data received:" << std::endl;
+    std::cout << file_data << std::endl;
 }
-
 
 int main() {
     int kq = kqueue();
-    if (kq == -1)
-    {
+    if (kq == -1) {
         perror("Error in kqueue");
         exit(EXIT_FAILURE);
     }
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd == -1)
-    {
+    if (server_fd == -1) {
         perror("Error in socket");
         exit(EXIT_FAILURE);
     }
@@ -144,14 +143,12 @@ int main() {
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(PORT);
 
-    if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
-    {
+    if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
         perror("Error in bind");
         exit(EXIT_FAILURE);
     }
 
-    if (listen(server_fd, 10) == -1)
-    {
+    if (listen(server_fd, 10) == -1) {
         perror("Error in listen");
         exit(EXIT_FAILURE);
     }
@@ -167,38 +164,31 @@ int main() {
 
     std::cout << YELLOW << "Server started. Listening on port " << PORT << RESET << std::endl;
 
-    while (true)
-    {
+    while (true) {
         int num_events = kevent(kq, NULL, 0, events, MAX_EVENTS, NULL);
-        if (num_events == -1)
-        {
+        if (num_events == -1) {
             perror("Error in kevent");
             exit(EXIT_FAILURE);
         }
 
-        for (int i = 0; i < num_events; ++i)
-        {
-            if ((int)events[i].ident == server_fd)
-            {
+        for (int i = 0; i < num_events; ++i) {
+            if ((int)events[i].ident == server_fd) {
                 // Accept new connection
                 struct sockaddr_in client_addr;
                 socklen_t client_len = sizeof(client_addr);
                 int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
-                if (client_fd == -1)
-                {
+                if (client_fd == -1) {
                     perror("Error in accept");
                     exit(EXIT_FAILURE);
                 }
 
                 // Set client socket to non-blocking
-                if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1)
-                {
+                if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
                     perror("Error in fcntl");
                     exit(EXIT_FAILURE);
                 }
 
-                if (fcntl(client_fd, F_SETFL, FD_CLOEXEC) == -1)
-                {
+                if (fcntl(client_fd, F_SETFL, FD_CLOEXEC) == -1) {
                     perror("Error in fcntl");
                     exit(EXIT_FAILURE);
                 }
@@ -207,29 +197,25 @@ int main() {
 
                 // Add client socket to kqueue
                 EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-                if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1)
-                {
+                if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1) {
                     perror("Error in kevent");
                     exit(EXIT_FAILURE);
                 }
-            }
-            else
-            {
+            } else {
                 int client_socket = events[i].ident;
 
                 // Lire la requête HTTP pour l'upload de fichier
                 std::string httpRequestContent = readHttpRequest(client_socket);
-                if (httpRequestContent.find("POST") != std::string::npos && httpRequestContent.find("multipart/form-data") != std::string::npos) {
-                    std::cout << "File handled\n";
-                    handleFileUpload(httpRequestContent);
+                if (!httpRequestContent.empty()) {
+                    std::cout << "File upload request received\n";
+                    handleFileUpload(client_socket, httpRequestContent);
                 }
 
                 // Réponse HTTP avec le contenu de socket.html
                 std::string htmlContent = readHtmlFile("socket.html");
                 std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
 
-                if (send(client_socket, response.c_str(), response.size(), 0) == -1)
-                {
+                if (send(client_socket, response.c_str(), response.size(), 0) == -1) {
                     perror("Error in send");
                     close(client_socket);
                     return 1;
