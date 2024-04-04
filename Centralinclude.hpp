@@ -6,12 +6,11 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/03 17:33:11 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/04 12:21:18 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
-#include <sys/event.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

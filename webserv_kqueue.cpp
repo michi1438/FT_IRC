@@ -1,16 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   webserv.cpp                                        :+:      :+:    :+:   */
+/*   webserv_kqueue.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/03 11:15:52 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/03 17:35:51 by mguerga          ###   ########.fr       */
+/*   Created: 2024/04/04 09:41:04 by mguerga           #+#    #+#             */
+/*   Updated: 2024/04/04 12:11:12 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Centralinclude.hpp"
+#include <sys/event.h>
 
 std::string readHtmlFile(const char *filename)
 {
@@ -27,7 +28,6 @@ std::string readHtmlFile(const char *filename)
 
 int init_ws(ConfigFile& conf) 
 {
-	(void)conf;
     int kq = kqueue();
     if (kq == -1)
 	{
@@ -112,11 +112,7 @@ int init_ws(ConfigFile& conf)
 
                 // Add client socket to kqueue
 				EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-                if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1)
-				{
-                    perror("Error in kevent");
-                    exit(EXIT_FAILURE);
-                }
+                kevent(kq, &change_event, 1, NULL, 0, NULL);
             }
 			else
 			{

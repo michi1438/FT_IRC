@@ -6,9 +6,11 @@
 #    By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/27 16:42:52 by mguerga           #+#    #+#              #
-#    Updated: 2024/04/03 12:47:43 by mguerga          ###   ########.fr        #
+#    Updated: 2024/04/04 12:26:23 by mguerga          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
+
+OS := $(shell uname)
 
 NAME = webserv
 
@@ -16,18 +18,27 @@ CXX = g++
 
 CXXFLAGS = -Werror -Wall -Wextra -std=c++98
 
-SRCS = main.cpp ConfigFile.cpp ParsingException.cpp webserv.cpp
+SRCS = main.cpp ConfigFile.cpp ParsingException.cpp
 
+ifeq ($(OS), Darwin)
+SRCS2 = webserv_kqueue.cpp
+endif
+
+ifeq ($(OS), Linux)
+SRCS2 = webserv_epoll.cpp
+endif
 
 OBJS = $(SRCS:cpp=o)
 
+OBJS2 = $(SRCS2:cpp=o)
+
 all: $(NAME)
 
-$(NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME) -lkqueue
+$(NAME): $(OBJS) $(OBJS2)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(OBJS2) -o $(NAME)
 
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJS) $(OBJS2)
 
 fclean: clean
 	rm -f $(NAME)
