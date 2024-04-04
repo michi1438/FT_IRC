@@ -1,26 +1,48 @@
-NAME =     		webserv
-CC =			c++
-CFLAGS =		-Wall -Wextra -Werror -std=c++98 #-pedantic
-RM =			rm -f
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/03/27 16:42:52 by mguerga           #+#    #+#              #
+#    Updated: 2024/04/04 14:44:30 by lzito            ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
-SRCS =			webserv.cpp
+OS := $(shell uname)
 
-OBJS =			$(SRCS:.cpp=.o)
+NAME = webserv
+
+CXX = c++
+
+CXXFLAGS = -Werror -Wall -Wextra -std=c++98
+
+SRCS = main.cpp ConfigFile.cpp ParsingException.cpp
+
+ifeq ($(OS), Darwin)
+SRCS2 = webserv_kqueue.cpp
+endif
+
+ifeq ($(OS), Linux)
+SRCS2 = webserv_epoll.cpp
+endif
+
+OBJS = $(SRCS:cpp=o)
+
+OBJS2 = $(SRCS2:cpp=o)
 
 all: $(NAME)
 
-%.o: %.cpp Makefile
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(NAME): $(OBJS)
-	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+$(NAME): $(OBJS) $(OBJS2)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(OBJS2) -o $(NAME)
 
 clean:
-	@$(RM) $(OBJS)
+	rm -f $(OBJS) $(OBJS2)
 
 fclean: clean
-	@$(RM) $(NAME)
+	rm -f $(NAME)
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: clean fclean re
