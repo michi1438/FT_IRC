@@ -6,11 +6,11 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:03:13 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/04 14:48:39 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/04 15:56:02 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Centralinclude.hpp"
+#include "../headers/Centralinclude.hpp"
 
 int testconffile(int, char**, std::string*);
 
@@ -38,6 +38,6 @@ int testconffile(int ac, char** av, std::string* conf_file)
 	else if (ac == 2)
 		*conf_file = av[1];
 	else
-		*conf_file = "Conf/default.conf";
+		*conf_file = "conf/default.conf";
 	return 0;
 }

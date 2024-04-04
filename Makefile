@@ -6,7 +6,7 @@
 #    By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/27 16:42:52 by mguerga           #+#    #+#              #
-#    Updated: 2024/04/04 14:44:30 by lzito            ###   ########.fr        #
+#    Updated: 2024/04/04 15:55:33 by lzito            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,14 +18,16 @@ CXX = c++
 
 CXXFLAGS = -Werror -Wall -Wextra -std=c++98
 
-SRCS = main.cpp ConfigFile.cpp ParsingException.cpp
+SRCS = 	src/main.cpp \
+		src/ConfigFile.cpp \
+		src/ParsingException.cpp
 
 ifeq ($(OS), Darwin)
-SRCS2 = webserv_kqueue.cpp
+SRCS2 = src/webserv_kqueue.cpp
 endif
 
 ifeq ($(OS), Linux)
-SRCS2 = webserv_epoll.cpp
+SRCS2 = src/webserv_epoll.cpp
 endif
 
 OBJS = $(SRCS:cpp=o)

@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/04 12:21:18 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/04 15:23:19 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <err.h>
 
 #include "ConfigFile.hpp"
@@ -34,7 +35,7 @@
 #define CYAN    "\033[36m"      // Cyan
 
 #define MAX_EVENTS 64
-#define PORT 8080
+//#define PORT 8080
 
 //webserv.cpp
 int			init_ws(ConfigFile& conf);

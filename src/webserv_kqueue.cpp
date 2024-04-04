@@ -1,27 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   webserv_kqueue.cpp                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
+/*   Updated: 2024/04/04 15:56:46 by lzito            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../headers/Centralinclude.hpp"
 #include <sys/event.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-
-#define RED     "\033[31m"
-#define RESET   "\033[0m"
-#define RED     "\033[31m"      // Rouge
-#define GREEN   "\033[32m"      // Vert
-#define YELLOW  "\033[33m"      // Jaune
-#define BLUE    "\033[34m"      // Bleu
-#define MAGENTA "\033[35m"      // Magenta
-#define CYAN    "\033[36m"      // Cyan
-
-#define MAX_EVENTS 64
-#define PORT 8080
 
 std::string readHtmlFile(const char *filename)
 {
@@ -36,7 +26,8 @@ std::string readHtmlFile(const char *filename)
     return content;
 }
 
-int main() {
+int init_ws(ConfigFile& conf)
+{
     int kq = kqueue();
     if (kq == -1)
 	{
@@ -54,7 +45,10 @@ int main() {
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(PORT);
+    server_addr.sin_port = htons(std::atoi(conf.getMap("prtn")));
+	
+	const int enable = 1;
+	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)); // TODO cleanup
 
     if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
 	{
@@ -72,12 +66,13 @@ int main() {
     struct kevent change_event;
     EV_SET(&change_event, server_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
 
-    if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1) {
+    if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1)
+	{
         perror("Error in kevent");
         exit(EXIT_FAILURE);
     }
 
-    std::cout << "Server started. Listening on port " << PORT << std::endl;
+    std::cout << "Server started. Listening on port " << conf.getMap("prtn") << std::endl;
 
     while (true)
 	{

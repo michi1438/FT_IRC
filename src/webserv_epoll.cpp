@@ -1,40 +1,45 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   webserv_kqueue.cpp                                 :+:      :+:    :+:   */
+/*   webserv_epoll.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/04 09:41:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/04 12:11:12 by mguerga          ###   ########.fr       */
+/*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
+/*   Updated: 2024/04/04 15:56:37 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Centralinclude.hpp"
-#include <sys/event.h>
+#include "../headers/Centralinclude.hpp"
+#include <sys/epoll.h>
 
 std::string readHtmlFile(const char *filename)
 {
     std::ifstream file(filename);
     if (!file.is_open())
 	{
-        return ""; // Ou une erreur appropriée
+		std::ifstream file("ERR500/50x.html");
+		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		file.close();
+		return content;
     }
-
-    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    file.close();
-    return content;
+	else
+	{
+		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		file.close();
+		return content;
+	}
 }
 
 int init_ws(ConfigFile& conf) 
 {
-    int kq = kqueue();
-    if (kq == -1)
+    int ep = epoll_create1(0);
+    if (ep == -1)
 	{
-        perror("Error in kqueue");
+        perror("Error in epoll");
         exit(EXIT_FAILURE);
     }
-
+	
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1)
 	{
@@ -49,6 +54,7 @@ int init_ws(ConfigFile& conf)
 
 	const int enable = 1;
 	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)); // TODO cleanup
+
     if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
 	{
         perror("Error in bind");
@@ -61,29 +67,28 @@ int init_ws(ConfigFile& conf)
         exit(EXIT_FAILURE);
     }
 
-    struct kevent events[MAX_EVENTS];
-    struct kevent change_event;
-    EV_SET(&change_event, server_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-
-    if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1) {
+	struct epoll_event events[MAX_EVENTS];
+	struct epoll_event change_event;
+	change_event.events = EPOLLIN;
+	change_event.data.fd = server_fd;
+	if (epoll_ctl(ep, EPOLL_CTL_ADD, server_fd, &change_event) == -1)
+	{
         perror("Error in kevent");
         exit(EXIT_FAILURE);
     }
-
     std::cout << "Server started. Listening on port " << conf.getMap("prtn") << std::endl;
 
     while (true)
 	{
-        int num_events = kevent(kq, NULL, 0, events, MAX_EVENTS, NULL);
+        int num_events = epoll_wait(ep, events, MAX_EVENTS, -1);
         if (num_events == -1)
 		{
-            perror("Error in kevent");
+            perror("Error in epoll");
             exit(EXIT_FAILURE);
         }
-
         for (int i = 0; i < num_events; ++i)
 		{
-            if ((int)events[i].ident == server_fd)
+            if ((int)events[i].data.fd == server_fd)
 			{
                 // Accept new connection
                 struct sockaddr_in client_addr;
@@ -111,13 +116,14 @@ int init_ws(ConfigFile& conf)
                 std::cout << "New connection accepted" << std::endl;
 
                 // Add client socket to kqueue
-				EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-                kevent(kq, &change_event, 1, NULL, 0, NULL);
+				change_event.events = EPOLLIN | EPOLLET;
+				change_event.data.fd = client_fd;
+                epoll_ctl(ep, EPOLL_CTL_ADD, client_fd, &change_event);
             }
 			else
 			{
 				char buffer[4096];
-                int client_socket = events[i].ident;
+                int client_socket = events[i].data.fd;
 				
 				recv(client_socket, buffer, sizeof(buffer), 0);
 				// Réponse HTTP avec le contenu de socket.html
@@ -135,6 +141,6 @@ int init_ws(ConfigFile& conf)
         }
     }
     close(server_fd);
-    close(kq);
+    close(ep);
     return 0;
 }

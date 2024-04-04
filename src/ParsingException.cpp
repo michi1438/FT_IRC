@@ -6,11 +6,11 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/28 11:56:33 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/01 16:30:01 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/04 15:56:22 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ParsingException.hpp"
+#include "../headers/ParsingException.hpp"
 
 ParsingException::ParsingException(int _ern) : ern(_ern)
 {

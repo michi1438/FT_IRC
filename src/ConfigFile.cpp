@@ -6,11 +6,11 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/03 13:27:48 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/04 15:56:12 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ConfigFile.hpp"
+#include "../headers/ConfigFile.hpp"
 
 ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name) 
 {
@@ -41,7 +41,7 @@ void ConfigFile::checker(void) const
 	int must_have_size = 4;
 	int i = -1;
 	std::map<std::string, std::string>::const_iterator it = _map.begin();
-	std::string must_have[must_have_size] = {"srvr", "prtn", "root", "lcbs"}; // TODO add all the must_have elements...
+	std::string must_have[4] = {"srvr", "prtn", "root", "lcbs"}; // TODO add all the must_have elements...
 
 	while (it != _map.end() && i++ < must_have_size - 1)
 	{
