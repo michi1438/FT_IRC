@@ -73,6 +73,28 @@ body {
     font-size: 18px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
+
+.upload-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.upload-container input[type="file"] {
+    display: none;
+}
+
+.upload-container label {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4285F4;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.uploaded-files {
+    margin-top: 10px;
+}
 </style>
 </head>
 <body>
@@ -85,11 +107,46 @@ body {
     <div class="promo">
         <p>Plongez dans l'univers psychédélique de Socket !</p>
     </div>
+
+    <div class="upload-container">
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <label for="fileInput">Uploader vos meilleures chaussettes :</label>
+            <input type="file" id="fileInput" name="fileInput" multiple>
+            <input type="submit">
+        </form>
+        <div id="uploadedFiles" class="uploaded-files"></div> <!-- Élément pour afficher les noms des fichiers -->
+    </div>
     
     <div class="footer">
         <p>Contactez-nous pour plus d'informations : contact@socket.com</p>
     </div>
 </div>
+
+<script>
+function displayFileNames() {
+    // Récupérer l'élément input
+    var input = document.getElementById('fileInput');
+
+    // Récupérer l'élément pour afficher les noms des fichiers
+    var uploadedFilesElement = document.getElementById('uploadedFiles');
+
+    // Vérifier si des fichiers ont été sélectionnés
+    if (input.files.length > 0) {
+        // Créer une liste pour stocker les noms de fichiers
+        var fileList = document.createElement('ul');
+
+        // Parcourir tous les fichiers sélectionnés et les ajouter à la liste
+        for (var i = 0; i < input.files.length; i++) {
+            var fileNameElement = document.createElement('li');
+            fileNameElement.textContent = input.files[i].name;
+            fileList.appendChild(fileNameElement);
+        }
+
+        // Ajouter la liste à l'élément existant pour afficher les noms des fichiers
+        uploadedFilesElement.appendChild(fileList);
+    }
+}
+</script>
 
 </body>
 </html>
