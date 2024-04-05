@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/04 10:56:43 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/05 16:07:21 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 std::string readHtmlFile(const char *filename)
 {
     std::ifstream file(filename);
-    if (!file.is_open())
+	if (!file.is_open())
 	{
 		std::ifstream file("ERR500/50x.html");
 		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -76,8 +76,8 @@ int init_ws(ConfigFile& conf)
         perror("Error in kevent");
         exit(EXIT_FAILURE);
     }
-    std::cout << "Server started. Listening on port " << conf.getMap("prtn") << std::endl;
 
+    std::cout << "Server started. Listening on port " << conf.getMap("prtn") << std::endl;
     while (true)
 	{
         int num_events = epoll_wait(ep, events, MAX_EVENTS, -1);
@@ -88,7 +88,7 @@ int init_ws(ConfigFile& conf)
         }
         for (int i = 0; i < num_events; ++i)
 		{
-            if ((int)events[i].data.fd == server_fd)
+			if ((int)events[i].data.fd == server_fd)
 			{
                 // Accept new connection
                 struct sockaddr_in client_addr;
@@ -133,28 +133,22 @@ int init_ws(ConfigFile& conf)
 					close(client_socket);
 					continue;
 				}
+
+				// TODO call RequestParser with buffer
+				RequestParser Req(buffer);
 				std::cout << buffer << std::endl;
-
-				// Analyser la requête HTTP pour extraire le chemin de l'URI
-				std::string request(buffer, buffer + bytes_received);
-				std::istringstream request_stream(request);
-				std::string request_line;
-				std::getline(request_stream, request_line);
-
-				std::istringstream request_line_stream(request_line);
-				std::string method;
-				std::string uri;
-				std::getline(request_line_stream, method, ' ');
-				std::getline(request_line_stream, uri, ' ');
-
-				std::cout << method << std::endl;
-				std::cout << uri << std::endl;
+				std::cout << std::endl;
+				std::cout << "REQUEST PARSER" << std::endl;
+				std::cout << "--------------" << std::endl;
+				std::cout << std::setw(12) << "METHOD : " << Req.getMethod() << std::endl;
+				std::cout << std::setw(12) << "URI : " << Req.getURI() << std::endl;
+				std::cout << std::setw(12) << "VERSION : " << Req.getVersion() << std::endl;
 
 				// Vérifier si le chemin de l'URI correspond à un script CGI
-				if (uri.find("/cgi_bin/") == 0)
+				if (Req.getURI().find("/cgi_bin/") == 0) //TODO remplacer par un is_CGI du RequestParser
 				{
 					// Exécuter le script CGI
-					std::string cgi_script_path = "." + uri;
+					std::string cgi_script_path = "." + Req.getURI();
 					std::string cgi_output = "<h1>CGI handling</h1>";//execute_cgi_script(cgi_script_path);
 
 					// Envoyer la sortie du script CGI au client
@@ -171,7 +165,7 @@ int init_ws(ConfigFile& conf)
 				else
 				{
 					// Réponse normale (non-CGI)
-					std::string htmlContent = readHtmlFile(uri.substr(1).c_str());
+					std::string htmlContent = readHtmlFile(Req.getURI().substr(1).c_str());
 					std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
 
 					if (send(client_socket, response.c_str(), response.size(), 0) == -1)

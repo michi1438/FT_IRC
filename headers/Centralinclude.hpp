@@ -6,11 +6,12 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/04 15:23:19 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/05 16:01:38 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
+#include <iomanip>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -25,6 +26,7 @@
 #include <err.h>
 
 #include "ConfigFile.hpp"
+#include "RequestParser.hpp"
 
 #define RESET   "\033[0m"
 #define RED     "\033[31m"      // Rouge
