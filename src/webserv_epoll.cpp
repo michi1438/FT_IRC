@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/04 10:56:43 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/05 21:37:24 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ std::string readHtmlFile(const char *filename)
     std::ifstream file(filename);
     if (!file.is_open())
 	{
-		std::ifstream file("ERR500/50x.html");
+		std::ifstream file("ERR500/50x.html"); //FIXME This is false 
 		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 		file.close();
 		return content;
@@ -36,7 +36,7 @@ int init_ws(ConfigFile& conf)
     int ep = epoll_create1(0);
     if (ep == -1)
 	{
-        perror("Error in epoll");
+        perror("Error in epoll"); // TODO instead send a err 500 page
         exit(EXIT_FAILURE);
     }
 	
@@ -168,7 +168,7 @@ int init_ws(ConfigFile& conf)
 					close(client_socket);
 					std::cout << BLUE << "Response sent from CGI" << RESET << std::endl;
 				}
-				else
+				else //TODO if (uri.find(ONE OF THE given .html) else error 404
 				{
 					// Réponse normale (non-CGI)
 					std::string htmlContent = readHtmlFile(uri.substr(1).c_str());
