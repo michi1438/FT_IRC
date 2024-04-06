@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/04/06 12:11:12 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/06 16:19:39 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #define RESET   "\033[0m"
 #define RED     "\033[31m"      // Rouge
@@ -40,35 +41,27 @@ std::string readHttpRequest(int client_socket) {
     std::string request;
     char buffer[1024];
     ssize_t bytes_read;
+    bool header_received = false;
 
     // Lire les données du socket jusqu'à ce que la requête soit complètement reçue
     while ((bytes_read = recv(client_socket, buffer, sizeof(buffer), 0)) > 0) {
-        std::cout << "Bytes read: " << bytes_read << std::endl;
         request.append(buffer, bytes_read);
-        std::cout << "Request so far:\n" << request << std::endl;
-        if (request.find("\r\n\r\n") != std::string::npos) {
+        // Si l'en-tête complet de la requête n'a pas encore été reçu, vérifier si l'en-tête est complet
+        if (!header_received && request.find("\r\n\r\n") != std::string::npos) {
             // L'en-tête complet de la requête a été reçu
             std::cout << "Header fully received\n";
+            header_received = true;
+        }
+        // Si l'en-tête complet a été reçu et que nous avons lu toutes les données de la requête, sortir de la boucle
+        if (header_received && request.find("\r\n\r\n") != std::string::npos) {
+            std::cout << MAGENTA << "Request so far:\n" << request << RESET << std::endl;
             break;
         }
     }
 
-    std::cout << "Final request:\n" << request << std::endl;
-
-    // Vérifier si la requête est une requête POST et si elle contient des données de formulaire multipart
-    size_t post_index = request.find("POST");
-    if (post_index != std::string::npos) {
-        size_t content_type_index = request.find("Content-Type: multipart/form-data", post_index);
-        if (content_type_index != std::string::npos) {
-            // La requête est une requête POST avec des données de formulaire multipart
-            std::cout << "File upload request received\n";
-            return request;
-        }
-    }
-
-    // La requête n'est pas une requête POST avec des données de formulaire multipart
-    return "";
+    return request;
 }
+
 
 std::string readHtmlFile(const char *filename) {
     std::ifstream file(filename);
@@ -87,7 +80,7 @@ std::string readHtmlFile(const char *filename) {
 }
 
 void handleFileUpload(int client_socket, const std::string& request_body) {
-    (void)client_socket;
+    (void) client_socket;
     std::cout << YELLOW << request_body << RESET << std::endl;
     std::cout << RED << "Handling file upload request" << RESET << std::endl;
 
@@ -138,6 +131,7 @@ void handleFileUpload(int client_socket, const std::string& request_body) {
     }
 }
 
+
 int main() {
     int kq = kqueue();
     if (kq == -1) {
@@ -186,7 +180,6 @@ int main() {
 
         for (int i = 0; i < num_events; ++i) {
             if ((int)events[i].ident == server_fd) {
-                // Accept new connection
                 struct sockaddr_in client_addr;
                 socklen_t client_len = sizeof(client_addr);
                 int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
@@ -195,7 +188,6 @@ int main() {
                     exit(EXIT_FAILURE);
                 }
 
-                // Set client socket to non-blocking
                 if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
                     perror("Error in fcntl");
                     exit(EXIT_FAILURE);
@@ -208,7 +200,6 @@ int main() {
 
                 std::cout << GREEN << "New connection accepted" << RESET << std::endl;
 
-                // Add client socket to kqueue
                 EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
                 if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1) {
                     perror("Error in kevent");
@@ -217,24 +208,23 @@ int main() {
             } else {
                 int client_socket = events[i].ident;
 
-                // Lire la requête HTTP pour l'upload de fichier
                 std::string httpRequestContent = readHttpRequest(client_socket);
                 if (!httpRequestContent.empty()) {
-                    std::cout << "File upload request received\n";
-                    handleFileUpload(client_socket, httpRequestContent);
-                }
+                    if (httpRequestContent.find("POST /upload") != std::string::npos) {
+                        handleFileUpload(client_socket, httpRequestContent);
+                    } else {
+                        std::string htmlContent = readHtmlFile("socket.html");
+                        std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
 
-                // Réponse HTTP avec le contenu de socket.html
-                std::string htmlContent = readHtmlFile("socket.html");
-                std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
-
-                if (send(client_socket, response.c_str(), response.size(), 0) == -1) {
-                    perror("Error in send");
-                    close(client_socket);
-                    return 1;
+                        if (send(client_socket, response.c_str(), response.size(), 0) == -1) {
+                            perror("Error in send");
+                            close(client_socket);
+                            return 1;
+                        }
+                        close(client_socket);
+                        std::cout << BLUE << "Response sent." << RESET << std::endl;
+                    }
                 }
-                close(client_socket);
-                std::cout << BLUE << "Response sent." << RESET << std::endl;
             }
         }
     }
