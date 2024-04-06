@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/04/04 17:01:02 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/06 12:11:12 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@
 #define CYAN    "\033[36m"      // Cyan
 
 #define MAX_EVENTS 64
-#define PORT 8000
+#define PORT 8080
 
 std::string readHttpRequest(int client_socket) {
     std::string request;
@@ -73,6 +73,7 @@ std::string readHttpRequest(int client_socket) {
 std::string readHtmlFile(const char *filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
+        std::cerr << "Unable to open file: " << filename << std::endl;
         return ""; // Ou une erreur appropriée
     }
 
@@ -87,42 +88,54 @@ std::string readHtmlFile(const char *filename) {
 
 void handleFileUpload(int client_socket, const std::string& request_body) {
     (void)client_socket;
+    std::cout << YELLOW << request_body << RESET << std::endl;
     std::cout << RED << "Handling file upload request" << RESET << std::endl;
 
-    // Trouver le début de la partie du corps de la requête contenant les données du fichier
-    std::string boundary = "boundary=";
-    size_t boundary_pos = request_body.find(boundary);
-    if (boundary_pos == std::string::npos) {
-        std::cerr << "Boundary not found in request body" << std::endl;
-        return;
-    }
-
-    // Extraire le délimiteur de la requête multipart
-    boundary = "--" + request_body.substr(boundary_pos + boundary.length());
-    size_t file_start = request_body.find(boundary);
-    if (file_start == std::string::npos) {
-        std::cerr << "File data not found in request body" << std::endl;
-        return;
-    }
-
-    // Trouver la position de début et de fin des données binaires du fichier
-    size_t data_start = request_body.find("\r\n\r\n", file_start);
+    // Trouver la position de début des données du fichier
+    size_t data_start = request_body.find("\r\n\r\n");
     if (data_start == std::string::npos) {
         std::cerr << "Invalid file data format" << std::endl;
         return;
     }
     data_start += 4; // Passer les caractères de séparation
+    std::cout << "Data start position: " << data_start << std::endl;
 
     // Extraire les données du fichier
     std::string file_data = request_body.substr(data_start);
 
-    // Vous pouvez maintenant traiter les données du fichier
-    // Par exemple, les enregistrer sur le serveur
-    // ou les traiter selon vos besoins
+    // Extraire le nom du fichier du Content-Disposition
+    std::istringstream iss(request_body);
+    std::string line;
+    std::string filename;
+    while (std::getline(iss, line)) {
+        if (line.find("Content-Disposition: form-data; name=\"fileInput\";") != std::string::npos) {
+            // Trouver le début du nom de fichier
+            size_t filename_start = line.find("filename=\"");
+            if (filename_start != std::string::npos) {
+                filename_start += 10; // Avancer jusqu'au début du nom de fichier
+                // Trouver la fin du nom de fichier
+                size_t filename_end = line.find("\"", filename_start);
+                if (filename_end != std::string::npos) {
+                    filename = line.substr(filename_start, filename_end - filename_start);
+                    break;
+                }
+            }
+        }
+    }
 
-    // Pour l'instant, nous affichons simplement les données du fichier
-    std::cout << "File data received:" << std::endl;
-    std::cout << file_data << std::endl;
+    // Écrire les données du fichier dans un nouveau fichier avec le nom dynamique
+    if (!filename.empty()) {
+        std::ofstream outfile("upload/" + filename, std::ios::binary);
+        if (outfile.is_open()) {
+            outfile << file_data;
+            outfile.close();
+            std::cout << "File saved successfully: " << filename << std::endl;
+        } else {
+            std::cerr << "Unable to save file: " << filename << std::endl;
+        }
+    } else {
+        std::cerr << "Filename not found in request" << std::endl;
+    }
 }
 
 int main() {

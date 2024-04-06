@@ -122,31 +122,5 @@ body {
     </div>
 </div>
 
-<script>
-function displayFileNames() {
-    // Récupérer l'élément input
-    var input = document.getElementById('fileInput');
-
-    // Récupérer l'élément pour afficher les noms des fichiers
-    var uploadedFilesElement = document.getElementById('uploadedFiles');
-
-    // Vérifier si des fichiers ont été sélectionnés
-    if (input.files.length > 0) {
-        // Créer une liste pour stocker les noms de fichiers
-        var fileList = document.createElement('ul');
-
-        // Parcourir tous les fichiers sélectionnés et les ajouter à la liste
-        for (var i = 0; i < input.files.length; i++) {
-            var fileNameElement = document.createElement('li');
-            fileNameElement.textContent = input.files[i].name;
-            fileList.appendChild(fileNameElement);
-        }
-
-        // Ajouter la liste à l'élément existant pour afficher les noms des fichiers
-        uploadedFilesElement.appendChild(fileList);
-    }
-}
-</script>
-
 </body>
 </html>
