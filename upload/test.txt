@@ -1,3 +1,0 @@
-------WebKitFormBoundaryISW30UYGBi9GXLjF
-Content-Disposition: form-data; name="fileInput"; filename="test.txt"
-Content-Type: 

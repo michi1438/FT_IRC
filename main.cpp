@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/04/06 16:19:39 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/06 16:29:28 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,6 @@ std::string readHtmlFile(const char *filename) {
 
 void handleFileUpload(int client_socket, const std::string& request_body) {
     (void) client_socket;
-    std::cout << YELLOW << request_body << RESET << std::endl;
     std::cout << RED << "Handling file upload request" << RESET << std::endl;
 
     // Trouver la position de début des données du fichier
@@ -101,7 +100,8 @@ void handleFileUpload(int client_socket, const std::string& request_body) {
     std::string line;
     std::string filename;
     while (std::getline(iss, line)) {
-        if (line.find("Content-Disposition: form-data; name=\"fileInput\";") != std::string::npos) {
+        if (line.find("Content-Disposition: form-data;") != std::string::npos &&
+            line.find("filename=\"") != std::string::npos) {
             // Trouver le début du nom de fichier
             size_t filename_start = line.find("filename=\"");
             if (filename_start != std::string::npos) {
@@ -115,9 +115,9 @@ void handleFileUpload(int client_socket, const std::string& request_body) {
             }
         }
     }
-
+    std::cout << YELLOW << "FILENAME : " << filename << RESET << std::endl;
     // Écrire les données du fichier dans un nouveau fichier avec le nom dynamique
-    if (!filename.empty()) {
+
         std::ofstream outfile("upload/" + filename, std::ios::binary);
         if (outfile.is_open()) {
             outfile << file_data;
@@ -126,11 +126,8 @@ void handleFileUpload(int client_socket, const std::string& request_body) {
         } else {
             std::cerr << "Unable to save file: " << filename << std::endl;
         }
-    } else {
-        std::cerr << "Filename not found in request" << std::endl;
-    }
 }
-
+  
 
 int main() {
     int kq = kqueue();
