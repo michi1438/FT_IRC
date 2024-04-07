@@ -6,11 +6,10 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/04/06 16:29:28 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/07 15:20:07 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
 #include <sys/event.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -35,33 +34,26 @@
 #define CYAN    "\033[36m"      // Cyan
 
 #define MAX_EVENTS 64
-#define PORT 8080
+#define PORT 8082
 
 std::string readHttpRequest(int client_socket) {
     std::string request;
     char buffer[1024];
     ssize_t bytes_read;
-    bool header_received = false;
 
     // Lire les données du socket jusqu'à ce que la requête soit complètement reçue
     while ((bytes_read = recv(client_socket, buffer, sizeof(buffer), 0)) > 0) {
         request.append(buffer, bytes_read);
-        // Si l'en-tête complet de la requête n'a pas encore été reçu, vérifier si l'en-tête est complet
-        if (!header_received && request.find("\r\n\r\n") != std::string::npos) {
-            // L'en-tête complet de la requête a été reçu
+        // Si l'en-tête complet de la requête a été reçu, sortir de la boucle
+        if (request.find("\r\n\r\n") != std::string::npos) {
             std::cout << "Header fully received\n";
-            header_received = true;
-        }
-        // Si l'en-tête complet a été reçu et que nous avons lu toutes les données de la requête, sortir de la boucle
-        if (header_received && request.find("\r\n\r\n") != std::string::npos) {
-            std::cout << MAGENTA << "Request so far:\n" << request << RESET << std::endl;
             break;
         }
     }
+    std::cout << RED << request << RESET << std::endl;
 
     return request;
 }
-
 
 std::string readHtmlFile(const char *filename) {
     std::ifstream file(filename);
@@ -83,22 +75,10 @@ void handleFileUpload(int client_socket, const std::string& request_body) {
     (void) client_socket;
     std::cout << RED << "Handling file upload request" << RESET << std::endl;
 
-    // Trouver la position de début des données du fichier
-    size_t data_start = request_body.find("\r\n\r\n");
-    if (data_start == std::string::npos) {
-        std::cerr << "Invalid file data format" << std::endl;
-        return;
-    }
-    data_start += 4; // Passer les caractères de séparation
-    std::cout << "Data start position: " << data_start << std::endl;
-
-    // Extraire les données du fichier
-    std::string file_data = request_body.substr(data_start);
-
-    // Extraire le nom du fichier du Content-Disposition
+    // Extraire le nom de fichier du Content-Disposition
+    std::string filename;
     std::istringstream iss(request_body);
     std::string line;
-    std::string filename;
     while (std::getline(iss, line)) {
         if (line.find("Content-Disposition: form-data;") != std::string::npos &&
             line.find("filename=\"") != std::string::npos) {
@@ -115,9 +95,21 @@ void handleFileUpload(int client_socket, const std::string& request_body) {
             }
         }
     }
-    std::cout << YELLOW << "FILENAME : " << filename << RESET << std::endl;
-    // Écrire les données du fichier dans un nouveau fichier avec le nom dynamique
+    //std::cout << YELLOW << "FILENAME : " << filename << RESET << std::endl;
 
+    // Trouver la position de début des données du fichier
+    size_t data_start = request_body.find("\r\n\r\n");
+    if (data_start == std::string::npos) {
+        std::cerr << "Invalid file data format" << std::endl;
+        return;
+    }
+    data_start += 4; // Passer les caractères de séparation
+
+    // Extraire les données du fichier
+    std::string file_data = request_body.substr(data_start);
+
+    // Écrire les données du fichier dans un nouveau fichier avec le nom dynamique
+    if (!filename.empty()) {
         std::ofstream outfile("upload/" + filename, std::ios::binary);
         if (outfile.is_open()) {
             outfile << file_data;
@@ -126,8 +118,10 @@ void handleFileUpload(int client_socket, const std::string& request_body) {
         } else {
             std::cerr << "Unable to save file: " << filename << std::endl;
         }
+    } else {
+        std::cerr << "Filename not found in request" << std::endl;
+    }
 }
-  
 
 int main() {
     int kq = kqueue();

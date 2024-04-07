@@ -17,6 +17,8 @@ $(NAME): $(OBJS)
 
 clean:
 	@$(RM) $(OBJS)
+	@$(RM)r upload
+	mkdir -p upload
 
 fclean: clean
 	@$(RM) $(NAME)
