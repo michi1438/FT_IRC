@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/04 15:56:12 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/08 15:56:30 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,50 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 	if (!conf_file.is_open())
 		throw ParsingException(2);
 	std::string line;
+	std::string srvr_name;
+	t_server serverinfo;
 	while (std::getline(conf_file, line) && i++ < CONFIG_FILE_MAX_SIZE)
 	{
-		std::string sub = line.substr(0, line.find(" "));	
-		_map[sub.substr(0, 4)] = (line.substr(line.rfind(" ") + 1, line.size()));
+		std::istringstream iss(line);
+		std::string sub;
+		std::cout << "XXXX" << srvr_name << std::endl;
+		if(line.find("srvr_name:") == 0)
+		{
+			iss >> sub;
+			iss >> sub;
+			srvr_name = sub;
+		}
+		else if (line.find("}") == 0)
+		{
+			this->_map[srvr_name] = serverinfo;
+		}
+		else if (line.find('\t') == 0)
+		{
+			iss >> sub;
+			if (sub.find("prtn_") == 0)
+			{
+				iss >> sub;
+				serverinfo.prtn = atoi(sub.c_str());
+			}
+			if (sub.find("root_") == 0)
+			{
+				iss >> sub;
+				serverinfo.root = sub;
+			}
+			if (sub.find("home_") == 0)
+			{
+				iss >> sub;
+				serverinfo.home = sub;
+			}
+			if (sub.find("lcbs_") == 0)
+			{
+				iss >> sub;
+				serverinfo.lcbs= atoi(sub.c_str());
+			}
+		}
 	}
-	this->checker();
-	if (i == CONFIG_FILE_MAX_SIZE)
+//	this->checker();
+	if (i >= CONFIG_FILE_MAX_SIZE)
 	   throw ParsingException(4);	
 	conf_file.close();
 }
@@ -36,7 +73,7 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 ConfigFile::~ConfigFile(void)
 {}
 
-void ConfigFile::checker(void) const
+/*void ConfigFile::checker(void) const
 {
 	int must_have_size = 4;
 	int i = -1;
@@ -51,9 +88,4 @@ void ConfigFile::checker(void) const
 			throw ParsingException(5);
 		}
 	}
-}
-
-const char *ConfigFile::getMap(std::string key)
-{
-	return this->_map[key].c_str();
-}
+}*/

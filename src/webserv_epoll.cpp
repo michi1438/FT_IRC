@@ -6,28 +6,40 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/05 21:37:24 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/08 15:52:37 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
 #include <sys/epoll.h>
 
-std::string readHtmlFile(const char *filename)
+std::string readHtmlFile(std::string filename, ConfigFile& conf, std::string host)
 {
-    std::ifstream file(filename);
+	std::fstream file;
+	if (filename.empty() == false)
+	{
+		filename.insert(0, conf._map[host].home);
+		file.open(filename.c_str());
+	}
+	else
+	{
+		filename.append(conf._map[host].root).append(conf._map[host].home);
+		file.open(filename.c_str());
+	}
     if (!file.is_open())
 	{
-		std::ifstream file("ERR500/50x.html"); //FIXME This is false 
+		std::ifstream file("html/40x.html");
 		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		std::string response = "HTTP/1.1 400 OK\r\nContent-Type: text/html\r\n\r\n" + content;
 		file.close();
-		return content;
+		return response;
     }
 	else
 	{
 		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + content;
 		file.close();
-		return content;
+		return response;
 	}
 }
 
@@ -50,7 +62,7 @@ int init_ws(ConfigFile& conf)
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(std::atoi(conf.getMap("prtn")));
+    server_addr.sin_port = htons(conf._map["tower"].prtn);
 
 	const int enable = 1;
 	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)); // TODO cleanup
@@ -73,10 +85,10 @@ int init_ws(ConfigFile& conf)
 	change_event.data.fd = server_fd;
 	if (epoll_ctl(ep, EPOLL_CTL_ADD, server_fd, &change_event) == -1)
 	{
-        perror("Error in kevent");
+        perror("Error in epoll");
         exit(EXIT_FAILURE);
     }
-    std::cout << "Server started. Listening on port " << conf.getMap("prtn") << std::endl;
+    std::cout << "Server started. Listening on port " << conf._map["tower"].prtn << std::endl;
 
     while (true)
 	{
@@ -144,11 +156,16 @@ int init_ws(ConfigFile& conf)
 				std::istringstream request_line_stream(request_line);
 				std::string method;
 				std::string uri;
+				std::string host;
 				std::getline(request_line_stream, method, ' ');
 				std::getline(request_line_stream, uri, ' ');
+				std::getline(request_stream, host);
 
-				std::cout << method << std::endl;
-				std::cout << uri << std::endl;
+				host = host.substr(host.find(' ') + 1);
+				host = host.substr(0, host.find(':'));
+				std::cout << "method : " <<  method << std::endl;
+				std::cout << "uri : " << uri << std::endl;
+				std::cout << "host : " << host << std::endl;
 
 				// Vérifier si le chemin de l'URI correspond à un script CGI
 				if (uri.find("/cgi_bin/") == 0)
@@ -168,11 +185,10 @@ int init_ws(ConfigFile& conf)
 					close(client_socket);
 					std::cout << BLUE << "Response sent from CGI" << RESET << std::endl;
 				}
-				else //TODO if (uri.find(ONE OF THE given .html) else error 404
-				{
+				else				{
 					// Réponse normale (non-CGI)
-					std::string htmlContent = readHtmlFile(uri.substr(1).c_str());
-					std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
+				
+					std::string response = readHtmlFile(uri.substr(1), conf, host);
 
 					if (send(client_socket, response.c_str(), response.size(), 0) == -1)
 					{
