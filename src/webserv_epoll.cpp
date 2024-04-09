@@ -6,24 +6,25 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/09 10:52:06 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/09 14:45:13 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
 #include <sys/epoll.h>
 
-std::string readHtmlFile(std::string filename, ConfigFile& conf, std::string host)
+std::string readHtmlFile(std::string filename, t_server srvr)
 {
+	
 	std::fstream file;
 	if (filename.empty() == false)
 	{
-		filename.insert(0, conf._map[host].home);
+		filename.insert(0, srvr.home);
 		file.open(filename.c_str());
 	}
 	else
 	{
-		filename.append(conf._map[host].root).append(conf._map[host].home);
+		filename.append(srvr.root).append(srvr.home);
 		file.open(filename.c_str());
 	}
     if (!file.is_open())
@@ -59,10 +60,11 @@ int init_ws(ConfigFile& conf)
         exit(EXIT_FAILURE);
     }
 
+	// while (prt_vec)
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(conf._map["tower"].prtn);
+    server_addr.sin_port = htons(8080);
 
 	const int enable = 1;
 	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)); // TODO cleanup
@@ -88,6 +90,7 @@ int init_ws(ConfigFile& conf)
         perror("Error in epoll");
         exit(EXIT_FAILURE);
     }
+	// end of while 
     std::cout << "Webserv started. Listening on port(s) " << conf.prt_vec_print() << std::endl;
 
     while (true)
@@ -162,12 +165,12 @@ int init_ws(ConfigFile& conf)
 				std::getline(request_stream, host);
 
 				host = host.substr(host.find(' ') + 1);
-				host = host.substr(0, host.find(':'));
 				std::cout << "method : " <<  method << std::endl;
 				std::cout << "uri : " << uri << std::endl;
 				std::cout << "host : " << host << std::endl;
 
 				// Vérifier si le chemin de l'URI correspond à un script CGI
+				t_server srvr_used = choose_server(conf, host);
 				if (uri.find("/cgi_bin/") == 0)
 				{
 					// Exécuter le script CGI
@@ -188,7 +191,7 @@ int init_ws(ConfigFile& conf)
 				else				{
 					// Réponse normale (non-CGI)
 				
-					std::string response = readHtmlFile(uri.substr(1), conf, host);
+					std::string response = readHtmlFile(uri.substr(1), srvr_used);
 
 					if (send(client_socket, response.c_str(), response.size(), 0) == -1)
 					{
@@ -205,4 +208,30 @@ int init_ws(ConfigFile& conf)
     close(server_fd);
     close(ep);
     return 0;
+}
+
+t_server	 choose_server(const ConfigFile& conf, std::string req_host)
+{
+	std::string host_name = req_host.substr(0, req_host.find(':'));
+	int	host_port = atoi(req_host.substr(req_host.find(':') + 1).c_str());
+	std::vector<t_server> servers = conf._map;
+	for(std::vector<t_server>::const_iterator srvr_it = servers.begin(); srvr_it != servers.end(); srvr_it++)
+	{
+		for(std::vector<int>::const_iterator prtn_it = srvr_it->prtn.begin(); prtn_it != srvr_it->prtn.end(); prtn_it++)
+		{
+			if (*prtn_it == host_port)
+			{
+				for(std::vector<std::string>::const_iterator name_it = srvr_it->srvr_name.begin(); name_it != srvr_it->srvr_name.end(); name_it++)
+				{
+					if (*name_it == host_name)
+						return *srvr_it;
+				}
+			}
+			if (srvr_it->is_default == true)
+				return *srvr_it;
+		}
+	}
+	t_server ret;
+	ret.err = true;
+	return ret;
 }

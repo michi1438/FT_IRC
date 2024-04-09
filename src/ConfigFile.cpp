@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/09 11:06:29 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/09 14:45:04 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,25 +28,32 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 	{
 		std::istringstream iss(line);
 		std::string sub;
-		if(line.find("srvr_name:") == 0)
+		if (line.find("}") == 0)
 		{
-			iss >> sub;
-			iss >> sub;
-			srvr_name = sub;
-		}
-		else if (line.find("}") == 0)
-		{
-			this->_map[srvr_name] = serverinfo;
+			serverinfo.err = false;	
+			this->_map.push_back(serverinfo);
 		}
 		else if (line.find('\t') == 0)
 		{
 			iss >> sub;
+			if(sub.find("srvr_name:") == 0)
+			{
+				while(iss >> sub)
+				{
+					if (!cont_name_of_srvr(serverinfo.srvr_name, sub))
+						serverinfo.srvr_name.push_back(sub);
+				}
+			}
 			if (sub.find("prtn_") == 0)
 			{
-				iss >> sub;
-				serverinfo.prtn = atoi(sub.c_str());
-				if (!vec_contains(serverinfo.prtn))
-					prt_vec.push_back(serverinfo.prtn);
+				while(iss >> sub)
+				{
+					int sub_int = atoi(sub.c_str());
+					if (!cont_prt_of_srvr(serverinfo.prtn, sub_int))
+						serverinfo.prtn.push_back(atoi(sub.c_str()));
+					if (!cont_prt(sub_int))
+						prt_vec.push_back(sub_int);
+				}
 			}
 			if (sub.find("root_") == 0)
 			{
@@ -85,7 +92,27 @@ std::string ConfigFile::prt_vec_print()
 	return ".";
 }
 
-bool ConfigFile::vec_contains(int cmp)
+bool ConfigFile::cont_prt_of_srvr(std::vector<int> vec, int cmp)
+{
+	for(std::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+	{
+		if (*it == cmp)
+			return true;
+	}
+	return false;
+}
+
+bool ConfigFile::cont_name_of_srvr(std::vector<std::string> vec, std::string cmp)
+{
+	for(std::vector<std::string>::iterator it = vec.begin(); it != vec.end(); it++)
+	{
+		if (*it == cmp)
+			return true;
+	}
+	return false;
+}
+
+bool ConfigFile::cont_prt(int cmp)
 {
 	for(std::vector<int>::iterator it = prt_vec.begin(); it != prt_vec.end(); it++)
 	{

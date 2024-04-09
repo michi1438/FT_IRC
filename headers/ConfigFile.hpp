@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 18:16:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/09 11:06:43 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/09 14:19:40 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,11 @@
 
 typedef struct S_erver
 {
-	int prtn;
+	bool is_default;
+	bool err;
 	std::string root;
+	std::vector<std::string> srvr_name;
+	std::vector<int> prtn;
 	std::string home;
 	int lcbs;
 } t_server;
@@ -43,12 +46,14 @@ class ConfigFile
 
 	public:
 		std::vector<int> prt_vec;
-		std::map<std::string, t_server> _map;
+		std::vector<t_server> _map;
 
 		ConfigFile(const std::string);
 		~ConfigFile();
 		
-		bool vec_contains(int);
+		bool cont_prt(int);
+		bool cont_prt_of_srvr(std::vector<int>, int);
+		bool cont_name_of_srvr(std::vector<std::string>, std::string);
 		std::string prt_vec_print();
 		//void checker() const;
 		//const char* getMap(std::string);		
