@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 18:16:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/08 15:57:11 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/09 11:06:43 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <string>
 # include <map>
 # include <vector>
+//# include <algorithm>
 # include "ParsingException.hpp"
 
 typedef struct S_erver
@@ -41,11 +42,15 @@ class ConfigFile
 		ConfigFile& operator=(const ConfigFile& o);
 
 	public:
+		std::vector<int> prt_vec;
 		std::map<std::string, t_server> _map;
 
-		//void checker() const;
 		ConfigFile(const std::string);
 		~ConfigFile();
+		
+		bool vec_contains(int);
+		std::string prt_vec_print();
+		//void checker() const;
 		//const char* getMap(std::string);		
 
 };

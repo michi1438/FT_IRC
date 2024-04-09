@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/08 15:56:30 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/09 11:06:29 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 		throw ParsingException(1);
 	std::ifstream conf_file(file_name.c_str());
 	
-	if (!conf_file.is_open())
+	if (!conf_file.is_open() || !conf_file.good())
 		throw ParsingException(2);
 	std::string line;
 	std::string srvr_name;
@@ -28,7 +28,6 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 	{
 		std::istringstream iss(line);
 		std::string sub;
-		std::cout << "XXXX" << srvr_name << std::endl;
 		if(line.find("srvr_name:") == 0)
 		{
 			iss >> sub;
@@ -46,6 +45,8 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 			{
 				iss >> sub;
 				serverinfo.prtn = atoi(sub.c_str());
+				if (!vec_contains(serverinfo.prtn))
+					prt_vec.push_back(serverinfo.prtn);
 			}
 			if (sub.find("root_") == 0)
 			{
@@ -72,6 +73,29 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 
 ConfigFile::~ConfigFile(void)
 {}
+
+std::string ConfigFile::prt_vec_print()
+{
+	for(std::vector<int>::iterator it = prt_vec.begin(); it != prt_vec.end(); it++)
+	{
+		std::cout << *it;
+		if (it + 1 != prt_vec.end())
+			std::cout << " ";
+	}
+	return ".";
+}
+
+bool ConfigFile::vec_contains(int cmp)
+{
+	for(std::vector<int>::iterator it = prt_vec.begin(); it != prt_vec.end(); it++)
+	{
+		if (*it == cmp)
+			return true;
+	}
+	return false;
+}
+	
+
 
 /*void ConfigFile::checker(void) const
 {

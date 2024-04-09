@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/08 15:52:37 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/09 10:52:06 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ int init_ws(ConfigFile& conf)
         perror("Error in epoll");
         exit(EXIT_FAILURE);
     }
-    std::cout << "Server started. Listening on port " << conf._map["tower"].prtn << std::endl;
+    std::cout << "Webserv started. Listening on port(s) " << conf.prt_vec_print() << std::endl;
 
     while (true)
 	{
