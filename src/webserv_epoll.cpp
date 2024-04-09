@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/05 16:07:21 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/09 09:35:03 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,7 @@ int init_ws(ConfigFile& conf)
 				std::cout << "--------------" << std::endl;
 				std::cout << std::setw(12) << "METHOD : " << Req.getMethod() << std::endl;
 				std::cout << std::setw(12) << "URI : " << Req.getURI() << std::endl;
-				std::cout << std::setw(12) << "VERSION : " << Req.getVersion() << std::endl;
+				std::cout << std::setw(12) << "HOST : " << Req.getHost() << std::endl;
 
 				// Vérifier si le chemin de l'URI correspond à un script CGI
 				if (Req.getURI().find("/cgi_bin/") == 0) //TODO remplacer par un is_CGI du RequestParser
