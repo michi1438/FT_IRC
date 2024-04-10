@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/04/10 12:08:03 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/10 12:35:52 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@
 #define CYAN    "\033[36m"      // Cyan
 
 #define MAX_EVENTS 64
-#define PORT 8081
+#define PORT 8080
 
 std::string readHttpRequest(int client_socket) {
     std::string request;
@@ -96,19 +96,42 @@ void handleFileUpload(const std::string& request_body) {
         return;
     }
 
+    // Extraire le nom de fichier du Content-Disposition
+    std::string filename;
+    size_t filename_start = request_body.find("filename=\"", 0);
+    if (filename_start != std::string::npos) {
+        filename_start += 10; // Avancer jusqu'au début du nom de fichier
+        size_t filename_end = request_body.find("\"", filename_start);
+        if (filename_end != std::string::npos) {
+            filename = request_body.substr(filename_start, filename_end - filename_start);
+        }
+    }
+
+    // Trouver la fin des données du fichier
+    size_t file_end = request_body.find("\r\n----------------------------", boundary_end);
+    if (file_end == std::string::npos) {
+        std::cerr << "Invalid file data format" << std::endl;
+        return;
+    }
+
     // Extraire les données du fichier
-    std::string file_data = request_body.substr(file_data_start, boundary_end - file_data_start);
+    std::string file_data = request_body.substr(file_data_start, file_end - file_data_start);
 
     // Écrire les données du fichier dans un nouveau fichier avec le nom dynamique
-    std::ofstream outfile("upload/test.txt", std::ios::binary);
-    if (outfile.is_open()) {
-        outfile << file_data;
-        outfile.close();
-        std::cout << "File saved successfully: test.txt" << std::endl;
+    if (!filename.empty()) {
+        std::ofstream outfile("upload/" + filename, std::ios::binary);
+        if (outfile.is_open()) {
+            outfile << file_data;
+            outfile.close();
+            std::cout << "File saved successfully: " << filename << std::endl;
+        } else {
+            std::cerr << "Unable to save file: " << filename << std::endl;
+        }
     } else {
-        std::cerr << "Unable to save file: test.txt" << std::endl;
+        std::cerr << "Filename not found in request" << std::endl;
     }
 }
+
 
 
 int main() {
