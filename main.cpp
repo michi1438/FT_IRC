@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/04/07 15:20:07 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/10 12:08:03 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@
 #define CYAN    "\033[36m"      // Cyan
 
 #define MAX_EVENTS 64
-#define PORT 8082
+#define PORT 8081
 
 std::string readHttpRequest(int client_socket) {
     std::string request;
@@ -71,57 +71,45 @@ std::string readHtmlFile(const char *filename) {
     return content;
 }
 
-void handleFileUpload(int client_socket, const std::string& request_body) {
-    (void) client_socket;
-    std::cout << RED << "Handling file upload request" << RESET << std::endl;
-
-    // Extraire le nom de fichier du Content-Disposition
-    std::string filename;
-    std::istringstream iss(request_body);
-    std::string line;
-    while (std::getline(iss, line)) {
-        if (line.find("Content-Disposition: form-data;") != std::string::npos &&
-            line.find("filename=\"") != std::string::npos) {
-            // Trouver le début du nom de fichier
-            size_t filename_start = line.find("filename=\"");
-            if (filename_start != std::string::npos) {
-                filename_start += 10; // Avancer jusqu'au début du nom de fichier
-                // Trouver la fin du nom de fichier
-                size_t filename_end = line.find("\"", filename_start);
-                if (filename_end != std::string::npos) {
-                    filename = line.substr(filename_start, filename_end - filename_start);
-                    break;
-                }
-            }
-        }
-    }
-    //std::cout << YELLOW << "FILENAME : " << filename << RESET << std::endl;
-
-    // Trouver la position de début des données du fichier
-    size_t data_start = request_body.find("\r\n\r\n");
+void handleFileUpload(const std::string& request_body) {
+    // Trouver le début des données du fichier
+    size_t data_start = request_body.find("Content-Type: text/plain");
     if (data_start == std::string::npos) {
+        std::cerr << "Content-Type not found" << std::endl;
+        return;
+    }
+
+    // Trouver la fin de l'en-tête du fichier
+    size_t header_end = request_body.find("\r\n\r\n", data_start);
+    if (header_end == std::string::npos) {
         std::cerr << "Invalid file data format" << std::endl;
         return;
     }
-    data_start += 4; // Passer les caractères de séparation
+
+    // Trouver le début des données du fichier
+    size_t file_data_start = header_end + 4;
+
+    // Trouver la fin des données du fichier
+    size_t boundary_end = request_body.find("\r\n----------------------------", file_data_start);
+    if (boundary_end == std::string::npos) {
+        std::cerr << "Invalid file data format" << std::endl;
+        return;
+    }
 
     // Extraire les données du fichier
-    std::string file_data = request_body.substr(data_start);
+    std::string file_data = request_body.substr(file_data_start, boundary_end - file_data_start);
 
     // Écrire les données du fichier dans un nouveau fichier avec le nom dynamique
-    if (!filename.empty()) {
-        std::ofstream outfile("upload/" + filename, std::ios::binary);
-        if (outfile.is_open()) {
-            outfile << file_data;
-            outfile.close();
-            std::cout << "File saved successfully: " << filename << std::endl;
-        } else {
-            std::cerr << "Unable to save file: " << filename << std::endl;
-        }
+    std::ofstream outfile("upload/test.txt", std::ios::binary);
+    if (outfile.is_open()) {
+        outfile << file_data;
+        outfile.close();
+        std::cout << "File saved successfully: test.txt" << std::endl;
     } else {
-        std::cerr << "Filename not found in request" << std::endl;
+        std::cerr << "Unable to save file: test.txt" << std::endl;
     }
 }
+
 
 int main() {
     int kq = kqueue();
@@ -202,7 +190,7 @@ int main() {
                 std::string httpRequestContent = readHttpRequest(client_socket);
                 if (!httpRequestContent.empty()) {
                     if (httpRequestContent.find("POST /upload") != std::string::npos) {
-                        handleFileUpload(client_socket, httpRequestContent);
+                        handleFileUpload(httpRequestContent);
                     } else {
                         std::string htmlContent = readHtmlFile("socket.html");
                         std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
