@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/09 14:45:13 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/10 12:40:32 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ std::string readHtmlFile(std::string filename, t_server srvr)
 	std::fstream file;
 	if (filename.empty() == false)
 	{
-		filename.insert(0, srvr.home);
+		filename.insert(0, srvr.root);
 		file.open(filename.c_str());
 	}
 	else
@@ -210,7 +210,7 @@ int init_ws(ConfigFile& conf)
     return 0;
 }
 
-t_server	 choose_server(const ConfigFile& conf, std::string req_host)
+t_server	 choose_server(const ConfigFile& conf, const std::string req_host)
 {
 	std::string host_name = req_host.substr(0, req_host.find(':'));
 	int	host_port = atoi(req_host.substr(req_host.find(':') + 1).c_str());
@@ -224,11 +224,23 @@ t_server	 choose_server(const ConfigFile& conf, std::string req_host)
 				for(std::vector<std::string>::const_iterator name_it = srvr_it->srvr_name.begin(); name_it != srvr_it->srvr_name.end(); name_it++)
 				{
 					if (*name_it == host_name)
+					{
+						std::cout << host_name << ":" << host_port << " was passed to (" << srvr_it->srvr_name[0] << ")server-block, for its name/port matched." << std::endl;
 						return *srvr_it;
+					}
 				}
 			}
-			if (srvr_it->is_default == true)
+		}
+	}
+	for(std::vector<t_server>::const_iterator srvr_it = servers.begin(); srvr_it != servers.end(); srvr_it++)
+	{
+		for(std::vector<int>::const_iterator prtn_it = srvr_it->prtn.begin(); prtn_it != srvr_it->prtn.end(); prtn_it++)
+		{
+			if (*prtn_it == host_port && srvr_it->is_default == true)
+			{
+				std::cout << host_name << ":" << host_port << " was passed to the default-tagged server-block (" << srvr_it->srvr_name[0] << ") with its port number." << std::endl;
 				return *srvr_it;
+			}
 		}
 	}
 	t_server ret;

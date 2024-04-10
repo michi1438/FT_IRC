@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/09 14:45:04 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/10 12:36:42 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 	if (!conf_file.is_open() || !conf_file.good())
 		throw ParsingException(2);
 	std::string line;
-	std::string srvr_name;
 	t_server serverinfo;
 	while (std::getline(conf_file, line) && i++ < CONFIG_FILE_MAX_SIZE)
 	{
@@ -31,7 +30,15 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 		if (line.find("}") == 0)
 		{
 			serverinfo.err = false;	
+			std::cout << "SERVER_BLOCK #" << std::endl;
+			for(std::vector<std::string>::const_iterator name_it = serverinfo.srvr_name.begin(); name_it != serverinfo.srvr_name.end(); name_it++)
+				std::cout << *name_it << std::endl;
+			for(std::vector<int>::const_iterator port_it = serverinfo.prtn.begin(); port_it!= serverinfo.prtn.end(); port_it++)
+				std::cout << *port_it << std::endl;
+			std::cout << std::endl;
 			this->_map.push_back(serverinfo);
+			serverinfo.srvr_name.clear();
+			serverinfo.prtn.clear();
 		}
 		else if (line.find('\t') == 0)
 		{
@@ -49,10 +56,14 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 				while(iss >> sub)
 				{
 					int sub_int = atoi(sub.c_str());
+					serverinfo.is_default = false;	
 					if (!cont_prt_of_srvr(serverinfo.prtn, sub_int))
 						serverinfo.prtn.push_back(atoi(sub.c_str()));
 					if (!cont_prt(sub_int))
+					{
+						serverinfo.is_default = true;	
 						prt_vec.push_back(sub_int);
+					}
 				}
 			}
 			if (sub.find("root_") == 0)
