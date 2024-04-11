@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/04/11 12:34:00 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/11 13:13:54 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,34 +102,6 @@ std::string readHtmlFile(const char *filename) {
 }
 
 void handleFileUpload(const std::string& request_body) {
-    // Trouver le début des données du fichier
-    size_t data_start = request_body.find("Content-Type: ");
-    if (data_start == std::string::npos) {
-        std::cerr << "Content-Type not found" << std::endl;
-        return;
-    }
-
-    // Trouver la fin de l'en-tête du fichier
-    size_t header_end = request_body.find("\r\n\r\n", data_start);
-    if (header_end == std::string::npos) {
-        std::cerr << "Invalid file data format" << std::endl;
-        return;
-    }
-
-    // Trouver la position de départ des données du fichier
-    size_t file_data_start = request_body.find("\r\n", header_end + 4); // Trouver la première occurrence de "\r\n" après l'en-tête
-    if (file_data_start == std::string::npos) {
-        std::cerr << "Invalid file data format" << std::endl;
-        return;
-    }
-    file_data_start = request_body.find("\r\n\r\n", header_end + 4);
-    file_data_start = request_body.find("\r\n", header_end + 2);
-    // Vérifier si la position de départ des données du fichier est valide
-    if (file_data_start == std::string::npos) {
-        std::cerr << "Invalid file data format" << std::endl;
-        return;
-    }
-
     // Extraire le nom de fichier du Content-Disposition
     std::string filename;
     size_t filename_start = request_body.find("filename=\"", 0);
@@ -139,18 +111,52 @@ void handleFileUpload(const std::string& request_body) {
         if (filename_end != std::string::npos) {
             filename = request_body.substr(filename_start, filename_end - filename_start);
         }
+    } else {
+        std::cerr << "Filename not found in request" << std::endl;
+        return;
     }
 
+    // Trouver la position de départ des données du fichier
+size_t header_end = request_body.find("\r\n\r\n");
+if (header_end == std::string::npos) {
+    std::cerr << "Invalid file data format" << std::endl;
+    return;
+}
+
+// Trouver la position du début du fichier en sautant trois lignes supplémentaires
+size_t file_data_start = request_body.find("\r\n", header_end + 4);
+if (file_data_start == std::string::npos) {
+    std::cerr << "Invalid file data format" << std::endl;
+    return;
+}
+file_data_start = request_body.find("\r\n", file_data_start + 2); // Sauter deux lignes supplémentaires
+if (file_data_start == std::string::npos) {
+    std::cerr << "Invalid file data format" << std::endl;
+    return;
+}
+file_data_start = request_body.find("\r\n", file_data_start + 2); // Sauter deux lignes supplémentaires
+if (file_data_start == std::string::npos) {
+    std::cerr << "Invalid file data format" << std::endl;
+    return;
+}
+file_data_start = request_body.find("\r\n", file_data_start + 2); // Sauter deux lignes supplémentaires
+if (file_data_start == std::string::npos) {
+    std::cerr << "Invalid file data format" << std::endl;
+    return;
+}
+file_data_start += 2; // Avancer jusqu'au début des données du fichier
+
+    
     // Trouver la fin des données du fichier
-    size_t boundary_end = request_body.find("\r\n----------------------------", file_data_start);
+    size_t boundary_end = request_body.find("--", file_data_start);
     if (boundary_end == std::string::npos) {
         std::cerr << "Invalid file data format" << std::endl;
         return;
     }
+    boundary_end -= 2;
 
     // Extraire les données du fichier
-    size_t file_end = boundary_end - 2; // Retirer les deux caractères de retour à la ligne en fin de fichier
-    std::string file_data = request_body.substr(file_data_start, file_end - file_data_start);
+    std::string file_data = request_body.substr(file_data_start, boundary_end - file_data_start);
 
     // Écrire les données du fichier dans un nouveau fichier avec le nom dynamique
     if (!filename.empty()) {
@@ -166,6 +172,8 @@ void handleFileUpload(const std::string& request_body) {
         std::cerr << "Filename not found in request" << std::endl;
     }
 }
+
+
 
 
 int main() {
