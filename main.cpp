@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/04/10 17:53:47 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/11 12:34:00 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,13 +35,13 @@
 
 #define MAX_EVENTS 64
 #define PORT 8080
-//est ce que ma fonction elle est bien ?
+
 std::string readHttpRequest(int client_socket) {
     std::string request;
-    char buffer[100];
+    char buffer[1024];
     ssize_t bytes_read;
 
-    // Lire les données du socket jusqu'à ce que la requête soit complètement reçue
+    // Lire les données du socket jusqu'à ce que la connexion soit fermée par le client
     while (true) {
         bytes_read = recv(client_socket, buffer, sizeof(buffer), 0);
         if (bytes_read < 0) {
@@ -53,12 +53,28 @@ std::string readHttpRequest(int client_socket) {
         }
 
         request.append(buffer, bytes_read);
-        std::cout << bytes_read << std::endl;
 
-        // Si l'en-tête complet de la requête a été reçu, sortir de la boucle
-        if (request.find("\r\n\r\n") != std::string::npos) {
+        // Si la requête contient la séquence de fin "\r\n\r\n", cela signifie que la requête est complète
+        size_t header_end = request.find("\r\n\r\n");
+        if (header_end != std::string::npos) {
             std::cout << "Header fully received" << std::endl;
-            break;
+            // Vérifier si la requête contient le Content-Length
+            size_t content_length_start = request.find("Content-Length: ");
+            if (content_length_start != std::string::npos) {
+                size_t content_length_end = request.find("\r\n", content_length_start);
+                if (content_length_end != std::string::npos) {
+                    std::string content_length_str = request.substr(content_length_start + strlen("Content-Length: "), content_length_end - content_length_start - strlen("Content-Length: "));
+                    int content_length = std::stoi(content_length_str);
+                    // Vérifier si le corps de la requête est entièrement reçu
+                    if (request.size() >= header_end + 4 + content_length) {
+                        std::cout << "Request fully received" << std::endl;
+                        break;
+                    }
+                }
+            } else {
+                std::cout << "Request fully received" << std::endl;
+                break;
+            }
         }
     }
 
@@ -66,6 +82,8 @@ std::string readHttpRequest(int client_socket) {
 
     return request;
 }
+
+
 
 std::string readHtmlFile(const char *filename) {
     std::ifstream file(filename);
