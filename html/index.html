@@ -6,7 +6,7 @@
 <!-- By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+       -->
 <!--                                              +#+#+#+#+#+   +#+          -->
 <!-- Created: 2024/04/05 13:10:51 by lzito             #+#    #+#            -->
-<!-- Updated: 2024/04/05 13:12:30 by lzito            ###   ########.fr      -->
+<!-- Updated: 2024/04/11 07:44:28 by lzito            ###   ########.fr      -->
 <!--                                                                         -->
 <!-- *********************************************************************** -->
 
@@ -32,13 +32,21 @@
     </style>
 </head>
 <body>
-	<h2>COUCOU</h2>
 	<div>
 		<form action="/cgi_bin/simple" method="post">
-			<input type="text" name="data">
-			<input type="submit">
+			<input type="text" name="data"><br><br>
+			<input type="submit" value="Envoyer">
 		</form>
-		<a href="socket.html">TEST</a>
 	</div>
+	<br>
+	<br>
+	<div>
+		<form action="/cgi_bin/upload" method="post" enctype="multipart/form-data">
+			<label for="file">S3lexioner 1 fechier :</label><br>
+			<input type="file" id="file" name="file"><br><br>
+			<input type="submit" value="Envoyer">
+		</form>
+	</div>
+	<a href="socket.html">TEST</a>
 </body>
 </html>

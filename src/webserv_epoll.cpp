@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/09 09:35:03 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/11 15:02:29 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 std::string readHtmlFile(const char *filename)
 {
-    std::ifstream file(filename);
+    std::fstream file(filename);
 	if (!file.is_open())
 	{
 		std::ifstream file("ERR500/50x.html");
@@ -134,48 +134,62 @@ int init_ws(ConfigFile& conf)
 					continue;
 				}
 
-				// TODO call RequestParser with buffer
-				RequestParser Req(buffer);
-				std::cout << buffer << std::endl;
-				std::cout << std::endl;
-				std::cout << "REQUEST PARSER" << std::endl;
-				std::cout << "--------------" << std::endl;
-				std::cout << std::setw(12) << "METHOD : " << Req.getMethod() << std::endl;
-				std::cout << std::setw(12) << "URI : " << Req.getURI() << std::endl;
-				std::cout << std::setw(12) << "HOST : " << Req.getHost() << std::endl;
-
-				// Vérifier si le chemin de l'URI correspond à un script CGI
-				if (Req.getURI().find("/cgi_bin/") == 0) //TODO remplacer par un is_CGI du RequestParser
+				try
 				{
-					// Exécuter le script CGI
-					std::string cgi_script_path = "." + Req.getURI();
-					std::string cgi_output = "<h1>CGI handling</h1>";//execute_cgi_script(cgi_script_path);
+					RequestParser Req(buffer);
 
-					// Envoyer la sortie du script CGI au client
-					std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + cgi_output;
-					if (send(client_socket, response.c_str(), response.size(), 0) == -1)
+//					std::cout << buffer << std::endl;
+//					std::cout << std::endl;
+					Req.show();
+
+					// Vérifier si le chemin de l'URI correspond à un script CGI
+					if (Req.getURI().find("/cgi_bin/") == 0) //TODO remplacer par un is_CGI du RequestParser
 					{
-						perror("Error in send");
+						//TODO Exécuter le script CGI
+						std::string cgi_script_path = "." + Req.getURI();
+						std::string cgi_output = "<h1>CGI handling</h1>";//execute_cgi_script(cgi_script_path);
+
+						// Envoyer la sortie du script CGI au client
+						std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + cgi_output;
+						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
+						{
+							perror("Error in send");
+							close(client_socket);
+							continue;
+						}
 						close(client_socket);
-						continue;
+						//TODO clear le buffer, sinon il garde des infos des requetes precedentes
+						std::cout << BLUE << "Response sent from CGI" << RESET << std::endl;
 					}
-					close(client_socket);
-					std::cout << BLUE << "Response sent from CGI" << RESET << std::endl;
+					else
+					{
+						// Réponse normale (non-CGI)
+						std::string htmlContent = readHtmlFile(Req.getURI().substr(1).c_str());
+						std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
+
+						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
+						{
+							perror("Error in send");
+							close(client_socket);
+							return 1;
+						}
+						close(client_socket);
+						//TODO clear le buffer, sinon il garde des infos des requetes precedentes
+						std::cout << BLUE << "Response sent." << RESET << std::endl;
+					}
 				}
-				else
+				catch (int errorCode)
 				{
-					// Réponse normale (non-CGI)
-					std::string htmlContent = readHtmlFile(Req.getURI().substr(1).c_str());
-					std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
-
-					if (send(client_socket, response.c_str(), response.size(), 0) == -1)
-					{
-						perror("Error in send");
-						close(client_socket);
-						return 1;
-					}
+					//TODO Afficher la bonne page html selon le code d'erreur
+					// switch case ?
+	 				std::cout << RED << "ERROR CODE : " << errorCode << std::endl;
+					std::cout << RESET;
 					close(client_socket);
-					std::cout << BLUE << "Response sent." << RESET << std::endl;
+					//TODO clear le buffer, sinon il garde des infos des requetes precedentes
+					// faire ca plus proprement que comme ca :
+					char *begin = buffer;
+					char *end = begin + sizeof(buffer);
+					std::fill(begin, end, 0);
 				}
             }
         }
