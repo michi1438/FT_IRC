@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/10 12:40:32 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/11 13:06:24 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,53 +44,60 @@ std::string readHtmlFile(std::string filename, t_server srvr)
 	}
 }
 
+int prts_is_open(std::vector<int> server_fd, int fd)
+{
+	for(std::vector<int>::iterator it = server_fd.begin(); it != server_fd.end(); it++)
+	{
+		if (*it == fd)
+			return *it;
+	}
+	return -1;
+}
+
 int init_ws(ConfigFile& conf) 
 {
     int ep = epoll_create1(0);
+	struct epoll_event events[MAX_EVENTS];
+	struct epoll_event change_event;
+	const int enable = 1;
+	change_event.events = EPOLLIN;
     if (ep == -1)
 	{
         perror("Error in epoll"); // TODO instead send a err 500 page
         exit(EXIT_FAILURE);
     }
-	
-    int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd == -1)
-	{
-        perror("Error in socket");
-        exit(EXIT_FAILURE);
-    }
+	std::vector<int> server_fd; 
+	for(std::vector<int>::iterator it = conf.prt_vec.begin(); it != conf.prt_vec.end(); it++)
+	{		
+		server_fd.push_back(socket(AF_INET, SOCK_STREAM, 0));
+		if (server_fd.back() == -1)
+		{
+			perror("Error in socket");
+			exit(EXIT_FAILURE);
+		}
+		struct sockaddr_in server_addr;
+		server_addr.sin_family = AF_INET;
+		server_addr.sin_addr.s_addr = INADDR_ANY;
+		server_addr.sin_port = htons(*it);
+		setsockopt(server_fd.back(), SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)); // TODO cleanup
+		if (bind(server_fd.back(), (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
+		{
+			perror("Error in bind");
+			exit(EXIT_FAILURE);
+		}
+		if (listen(server_fd.back(), 10) == -1)
+		{
+			perror("Error in listen");
+			exit(EXIT_FAILURE);
+		}
+		change_event.data.fd = server_fd.back();
+		if (epoll_ctl(ep, EPOLL_CTL_ADD, server_fd.back(), &change_event) == -1)
+		{
+			perror("Error in epoll");
+			exit(EXIT_FAILURE);
+		}
 
-	// while (prt_vec)
-    struct sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(8080);
-
-	const int enable = 1;
-	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)); // TODO cleanup
-
-    if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
-	{
-        perror("Error in bind");
-        exit(EXIT_FAILURE);
-    }
-
-    if (listen(server_fd, 10) == -1)
-	{
-        perror("Error in listen");
-        exit(EXIT_FAILURE);
-    }
-
-	struct epoll_event events[MAX_EVENTS];
-	struct epoll_event change_event;
-	change_event.events = EPOLLIN;
-	change_event.data.fd = server_fd;
-	if (epoll_ctl(ep, EPOLL_CTL_ADD, server_fd, &change_event) == -1)
-	{
-        perror("Error in epoll");
-        exit(EXIT_FAILURE);
-    }
-	// end of while 
+	}
     std::cout << "Webserv started. Listening on port(s) " << conf.prt_vec_print() << std::endl;
 
     while (true)
@@ -103,42 +110,43 @@ int init_ws(ConfigFile& conf)
         }
         for (int i = 0; i < num_events; ++i)
 		{
-            if ((int)events[i].data.fd == server_fd)
+			int cur_srv_fd;
+			if ((cur_srv_fd = prts_is_open(server_fd, (int)events[i].data.fd)) != -1)
 			{
-                // Accept new connection
-                struct sockaddr_in client_addr;
-                socklen_t client_len = sizeof(client_addr);
-                int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
-                if (client_fd == -1)
+				// Accept new connection
+				struct sockaddr_in client_addr;
+				socklen_t client_len = sizeof(client_addr);
+				int client_fd = accept(cur_srv_fd, (struct sockaddr*)&client_addr, &client_len);
+				if (client_fd == -1)
 				{
-                    perror("Error in accept");
-                    exit(EXIT_FAILURE);
-                }
+					perror("Error in accept");
+					exit(EXIT_FAILURE);
+				}
 
-                // Set client socket to non-blocking
-				if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1)
+				// Set client socket to non-blocking and close on exec
+				if (fcntl(client_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
 				{
-                    perror("Error in fcntl");
-                    exit(EXIT_FAILURE);
-                }
+					perror("Error in fcntl");
+					exit(EXIT_FAILURE);
+				}
 
-				if (fcntl(client_fd, F_SETFL, FD_CLOEXEC) == -1)
+				if (fcntl(client_fd, F_SETFD, FD_CLOEXEC) == -1)
 				{
-                    perror("Error in fcntl");
-                    exit(EXIT_FAILURE);
-                }
+					perror("Error in fcntl");
+					exit(EXIT_FAILURE);
+				}
+				//std::cout << "GETFL " << fcntl(client_fd, F_GETFL, FD_CLOEXEC) << std::endl; TODO check the nonblock and cloexec is on SETFD or SETFL
+				std::cout << "New connection accepted" << std::endl;
 
-                std::cout << "New connection accepted" << std::endl;
-
-                // Add client socket to epoll
+				// Add client socket to epoll
 				change_event.events = EPOLLIN | EPOLLET;
 				change_event.data.fd = client_fd;
-                epoll_ctl(ep, EPOLL_CTL_ADD, client_fd, &change_event);
-            }
+				epoll_ctl(ep, EPOLL_CTL_ADD, client_fd, &change_event);
+			}
 			else
 			{
 				char buffer[4096];
-                int client_socket = events[i].data.fd;
+				int client_socket = events[i].data.fd;
 				
 				// Lire la requête HTTP du client
 				int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
@@ -202,10 +210,11 @@ int init_ws(ConfigFile& conf)
 					close(client_socket);
 					std::cout << BLUE << "Response sent." << RESET << std::endl;
 				}
-            }
+			}
         }
     }
-    close(server_fd);
+	for(std::vector<int>::iterator it = conf.prt_vec.begin(); it != conf.prt_vec.end(); it++)
+		close(*it);
     close(ep);
     return 0;
 }
