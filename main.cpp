@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/04/12 15:23:09 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/12 16:33:58 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,41 +148,43 @@ file_data_start += 2; // Avancer jusqu'au début des données du fichier
 
     
     // Trouver la fin des données du fichier
-    size_t boundary_end = request_body.find("--", file_data_start);
+    size_t boundary_end = request_body.find("--------------", file_data_start);
     if (boundary_end == std::string::npos) {
         std::cerr << "Invalid file data format" << std::endl;
         return;
     }
     boundary_end -= 2;
 
-// Extraire les données du fichier
-std::string file_data = request_body.substr(file_data_start, boundary_end - file_data_start);
 
-// Écrire les données du fichier dans un nouveau fichier avec le nom dynamique
-if (!filename.empty()) {
+    // Ouvrir le fichier de sortie
     std::ofstream outfile("upload/" + filename, std::ios::binary);
-    if (outfile.is_open()) {
-        outfile.write(file_data.c_str(), file_data.size());
-        outfile.close();
-
-        // Vérifier la taille du fichier
-        std::ifstream infile("upload/" + filename, std::ios::binary | std::ios::ate);
-        std::streamsize size = infile.tellg();
-        infile.close();
-
-        if (size == static_cast<std::streamsize>(file_data.size())) {
-            std::cout << "File saved successfully: " << filename << std::endl;
-        } else {
-            std::cerr << "File size mismatch: " << filename << std::endl;
-        }
-    } else {
+    if (!outfile.is_open()) {
         std::cerr << "Unable to save file: " << filename << std::endl;
+        return;
     }
-} else {
-    std::cerr << "Filename not found in request" << std::endl;
-}
-}
 
+    // Écrire les données du fichier dans un nouveau fichier avec le nom dynamique
+    size_t pos = file_data_start;
+    while (pos < boundary_end) {
+        size_t chunk_size = std::min(static_cast<size_t>(boundary_end - pos), static_cast<size_t>(1024 * 1024)); // Taille du chunk (1 Mo)
+        outfile.write(request_body.data() + pos, chunk_size); // Écrire le chunk dans le fichier
+        pos += chunk_size; // Avancer la position
+    }
+
+    // Fermer le fichier de sortie
+    outfile.close();
+
+    // Vérifier la taille du fichier
+    std::ifstream infile("upload/" + filename, std::ios::binary | std::ios::ate);
+    std::streamsize size = infile.tellg();
+    infile.close();
+
+    if (size == static_cast<std::streamsize>(boundary_end - file_data_start)) {
+        std::cout << "File saved successfully: " << filename << std::endl;
+    } else {
+        std::cerr << "File size mismatch: " << filename << std::endl;
+    }
+}
 
 
 
