@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/04/12 16:33:58 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/12 16:58:23 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,7 +268,7 @@ int main() {
                 if (!httpRequestContent.empty()) {
                     if (httpRequestContent.find("POST /upload") != std::string::npos) {
                         handleFileUpload(httpRequestContent);
-                        std::string htmlContent = readHtmlFile("socket.html");
+                        std::string htmlContent = readHtmlFile("upload.html");
                         std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
 
                         if (send(client_socket, response.c_str(), response.size(), 0) == -1) {
