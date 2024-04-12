@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 16:09:27 by robin             #+#    #+#             */
-/*   Updated: 2024/04/11 13:13:54 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/12 15:23:09 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@
 
 std::string readHttpRequest(int client_socket) {
     std::string request;
-    char buffer[1024];
+    char buffer[1000024];
     ssize_t bytes_read;
 
     // Lire les données du socket jusqu'à ce que la connexion soit fermée par le client
@@ -155,22 +155,32 @@ file_data_start += 2; // Avancer jusqu'au début des données du fichier
     }
     boundary_end -= 2;
 
-    // Extraire les données du fichier
-    std::string file_data = request_body.substr(file_data_start, boundary_end - file_data_start);
+// Extraire les données du fichier
+std::string file_data = request_body.substr(file_data_start, boundary_end - file_data_start);
 
-    // Écrire les données du fichier dans un nouveau fichier avec le nom dynamique
-    if (!filename.empty()) {
-        std::ofstream outfile("upload/" + filename, std::ios::binary);
-        if (outfile.is_open()) {
-            outfile << file_data;
-            outfile.close();
+// Écrire les données du fichier dans un nouveau fichier avec le nom dynamique
+if (!filename.empty()) {
+    std::ofstream outfile("upload/" + filename, std::ios::binary);
+    if (outfile.is_open()) {
+        outfile.write(file_data.c_str(), file_data.size());
+        outfile.close();
+
+        // Vérifier la taille du fichier
+        std::ifstream infile("upload/" + filename, std::ios::binary | std::ios::ate);
+        std::streamsize size = infile.tellg();
+        infile.close();
+
+        if (size == static_cast<std::streamsize>(file_data.size())) {
             std::cout << "File saved successfully: " << filename << std::endl;
         } else {
-            std::cerr << "Unable to save file: " << filename << std::endl;
+            std::cerr << "File size mismatch: " << filename << std::endl;
         }
     } else {
-        std::cerr << "Filename not found in request" << std::endl;
+        std::cerr << "Unable to save file: " << filename << std::endl;
     }
+} else {
+    std::cerr << "Filename not found in request" << std::endl;
+}
 }
 
 
@@ -256,6 +266,16 @@ int main() {
                 if (!httpRequestContent.empty()) {
                     if (httpRequestContent.find("POST /upload") != std::string::npos) {
                         handleFileUpload(httpRequestContent);
+                        std::string htmlContent = readHtmlFile("socket.html");
+                        std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
+
+                        if (send(client_socket, response.c_str(), response.size(), 0) == -1) {
+                            perror("Error in send");
+                            close(client_socket);
+                            return 1;
+                        }
+                        close(client_socket);
+                        std::cout << BLUE << "Response sent." << RESET << std::endl;
                     } else {
                         std::string htmlContent = readHtmlFile("socket.html");
                         std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
