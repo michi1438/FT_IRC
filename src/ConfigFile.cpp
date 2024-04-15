@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/10 12:36:42 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/14 16:00:38 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,8 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 			{
 				while(iss >> sub)
 				{
+					if (sub.find_first_not_of(" 0123456789") != std::string::npos)
+						break; // TODO maybe an error
 					int sub_int = atoi(sub.c_str());
 					serverinfo.is_default = false;	
 					if (!cont_prt_of_srvr(serverinfo.prtn, sub_int))
