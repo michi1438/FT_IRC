@@ -6,7 +6,7 @@
 /*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:09 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/11 15:03:08 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/16 11:16:32 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,35 +35,42 @@
 class RequestParser
 {
 	private:
-		std::map<std::string, std::string>	_header; //TODO needed ?
-		std::map<std::string, std::string>	_query_param;
 		std::string							_method;
 		std::string							_uri;
+		std::string							_version;
 		std::string							_host;
+		std::string							_script_name;
 
+		bool								_is_chunked;
 		std::string							_boundary;
 		std::string							_content_type;
 		size_t								_content_length;
 		std::string							_body;
 
+		std::map<std::string, std::string>	_query_param;
+
 	public:
 		RequestParser(const std::string &request);
 		~RequestParser(void);
 
-		bool		is_chunked();
-		bool		is_CGI();
-
 		void		show() const;
+		std::string unchunk(std::string body) const;
+
+		bool		isChunked() const;
+		bool		isCGI() const;
+
 		std::string	getMethod() const;
 		std::string	getURI() const;
+		std::string	getVersion() const;
 		std::string	getHost() const;
+		std::string	getScriptName() const;
 
-		std::string getBody() const; //TODO tester si la requete est chunked et la unchunk avant de retourner le body si c'est le cas
+		std::string getBody() const;
 		std::string getContentType() const;
 		std::string	getBoundary() const;
 		size_t		getContentLength() const;
 
-		std::map<std::string, std::string>	getQueryParam() const; //TODO
+		std::map<std::string, std::string>	getQueryParam() const;
 };
 
 #endif

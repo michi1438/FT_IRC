@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/11 15:02:29 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/16 10:02:57 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,14 +138,14 @@ int init_ws(ConfigFile& conf)
 				{
 					RequestParser Req(buffer);
 
-//					std::cout << buffer << std::endl;
-//					std::cout << std::endl;
+					std::cout << buffer << std::endl;
+					std::cout << std::endl;
 					Req.show();
 
 					// Vérifier si le chemin de l'URI correspond à un script CGI
-					if (Req.getURI().find("/cgi_bin/") == 0) //TODO remplacer par un is_CGI du RequestParser
+					if (Req.isCGI())
 					{
-						//TODO Exécuter le script CGI
+						//TODO Exécuter le script CGI dans un nouveau process
 						std::string cgi_script_path = "." + Req.getURI();
 						std::string cgi_output = "<h1>CGI handling</h1>";//execute_cgi_script(cgi_script_path);
 
