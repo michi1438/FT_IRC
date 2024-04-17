@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Centralinclude.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/17 08:36:32 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/17 09:08:38 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,11 @@
 #include <fstream>
 #include <sstream>
 #include <err.h>
+#include <vector>
+#include <string>
+#include <sys/event.h>
+#include <iterator>
+
 
 #include "ConfigFile.hpp"
 #include "RequestParser.hpp"
@@ -42,7 +47,11 @@
 #define HTTP_VER "HTTP/1.1"
 
 //webserv.cpp
-int			init_ws(ConfigFile& conf);
-std::string readHtmlFile(std::string filename, t_server srvr_used, bool err_50x);
-t_server	 choose_server(const ConfigFile& conf, std::string host);
-int			 prts_is_open(std::vector<int> server_fd, int fd);
+int				init_ws(ConfigFile& conf);
+std::string		readHtmlFile(std::string filename, t_server srvr_used, bool err_50x);
+t_server		choose_server(const ConfigFile& conf, std::string host);
+int				prts_is_open(std::vector<int> server_fd, int fd);
+
+//upload.cpp
+std::string		readHttpRequest(int client_socket);
+void			handleFileUpload(const std::string& request_body);

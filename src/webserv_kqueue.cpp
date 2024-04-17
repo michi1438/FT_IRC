@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   webserv_kqueue.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/15 11:01:04 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/17 09:41:45 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
-#include <sys/event.h>
 
 std::string readHtmlFile(std::string filename, t_server srvr, bool err_50x)
 {
@@ -70,7 +69,7 @@ int init_ws(ConfigFile& conf)
     struct kevent events[MAX_EVENTS];
     struct kevent change_event;
     if (kq == -1)
-	{
+    {
         perror("Error in kqueue");
         exit(EXIT_FAILURE);
     }
@@ -113,10 +112,10 @@ int init_ws(ConfigFile& conf)
     std::cout << "Webserv started. Listening on port(s) " << conf.prt_vec_print() << std::endl;
 
     while (true)
-	{
+    {
         int num_events = kevent(kq, NULL, 0, events, MAX_EVENTS, NULL);
         if (num_events == -1)
-		{
+        {
             perror("Error in kevent");
             exit(EXIT_FAILURE);
         }
@@ -131,20 +130,20 @@ int init_ws(ConfigFile& conf)
                 socklen_t client_len = sizeof(client_addr);
                 int client_fd = accept(cur_srv_fd, (struct sockaddr*)&client_addr, &client_len);
                 if (client_fd == -1)
-				{
+                {
                     perror("Error in accept");
                     exit(EXIT_FAILURE);
                 }
 
                 // Set client socket to non-blocking
-				if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1)
-				{
+                if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1)
+                {
                     perror("Error in fcntl");
                     exit(EXIT_FAILURE);
                 }
 
-				if (fcntl(client_fd, F_SETFL, FD_CLOEXEC) == -1)
-				{
+                if (fcntl(client_fd, F_SETFL, FD_CLOEXEC) == -1)
+                {
                     perror("Error in fcntl");
                     exit(EXIT_FAILURE);
                 }
@@ -154,17 +153,17 @@ int init_ws(ConfigFile& conf)
                 // Add client socket to kqueue
                 EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
                 if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1)
-				{
+                {
                     perror("Error in kevent");
                     exit(EXIT_FAILURE);
                 }
             }
-			else
+            else 
 			{
-                int client_socket = events[i].ident;
-
-				// Lire la requête HTTP du client
 				char buffer[4096];
+                int client_socket = events[i].ident;
+				
+				// Lire la requête HTTP du client
 				int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
 				if (bytes_received <= 0)
 				{
@@ -172,72 +171,78 @@ int init_ws(ConfigFile& conf)
 					close(client_socket);
 					continue;
 				}
-				std::cout << buffer << std::endl;
 
-				// Analyser la requête HTTP pour extraire le chemin de l'URI
-				// TODO if in request HTTP is diffferent then HTTP/1.1 send an error 503
-				std::string request(buffer, buffer + bytes_received);
-				std::istringstream request_stream(request);
-				std::string request_line;
-				std::getline(request_stream, request_line);
-
-				std::istringstream request_line_stream(request_line);
-				std::string method;
-				std::string uri;
-				std::string host;
-				std::string http_ver;
-				std::getline(request_line_stream, method, ' ');
-				request_line_stream >> http_ver;
-				request_line_stream >> http_ver;
-				std::getline(request_line_stream, uri, ' ');
-				std::getline(request_stream, host);
-
-				host = host.substr(host.find(' ') + 1);
-				std::cout << "method : " << method << std::endl;
-				std::cout << "uri : " << uri << std::endl;
-				std::cout << "host : " << host << std::endl;
-				std::cout << "http : " << http_ver << std::endl;
-
-				// Vérifier si le chemin de l'URI correspond à un script CGI
-				t_server srvr_used = choose_server(conf, host);
-				if (http_ver.compare(HTTP_VER) != 0)
+				try
 				{
-					// ERREUR 500
-					std::string response = readHtmlFile(uri.substr(1), srvr_used, true);
-					send(client_socket, response.c_str(), response.size(), 0);
-					close(client_socket);
-					std::cout << BLUE << "Response 500 sent." << RESET << std::endl;
-				}
-				else if (uri.find("/cgi_bin/") == 0)
-				{
-					// Exécuter le script CGI
-					std::string cgi_script_path = "." + uri;
-					std::string cgi_output = "<h1>CGI handling</h1>";//execute_cgi_script(cgi_script_path);
+					RequestParser Req(buffer);
 
-					// Envoyer la sortie du script CGI au client
-					std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + cgi_output;
-					if (send(client_socket, response.c_str(), response.size(), 0) == -1)
+					t_server srvr_used = choose_server(conf, Req.getHost());
+					std::cout << buffer << std::endl;
+					std::cout << std::endl;
+					Req.show();
+
+					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
 					{
-						perror("Error in send");
+						handleFileUpload(Req.getBody());
+						std::string response = readHtmlFile("./html/upload.html", srvr_used, false);
+						send(client_socket, response.c_str(), response.size(), 0);
 						close(client_socket);
-						continue;
-					}
-					close(client_socket);
-					std::cout << BLUE << "Response 200 sent from CGI" << RESET << std::endl;
-				}
-				else
-				{
-					// Réponse normale (non-CGI)
-					std::string response = readHtmlFile(uri.substr(1), srvr_used, false);
-
-					if (send(client_socket, response.c_str(), response.size(), 0) == -1)
-					{
-						perror("Error in send");
-						close(client_socket);
-						return 1;
+						std::cout << BLUE << "Response upload sent." << RESET << std::endl;
 					}
 
+					// Vérifier si le chemin de l'URI correspond à un script CGI
+					if (Req.getVersion().compare(HTTP_VER) != 0)
+					{
+						// ERREUR 500
+						std::string response = readHtmlFile(Req.getURI().substr(1), srvr_used, true);
+						send(client_socket, response.c_str(), response.size(), 0);
+						close(client_socket);
+						std::cout << BLUE << "Response 500 sent." << RESET << std::endl;
+					}
+					else if (Req.isCGI())
+					{
+						// Exécuter le script CGI
+						std::string cgi_script_path = "." + Req.getURI();
+						std::string cgi_output = "<h1>CGI handling</h1>";//execute_cgi_script(cgi_script_path);
+
+						// Envoyer la sortie du script CGI au client
+						std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + cgi_output;
+						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
+						{
+							perror("Error in send");
+							close(client_socket);
+							continue;
+						}
+						close(client_socket);
+						std::cout << BLUE << "Response 200 sent from CGI" << RESET << std::endl;
+					}
+					else
+					{
+						// Réponse normale (non-CGI)
+						std::string response = readHtmlFile(Req.getURI().substr(1), srvr_used, false);
+
+						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
+						{
+							perror("Error in send");
+							close(client_socket);
+							return 1;
+						}
+
+						close(client_socket);
+					}
+				}
+				catch (int errorCode)
+				{
+					//TODO Afficher la bonne page html selon le code d'erreur
+					// switch case ?
+	 				std::cout << RED << "ERROR CODE : " << errorCode << std::endl;
+					std::cout << RESET;
 					close(client_socket);
+					//TODO clear le buffer, sinon il garde des infos des requetes precedentes
+					// faire ca plus proprement que comme ca :
+					char *begin = buffer;
+					char *end = begin + sizeof(buffer);
+					std::fill(begin, end, 0);
 				}
             }
         }
