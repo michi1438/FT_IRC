@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/05 16:01:38 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/17 08:36:32 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,12 @@
 #define CYAN    "\033[36m"      // Cyan
 
 #define MAX_EVENTS 64
-//#define PORT 8080
+#define ERR_400 "html/40x.html"
+#define ERR_500 "html/50x.html"
+#define HTTP_VER "HTTP/1.1"
 
 //webserv.cpp
 int			init_ws(ConfigFile& conf);
-std::string	readHtmlFile(const char *filename);
+std::string readHtmlFile(std::string filename, t_server srvr_used, bool err_50x);
+t_server	 choose_server(const ConfigFile& conf, std::string host);
+int			 prts_is_open(std::vector<int> server_fd, int fd);
