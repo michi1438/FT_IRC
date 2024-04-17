@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv_kqueue.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/04 15:56:46 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/17 11:27:18 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,74 +120,40 @@ int init_ws(ConfigFile& conf)
                     exit(EXIT_FAILURE);
                 }
             }
-			else
-			{
+			else {
                 int client_socket = events[i].ident;
 
-				// Lire la requête HTTP du client
-				char buffer[4096];
-				int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
-				if (bytes_received <= 0)
-				{
-					perror("Error receiving request");
-					close(client_socket);
-					continue;
-				}
-				std::cout << buffer << std::endl;
+                std::string httpRequestContent = readHttpRequest(client_socket);
+                if (!httpRequestContent.empty()) {
+                    if (httpRequestContent.find("POST /upload") != std::string::npos) {
+                        handleFileUpload(httpRequestContent);
+                        std::string htmlContent = readHtmlFile("upload.html");
+                        std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
 
-				// Analyser la requête HTTP pour extraire le chemin de l'URI
-				std::string request(buffer, buffer + bytes_received);
-				std::istringstream request_stream(request);
-				std::string request_line;
-				std::getline(request_stream, request_line);
+                        if (send(client_socket, response.c_str(), response.size(), 0) == -1) {
+                            perror("Error in send");
+                            close(client_socket);
+                            return 1;
+                        }
+                        close(client_socket);
+                        std::cout << BLUE << "Response sent." << RESET << std::endl;
+                    } else {
+                        std::string htmlContent = readHtmlFile("socket.html");
+                        std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
 
-				std::istringstream request_line_stream(request_line);
-				std::string method;
-				std::string uri;
-				std::getline(request_line_stream, method, ' ');
-				std::getline(request_line_stream, uri, ' ');
-
-				std::cout << method << std::endl;
-				std::cout << uri << std::endl;
-
-				// Vérifier si le chemin de l'URI correspond à un script CGI
-				if (uri.find("/cgi_bin/") == 0)
-				{
-					// Exécuter le script CGI
-					std::string cgi_script_path = "." + uri;
-					std::string cgi_output = "<h1>CGI handling</h1>";//execute_cgi_script(cgi_script_path);
-
-					// Envoyer la sortie du script CGI au client
-					std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + cgi_output;
-					if (send(client_socket, response.c_str(), response.size(), 0) == -1)
-					{
-						perror("Error in send");
-						close(client_socket);
-						continue;
-					}
-					close(client_socket);
-					std::cout << BLUE << "Response sent from CGI" << RESET << std::endl;
-				}
-				else
-				{
-					// Réponse normale (non-CGI)
-					std::string htmlContent = readHtmlFile(uri.substr(1).c_str());
-					std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
-
-					if (send(client_socket, response.c_str(), response.size(), 0) == -1)
-					{
-						perror("Error in send");
-						close(client_socket);
-						return 1;
-					}
-
-					close(client_socket);
-					std::cout << BLUE << "Response sent." << RESET << std::endl;
-				}
-            }
+                        if (send(client_socket, response.c_str(), response.size(), 0) == -1) {
+                            perror("Error in send");
+                            close(client_socket);
+                            return 1;
+                        }
+                        close(client_socket);
+                        std::cout << BLUE << "Response sent." << RESET << std::endl;
+                    }
+                }
         }
     }
     close(server_fd);
     close(kq);
     return 0;
+}
 }

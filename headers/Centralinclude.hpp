@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Centralinclude.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/04 15:23:19 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/17 11:38:28 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@
 #include <fstream>
 #include <sstream>
 #include <err.h>
+#include <vector>
+#include <string>
 
 #include "ConfigFile.hpp"
 
@@ -40,3 +42,7 @@
 //webserv.cpp
 int			init_ws(ConfigFile& conf);
 std::string	readHtmlFile(const char *filename);
+
+//upload.cpp
+std::string readHttpRequest(int client_socket);
+void handleFileUpload(const std::string& request_body);
