@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/17 09:41:45 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/17 17:56:10 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,15 +183,15 @@ int init_ws(ConfigFile& conf)
 
 					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
 					{
-						handleFileUpload(Req.getBody());
-						std::string response = readHtmlFile("./html/upload.html", srvr_used, false);
+						handleFileUpload(Req);
+						std::string response = readHtmlFile("./upload.html", srvr_used, false);
 						send(client_socket, response.c_str(), response.size(), 0);
 						close(client_socket);
 						std::cout << BLUE << "Response upload sent." << RESET << std::endl;
 					}
 
 					// Vérifier si le chemin de l'URI correspond à un script CGI
-					if (Req.getVersion().compare(HTTP_VER) != 0)
+					else if (Req.getVersion().compare(HTTP_VER) != 0)
 					{
 						// ERREUR 500
 						std::string response = readHtmlFile(Req.getURI().substr(1), srvr_used, true);

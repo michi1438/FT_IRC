@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/16 11:29:59 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/17 17:55:51 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ RequestParser::RequestParser(const std::string &request)
 		else if (new_line.find("Content-Length: ") != std::string::npos)
 		{
 			this->_content_length = std::atoi(new_line.erase(new_line.size() - 1, 1).substr(16).c_str());
-			if (this->_content_length > 500) //TODO get body limit from ConfigFile
+			if (this->_content_length > 100000000) //TODO get body limit from ConfigFile
 				throw 413;
 		}
 		else if (new_line.find("Transfer-Encoding: ") != std::string::npos)
