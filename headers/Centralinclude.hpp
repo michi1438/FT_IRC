@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/17 11:38:28 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/17 12:08:20 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,9 @@
 #include <err.h>
 #include <vector>
 #include <string>
+#include <sys/event.h>
+#include <iterator>
+
 
 #include "ConfigFile.hpp"
 
