@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/17 12:26:57 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/17 14:38:10 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,7 @@ int init_ws(ConfigFile& conf)
                 if (!httpRequestContent.empty()) {
                     if (httpRequestContent.find("POST /upload") != std::string::npos) {
                         handleFileUpload(httpRequestContent);
-                        std::string htmlContent = readHtmlFile("../html/upload.html");
+                        std::string htmlContent = readHtmlFile("./html/upload.html");
                         std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
 
                         if (send(client_socket, response.c_str(), response.size(), 0) == -1) {
@@ -137,7 +137,7 @@ int init_ws(ConfigFile& conf)
                         close(client_socket);
                         std::cout << BLUE << "Response sent." << RESET << std::endl;
                     } else {
-                        std::string htmlContent = readHtmlFile("../html/socket.html");
+                        std::string htmlContent = readHtmlFile("./html/socket.html");
                         std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + htmlContent;
                         std::cout << htmlContent << std::endl;
                         if (send(client_socket, response.c_str(), response.size(), 0) == -1) {
