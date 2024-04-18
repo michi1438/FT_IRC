@@ -6,16 +6,46 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/17 17:55:51 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/18 18:55:47 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/RequestParser.hpp"
 
-RequestParser::RequestParser(const std::string &request)
+RequestParser::RequestParser(const int &client_socket)
 	: _method(""), _uri(""), _version(""), _host(""), _script_name(""),
    	_is_chunked(false),	_boundary(""), _content_type(""), _content_length(0), _body("")
 {
+	//TODO Boucle pour recuperer toute la requete, voir comment l'adapter
+	//pour populer la classe, pendant ou apres le while ?
+	char buffer[256] = {0};
+	std::string req_data;
+	int bytes_received;
+	while (true)
+	{
+		bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
+		if (bytes_received < 0)
+		{
+			perror("Error receiving request");
+			close(client_socket);
+			break;
+		}
+		else if (bytes_received == 0)
+		{
+			close(client_socket);
+			break;
+		}
+		else
+		{
+			req_data.append(buffer, bytes_received);
+			RequestParser temp(req_data);
+			size_t body_start = req_data.find("\r\n\r\n");
+			size_t length = temp.getContentLength();
+			if (body_start != std::string::npos && req_data.size() >= body_start + 4 + length)
+				break;
+		}
+	}
+
 	// First line (Method, URI & Version)
 	///////////////////////////////////////
 	std::istringstream	request_stream(request);
@@ -103,7 +133,12 @@ RequestParser::RequestParser(const std::string &request)
 		line.append("\n");
 		this->_body.append(line);
 	}
-
+//	while (new_line.find((this->getBoundary() + "--").c_str()) == std::string::npos)
+//	{
+//		new_line.append("\n");
+//		this->_body.append(new_line);
+//		std::getline(request_stream, new_line);
+//	}
 }
 
 RequestParser::~RequestParser()
@@ -131,6 +166,9 @@ void RequestParser::show() const
 	std::cout << CYAN << this->getBody() << "$" << std::endl;
 
 	std::cout << std::setw(20) << std::endl;
+
+	if (this->_query_param.empty())
+		return ;
 	std::cout << std::setw(20) << RESET << "QUERY" << std::endl;
 
 	std::map<std::string, std::string>::const_iterator it;

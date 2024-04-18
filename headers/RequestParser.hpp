@@ -6,7 +6,7 @@
 /*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:09 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/16 11:16:32 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/18 17:43:53 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 #include <iostream>
 #include <iomanip>
+#include <sys/socket.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <fstream>
 #include <sstream>
@@ -50,7 +52,7 @@ class RequestParser
 		std::map<std::string, std::string>	_query_param;
 
 	public:
-		RequestParser(const std::string &request);
+		RequestParser(const int &client_socket);
 		~RequestParser(void);
 
 		void		show() const;

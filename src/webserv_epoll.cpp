@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/17 08:55:05 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/18 17:39:16 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,26 +144,16 @@ int init_ws(ConfigFile& conf)
 			}
 			else
 			{
-				char buffer[4096];
-				int client_socket = events[i].data.fd;
-				
 				// Lire la requête HTTP du client
-				int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
-				if (bytes_received <= 0)
-				{
-					perror("Error receiving request");
-					close(client_socket);
-					continue;
-				}
+				int client_socket = events[i].data.fd;
 
 				try
 				{
-					RequestParser Req(buffer);
+					RequestParser Req(client_socket);
 
-					// Vérifier si le chemin de l'URI correspond à un script CGI
 					t_server srvr_used = choose_server(conf, Req.getHost());
-					std::cout << buffer << std::endl;
-					std::cout << std::endl;
+//					std::cout << buffer << std::endl;
+//					std::cout << std::endl;
 					Req.show();
 
 					// Vérifier si le chemin de l'URI correspond à un script CGI
@@ -182,7 +172,6 @@ int init_ws(ConfigFile& conf)
 							continue;
 						}
 						close(client_socket);
-						//TODO clear le buffer, sinon il garde des infos des requetes precedentes
 						std::cout << BLUE << "Response sent from CGI" << RESET << std::endl;
 					}
 					else
@@ -197,7 +186,6 @@ int init_ws(ConfigFile& conf)
 							return 1;
 						}
 						close(client_socket);
-						//TODO clear le buffer, sinon il garde des infos des requetes precedentes
 						std::cout << BLUE << "Response sent." << RESET << std::endl;
 					}
 				}
@@ -208,11 +196,6 @@ int init_ws(ConfigFile& conf)
 	 				std::cout << RED << "ERROR CODE : " << errorCode << std::endl;
 					std::cout << RESET;
 					close(client_socket);
-					//TODO clear le buffer, sinon il garde des infos des requetes precedentes
-					// faire ca plus proprement que comme ca :
-					char *begin = buffer;
-					char *end = begin + sizeof(buffer);
-					std::fill(begin, end, 0);
 				}
 			}
         }

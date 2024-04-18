@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/04/17 17:04:04 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/18 11:25:03 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ std::string readHttpRequest(int client_socket) {
                 size_t content_length_end = request.find("\r\n", content_length_start);
                 if (content_length_end != std::string::npos) {
                     std::string content_length_str = request.substr(content_length_start + strlen("Content-Length: "), content_length_end - content_length_start - strlen("Content-Length: "));
-                    int content_length = std::stoi(content_length_str);
+                    int content_length = 0;//std::stoi(content_length_str);
                     // Vérifier si le corps de la requête est entièrement reçu
                     if (request.size() >= header_end + 4 + content_length) {
                         std::cout << "Request fully received" << std::endl;
@@ -94,7 +94,7 @@ header_end += 4;
 
     // Ouvrir le fichier de sortie
     std::cout << getcwd(NULL, 0) << std::endl;
-    std::ofstream outfile("src/upload/" + filename, std::ios::binary);
+    std::ofstream outfile(("src/upload/" + filename).c_str(), std::ios::binary);
     if (!outfile.is_open()) {
         std::cerr << "Unable to save file: " << filename << std::endl;
         return;
@@ -112,7 +112,7 @@ header_end += 4;
     outfile.close();
 
     // Vérifier la taille du fichier
-    std::ifstream infile("src/upload/" + filename, std::ios::binary | std::ios::ate);
+    std::ifstream infile(("src/upload/" + filename).c_str(), std::ios::binary | std::ios::ate);
     std::streamsize size = infile.tellg();
     infile.close();
 
