@@ -6,7 +6,7 @@
 #    By: robin <robin@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/27 16:42:52 by mguerga           #+#    #+#              #
-#    Updated: 2024/04/17 11:40:42 by robin            ###   ########.fr        #
+#    Updated: 2024/04/17 09:04:26 by lzito            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,8 +20,9 @@ CXXFLAGS = -Werror -Wall -Wextra -std=c++98
 
 SRCS = 	src/main.cpp \
 		src/ConfigFile.cpp \
+		src/RequestParser.cpp \
 		src/ParsingException.cpp \
-		src/upload/upload.cpp \
+		src/upload/upload.cpp
 
 ifeq ($(OS), Darwin)
 SRCS2 = src/webserv_kqueue.cpp

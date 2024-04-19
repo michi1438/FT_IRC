@@ -1,3 +1,15 @@
+<!-- *********************************************************************** -->
+<!--                                                                         -->
+<!--                                                      :::      ::::::::  -->
+<!-- index.html                                         :+:      :+:    :+:  -->
+<!--                                                  +:+ +:+         +:+    -->
+<!-- By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+       -->
+<!--                                              +#+#+#+#+#+   +#+          -->
+<!-- Created: 2024/04/05 13:10:51 by lzito             #+#    #+#            -->
+<!-- Updated: 2024/04/17 09:10:13 by lzito            ###   ########.fr      -->
+<!--                                                                         -->
+<!-- *********************************************************************** -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,6 +40,23 @@ h1 {
 </style>
 </head>
 <body>
+	<div>
+		<form action="/cgi_bin/simple" method="post">
+			<input type="text" name="data"><br><br>
+			<input type="submit" value="Envoyer">
+		</form>
+		<a href="/html/socket.html">TEST</a>
+	</div>
+	<br>
+	<br>
+	<div>
+		<form action="/cgi_bin/upload" method="post" enctype="multipart/form-data">
+			<label for="file">S3lexioner 1 fechier :</label><br>
+			<input type="file" id="file" name="file"><br><br>
+			<input type="text" name="data"><br><br>
+			<input type="submit" value="Envoyer">
+		</form>
+	</div>
 <div class="container">
     <h1>Hello!</h1>
 </div>
