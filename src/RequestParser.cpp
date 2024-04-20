@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/18 18:55:47 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/20 13:12:45 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ RequestParser::RequestParser(const int &client_socket)
 {
 	//TODO Boucle pour recuperer toute la requete, voir comment l'adapter
 	//pour populer la classe, pendant ou apres le while ?
-	char buffer[256] = {0};
+	char buffer[BUFFER_SIZE] = {0};
 	std::string req_data;
 	int bytes_received;
 	while (true)
@@ -38,17 +38,21 @@ RequestParser::RequestParser(const int &client_socket)
 		else
 		{
 			req_data.append(buffer, bytes_received);
-			RequestParser temp(req_data);
-			size_t body_start = req_data.find("\r\n\r\n");
-			size_t length = temp.getContentLength();
-			if (body_start != std::string::npos && req_data.size() >= body_start + 4 + length)
+			if (req_data.find("\r\n\r\n") != std::string::npos)
 				break;
+//			RequestParser temp(req_data);
+//			size_t body_start = req_data.find("\r\n\r\n");
+//			size_t length = temp.getContentLength();
+//			if (body_start != std::string::npos && req_data.size() >= body_start + 4 + length)
+//				break;
 		}
 	}
+//	std::cout << req_data << std::endl;
+//	std::cout << std::endl;
 
 	// First line (Method, URI & Version)
 	///////////////////////////////////////
-	std::istringstream	request_stream(request);
+	std::istringstream	request_stream(req_data);
 
 	std::string	first_line;
 	std::getline(request_stream, first_line);
@@ -69,8 +73,9 @@ RequestParser::RequestParser(const int &client_socket)
 	if (this->isCGI())
 	{
 		std::string URI = this->getURI();
-		size_t cgiPos = URI.find("/cgi_bin/");
-		this->_script_name = URI.substr(cgiPos + 9, sizeof(URI));
+		size_t startPos = URI.find("/cgi_bin/") + 9;
+		size_t endPos = URI.find("?");
+		this->_script_name = URI.substr(startPos, endPos - startPos);
 	}
 
 	// Rest of headers
@@ -127,18 +132,33 @@ RequestParser::RequestParser(const int &client_socket)
 		}
 		std::getline(request_stream, new_line);
 	}
-	// Body
-	for (std::string line; std::getline(request_stream, line);)
-	{
-		line.append("\n");
+
+	//TODO gestion des requete chunked a faire
+	std::cout << "Body size before : " << _body.size() << std::endl;
+	// Body from request stream
+	for (std::string line; std::getline(request_stream, line, '\n');)
 		this->_body.append(line);
+	// Rest of the body from socket (if existing)
+	while (this->getBody().size() < this->getContentLength())
+	{
+		bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
+		std::cout << bytes_received << std::endl;
+		if (bytes_received < 0)
+		{
+			perror("Error receiving request");
+			close(client_socket);
+			break;
+		}
+		else if (bytes_received == 0)
+			break;
+		else
+		{
+			this->_body.append(buffer, bytes_received);
+			if (bytes_received < BUFFER_SIZE)
+				break;
+		}
 	}
-//	while (new_line.find((this->getBoundary() + "--").c_str()) == std::string::npos)
-//	{
-//		new_line.append("\n");
-//		this->_body.append(new_line);
-//		std::getline(request_stream, new_line);
-//	}
+	std::cout << "Body size after : " << _body.size() << std::endl;
 }
 
 RequestParser::~RequestParser()
@@ -162,9 +182,12 @@ void RequestParser::show() const
 	std::cout << RESET << std::setw(20) << "BOUNDARY : " << GREEN << this->getBoundary() << "$" << std::endl;
 	std::cout << RESET << std::setw(20) << "CONTENT TYPE : " << GREEN << this->getContentType() << "$" << std::endl;
 	std::cout << RESET << std::setw(20) << "CONTENT LENGTH : " << GREEN << this->getContentLength() << "$" << std::endl;
-	std::cout << RESET << std::setw(20) << "BODY : " << std::endl;
-	std::cout << CYAN << this->getBody() << "$" << std::endl;
 
+	if (!this->getBody().empty())
+	{
+		std::cout << RESET << std::setw(20) << "BODY : " << std::endl;
+		std::cout << CYAN << this->getBody() << "$" << std::endl;
+	}
 	std::cout << std::setw(20) << std::endl;
 
 	if (this->_query_param.empty())

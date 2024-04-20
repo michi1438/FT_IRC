@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/18 17:39:16 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/20 12:10:32 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,9 +152,32 @@ int init_ws(ConfigFile& conf)
 					RequestParser Req(client_socket);
 
 					t_server srvr_used = choose_server(conf, Req.getHost());
-//					std::cout << buffer << std::endl;
-//					std::cout << std::endl;
 					Req.show();
+					
+					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
+					{
+						handleFileUpload(Req);
+						std::string response = readHtmlFile("/upload.html", srvr_used);
+					    std::cout << response.c_str() << std::endl;
+						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
+						{
+							perror("Error in send ouaich");
+							close(client_socket);
+							continue;
+						}
+						close(client_socket);
+						std::cout << BLUE << "Response upload sent." << RESET << std::endl;
+						continue;
+					}
+
+					else if (Req.getVersion().compare(HTTP_VER) != 0)
+					{
+						// ERREUR 500
+						std::string response = readHtmlFile(Req.getURI().substr(1), srvr_used);
+						send(client_socket, response.c_str(), response.size(), 0);
+						close(client_socket);
+						std::cout << BLUE << "Response 500 sent." << RESET << std::endl;
+					}
 
 					// Vérifier si le chemin de l'URI correspond à un script CGI
 					if (Req.isCGI())
@@ -167,7 +190,7 @@ int init_ws(ConfigFile& conf)
 						std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + cgi_output;
 						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
 						{
-							perror("Error in send");
+							perror("Error in send (CGI)");
 							close(client_socket);
 							continue;
 						}
@@ -181,7 +204,7 @@ int init_ws(ConfigFile& conf)
 
 						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
 						{
-							perror("Error in send");
+							perror("Error in send (non-CGI)");
 							close(client_socket);
 							return 1;
 						}

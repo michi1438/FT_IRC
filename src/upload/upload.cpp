@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/04/18 11:25:03 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/20 12:16:02 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 std::string readHttpRequest(int client_socket) {
     std::string request;
-    char buffer[1000024];
+    char buffer[1024];
     ssize_t bytes_read;
 
     // Lire les données du socket jusqu'à ce que la connexion soit fermée par le client
@@ -75,12 +75,12 @@ void handleFileUpload(RequestParser & Req) {
     }
 
     // Trouver la position de départ des données du fichier
-size_t header_end = Req.getBody().find("\r\n\r\n");
-if (header_end == std::string::npos) {
+	size_t header_end = Req.getBody().find("\r\n\r\n");
+	if (header_end == std::string::npos) {
     std::cerr << "Invalid file data format0" << std::endl;
     return;
-}
-header_end += 4;
+	}
+	header_end += 4;
 
     
     // Trouver la fin des données du fichier
@@ -93,8 +93,8 @@ header_end += 4;
 
 
     // Ouvrir le fichier de sortie
-    std::cout << getcwd(NULL, 0) << std::endl;
-    std::ofstream outfile(("src/upload/" + filename).c_str(), std::ios::binary);
+//    std::cout << getcwd(NULL, 0) << std::endl;
+    std::ofstream outfile(("upload/" + filename).c_str(), std::ios::binary);
     if (!outfile.is_open()) {
         std::cerr << "Unable to save file: " << filename << std::endl;
         return;
@@ -112,7 +112,7 @@ header_end += 4;
     outfile.close();
 
     // Vérifier la taille du fichier
-    std::ifstream infile(("src/upload/" + filename).c_str(), std::ios::binary | std::ios::ate);
+    std::ifstream infile(("upload/" + filename).c_str(), std::ios::binary | std::ios::ate);
     std::streamsize size = infile.tellg();
     infile.close();
 
