@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/17 17:55:51 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/19 13:15:31 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,4 +216,19 @@ size_t RequestParser::getContentLength() const
 std::map<std::string, std::string> RequestParser::getQueryParam() const
 {
 	return (this->_query_param);
+}
+
+std::string RequestParser::getQueryString() const
+{
+	std::string query_string = "";
+	std::map<std::string, std::string>::const_iterator it;
+
+	for (it = this->_query_param.begin(); it != this->_query_param.end(); ++it)
+	{
+		query_string.append(it->first);
+		query_string.append("=");
+		query_string.append(it->second);
+		query_string.append("&");
+	}
+	return (query_string);
 }

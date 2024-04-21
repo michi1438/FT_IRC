@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/17 17:56:10 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/19 16:44:37 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,85 @@ int prts_is_open(std::vector<int> server_fd, int fd)
 			return *it;
 	}
 	return -1;
+}
+
+std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser& Req)
+{
+    int pipefd[2];
+    if (pipe(pipefd) == -1)
+    {
+        perror("Error in pipe");
+        exit(EXIT_FAILURE);
+    }
+
+    pid_t pid = fork();
+    if (pid == -1)
+    {
+        perror("Error in fork");
+        exit(EXIT_FAILURE);
+    }
+
+    if (pid == 0)
+    {
+        // Child process
+        close(pipefd[0]);
+        dup2(pipefd[1], STDOUT_FILENO);
+        close(pipefd[1]);
+
+        // Set environment variables
+        setenv("REQUEST_METHOD", Req.getMethod().c_str(), 1);
+        setenv("SCRIPT_FILENAME", cgi_script_path.c_str(), 1);
+        //setenv("QUERY_STRING", Req.getQueryParam().c_str(), 1);
+        std::ostringstream oss;
+        oss << Req.getContentLength();
+        std::string contentLengthStr = oss.str();
+        setenv("CONTENT_LENGTH", contentLengthStr.c_str(), 1);
+        setenv("CONTENT_TYPE", Req.getContentType().c_str(), 1);
+        //std::cout << "getMethod : " << Req.getMethod().c_str() << "<br>" << std::endl;
+        
+        // Execute the CGI script
+        if(Req.getScriptName().find(".py") != std::string::npos){
+            std::string num1;
+            std::string num2;
+            std::string oprtr;
+            std::map<std::string, std::string> query = Req.getQueryParam();
+            std::map<std::string, std::string>::iterator it = query.begin();
+            for (it = query.begin(); it != query.end(); it++)
+            {
+                if (it->first == "number1")
+                    num1 = it->second;
+                else if (it->first == "number2")
+                    num2 = it->second;
+                else if (it->first == "operator")
+                    oprtr = it->second;
+                else
+                    std::cerr << "Invalid query parameter" << std::endl;
+            }
+            execl("/usr/bin/python3", "python3", cgi_script_path.c_str(), num1.c_str(), num2.c_str(), oprtr.c_str(), NULL);
+        }
+        else if(Req.getScriptName().find(".php") != std::string::npos)
+            execl("/usr/bin/php", "php", cgi_script_path.c_str(), NULL);
+        perror("Error in execl");
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        // Parent process
+        close(pipefd[1]);
+
+        // Read the output of the CGI script
+        char buffer[4096];
+        ssize_t bytes_read;
+        std::string cgi_output;
+        while ((bytes_read = read(pipefd[0], buffer, sizeof(buffer))) > 0)
+        {
+            cgi_output.append(buffer, bytes_read);
+        }
+
+        close(pipefd[0]);
+        waitpid(pid, NULL, 0);
+        return cgi_output;
+    }
 }
 
 int init_ws(ConfigFile& conf)
@@ -160,25 +239,16 @@ int init_ws(ConfigFile& conf)
             }
             else 
 			{
-				char buffer[4096];
                 int client_socket = events[i].ident;
-				
-				// Lire la requête HTTP du client
-				int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
-				if (bytes_received <= 0)
-				{
-					perror("Error receiving request");
-					close(client_socket);
-					continue;
-				}
+                std::string buffer = readHttpRequest(client_socket);
 
 				try
 				{
 					RequestParser Req(buffer);
 
 					t_server srvr_used = choose_server(conf, Req.getHost());
-					std::cout << buffer << std::endl;
-					std::cout << std::endl;
+					// std::cout << request << std::endl;
+					// std::cout << std::endl;
 					Req.show();
 
 					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
@@ -202,9 +272,9 @@ int init_ws(ConfigFile& conf)
 					else if (Req.isCGI())
 					{
 						// Exécuter le script CGI
-						std::string cgi_script_path = "." + Req.getURI();
-						std::string cgi_output = "<h1>CGI handling</h1>";//execute_cgi_script(cgi_script_path);
-
+						std::string cgi_script_path = "cgi_bin/hello.py";
+						//std::string cgi_output = "<h1>CGI handling</h1>";//execute_cgi_script(cgi_script_path);
+                        std::string cgi_output = execute_cgi_script(cgi_script_path, Req);
 						// Envoyer la sortie du script CGI au client
 						std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + cgi_output;
 						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
@@ -213,8 +283,8 @@ int init_ws(ConfigFile& conf)
 							close(client_socket);
 							continue;
 						}
+						//std::cout << BLUE <<  << RESET << std::endl;
 						close(client_socket);
-						std::cout << BLUE << "Response 200 sent from CGI" << RESET << std::endl;
 					}
 					else
 					{
@@ -240,9 +310,9 @@ int init_ws(ConfigFile& conf)
 					close(client_socket);
 					//TODO clear le buffer, sinon il garde des infos des requetes precedentes
 					// faire ca plus proprement que comme ca :
-					char *begin = buffer;
-					char *end = begin + sizeof(buffer);
-					std::fill(begin, end, 0);
+					// char *begin = buffer;
+					// char *end = begin + sizeof(buffer);
+					// std::fill(begin, end, 0);
 				}
             }
         }
@@ -290,3 +360,4 @@ t_server	 choose_server(const ConfigFile& conf, const std::string req_host)
 	ret.err = true;
 	return ret;
 }
+
