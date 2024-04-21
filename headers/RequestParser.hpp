@@ -6,7 +6,7 @@
 /*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:09 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/20 12:51:32 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/21 16:27:13 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 #include <map>
 
 # define MAX_HEADER_SIZE 4096
-# define BUFFER_SIZE 256
+# define BUFFER_SIZE 4096
 # define MAX_HEADER_FIELDS 100
 
 # define RESET   "\033[0m"
@@ -75,5 +75,7 @@ class RequestParser
 
 		std::map<std::string, std::string>	getQueryParam() const;
 };
+
+std::string getHttpRequest(int client_socket);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/20 12:10:32 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/21 17:25:09 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,7 +158,7 @@ int init_ws(ConfigFile& conf)
 					{
 						handleFileUpload(Req);
 						std::string response = readHtmlFile("/upload.html", srvr_used);
-					    std::cout << response.c_str() << std::endl;
+//					    std::cout << response.c_str() << std::endl;
 						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
 						{
 							perror("Error in send ouaich");
