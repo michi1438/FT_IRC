@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/17 09:08:38 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/17 16:44:53 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,4 +54,4 @@ int				prts_is_open(std::vector<int> server_fd, int fd);
 
 //upload.cpp
 std::string		readHttpRequest(int client_socket);
-void			handleFileUpload(const std::string& request_body);
+void			handleFileUpload(RequestParser & Req);
