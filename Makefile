@@ -6,7 +6,7 @@
 #    By: robin <robin@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/27 16:42:52 by mguerga           #+#    #+#              #
-#    Updated: 2024/04/17 09:04:26 by lzito            ###   ########.fr        #
+#    Updated: 2024/04/21 16:47:32 by mguerga          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,7 @@ SRCS = 	src/main.cpp \
 		src/ConfigFile.cpp \
 		src/RequestParser.cpp \
 		src/ParsingException.cpp \
+		src/ws_ontheside.cpp \
 		src/upload/upload.cpp
 
 ifeq ($(OS), Darwin)
