@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/21 12:02:45 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/21 12:56:55 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -276,7 +276,10 @@ t_server	 choose_server(const ConfigFile& conf, const std::string req_host)
 		{
 			if (*prtn_it == host_port && srvr_it->is_default == true)
 			{
-				std::cout << host_name << ":" << host_port << " was passed to the default-tagged server-block (" << srvr_it->srvr_name[0] << ") with its port number." << std::endl;
+				if (!srvr_it->srvr_name.empty())
+					std::cout << host_name << ":" << host_port << " was passed to the default-tagged server-block (" << srvr_it->srvr_name[0] << ") with its port number." << std::endl;
+				else
+					std::cout << host_name << ":" << host_port << " went to the default block of this prtn with no srvr_name defined" << std::endl;
 				return *srvr_it;
 			}
 		}
