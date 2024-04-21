@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/21 13:26:24 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/21 13:56:04 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ std::string readHtmlFile(std::string filename, t_server srvr, bool err_50x)
 	}
     if (!file.is_open())
 	{
-		std::ifstream file("html/40x.html");
+		std::ifstream file(ERR_400);
 		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 		std::string response = "HTTP/1.1 400 OK\r\nContent-Type: text/html\r\n\r\n" + content;
 		file.close();
