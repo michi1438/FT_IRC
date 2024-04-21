@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/21 10:34:00 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/21 12:02:45 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ int init_ws(ConfigFile& conf)
     int ep = epoll_create1(0);
 	struct epoll_event events[MAX_EVENTS];
 	struct epoll_event change_event;
+	std::vector<int> prt_vec = conf.getPort_vec(); 
 	const int enable = 1;
 	change_event.events = EPOLLIN;
     if (ep == -1)
@@ -74,7 +75,7 @@ int init_ws(ConfigFile& conf)
         exit(EXIT_FAILURE);
     }
 	std::vector<int> server_fd; 
-	for(std::vector<int>::iterator it = conf.prt_vec.begin(); it != conf.prt_vec.end(); it++)
+	for(std::vector<int>::iterator it = prt_vec.begin(); it != prt_vec.end(); it++)
 	{		
 		server_fd.push_back(socket(AF_INET, SOCK_STREAM, 0));
 		if (server_fd.back() == -1)
@@ -241,7 +242,7 @@ int init_ws(ConfigFile& conf)
 			}
         }
     }
-	for(std::vector<int>::iterator it = conf.prt_vec.begin(); it != conf.prt_vec.end(); it++)
+	for(std::vector<int>::iterator it = prt_vec.begin(); it != prt_vec.end(); it++)
 		close(*it);
     close(ep);
     return 0;
@@ -251,7 +252,7 @@ t_server	 choose_server(const ConfigFile& conf, const std::string req_host)
 {
 	std::string host_name = req_host.substr(0, req_host.find(':'));
 	int	host_port = atoi(req_host.substr(req_host.find(':') + 1).c_str());
-	std::vector<t_server> servers = conf.blocks;
+	std::vector<t_server> servers = conf.getBlocks();
 	for(std::vector<t_server>::const_iterator srvr_it = servers.begin(); srvr_it != servers.end(); srvr_it++)
 	{
 		for(std::vector<int>::const_iterator prtn_it = srvr_it->prtn.begin(); prtn_it != srvr_it->prtn.end(); prtn_it++)

@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/21 10:00:32 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/21 12:01:50 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,6 +135,15 @@ bool ConfigFile::cont_prt(int cmp)
 	return false;
 }
 	
+std::vector<t_server> ConfigFile::getBlocks(void) const
+{
+	return blocks;
+}
+
+std::vector<int> ConfigFile::getPort_vec(void) const
+{
+	return prt_vec;
+}
 
 
 /*void ConfigFile::checker(void) const
