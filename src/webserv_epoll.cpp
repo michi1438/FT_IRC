@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/21 12:56:55 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/21 13:26:24 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,9 +255,9 @@ t_server	 choose_server(const ConfigFile& conf, const std::string req_host)
 	std::vector<t_server> servers = conf.getBlocks();
 	for(std::vector<t_server>::const_iterator srvr_it = servers.begin(); srvr_it != servers.end(); srvr_it++)
 	{
-		for(std::vector<int>::const_iterator prtn_it = srvr_it->prtn.begin(); prtn_it != srvr_it->prtn.end(); prtn_it++)
+		for(std::vector<t_prt>::const_iterator prtn_it = srvr_it->prt_n_default.begin(); prtn_it != srvr_it->prt_n_default.end(); prtn_it++)
 		{
-			if (*prtn_it == host_port)
+			if ((*prtn_it).prtn == host_port)
 			{
 				for(std::vector<std::string>::const_iterator name_it = srvr_it->srvr_name.begin(); name_it != srvr_it->srvr_name.end(); name_it++)
 				{
@@ -272,9 +272,9 @@ t_server	 choose_server(const ConfigFile& conf, const std::string req_host)
 	}
 	for(std::vector<t_server>::const_iterator srvr_it = servers.begin(); srvr_it != servers.end(); srvr_it++)
 	{
-		for(std::vector<int>::const_iterator prtn_it = srvr_it->prtn.begin(); prtn_it != srvr_it->prtn.end(); prtn_it++)
+		for(std::vector<t_prt>::const_iterator prtn_it = srvr_it->prt_n_default.begin(); prtn_it != srvr_it->prt_n_default.end(); prtn_it++)
 		{
-			if (*prtn_it == host_port && srvr_it->is_default == true)
+			if ((*prtn_it).prtn == host_port && (*prtn_it).is_deflt == true)
 			{
 				if (!srvr_it->srvr_name.empty())
 					std::cout << host_name << ":" << host_port << " was passed to the default-tagged server-block (" << srvr_it->srvr_name[0] << ") with its port number." << std::endl;

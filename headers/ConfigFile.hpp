@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 18:16:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/21 13:01:10 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/21 13:20:00 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,18 @@
 //# include <algorithm>
 # include "ParsingException.hpp"
 
+typedef struct S_prt
+{
+	int prtn;
+	bool is_deflt;
+} t_prt;
+
 typedef struct S_erver
 {
-	bool is_default;
 	bool err;
 	std::string root;
 	std::vector<std::string> srvr_name;
-	std::vector<int> prtn;
+	std::vector<t_prt> prt_n_default;
 	std::string home;
 	int lcbs;
 } t_server;
@@ -52,7 +57,7 @@ class ConfigFile
 		~ConfigFile();
 		
 		bool cont_prt(int);
-		bool cont_prt_of_srvr(std::vector<int>, int);
+		bool cont_prt_of_srvr(std::vector<t_prt>, int);
 		bool cont_name_of_srvr(std::vector<std::string>, std::string);
 		std::string prt_vec_print();
 

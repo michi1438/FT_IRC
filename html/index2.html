@@ -1,0 +1,64 @@
+<!-- *********************************************************************** -->
+<!--                                                                         -->
+<!--                                                      :::      ::::::::  -->
+<!-- index2.html                                        :+:      :+:    :+:  -->
+<!--                                                  +:+ +:+         +:+    -->
+<!-- By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+       -->
+<!--                                              +#+#+#+#+#+   +#+          -->
+<!-- Created: 2024/04/05 13:10:51 by lzito             #+#    #+#            -->
+<!-- Updated: 2024/04/21 13:42:06 by mguerga          ###   ########.fr      -->
+<!--                                                                         -->
+<!-- *********************************************************************** -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello From Index2 Page</title>
+<style>
+body {
+    background-color: lavender; /* Fond mauve pastel */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+}
+
+h1 {
+    font-size: 36px; /* Taille de police plus grande */
+    color: white; /* Texte en blanc */
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
+    border-radius: 10px; /* Coins arrondis */
+}
+</style>
+</head>
+<body>
+	<div>
+		<form action="/cgi_bin/simple" method="post">
+			<input type="text" name="data"><br><br>
+			<input type="submit" value="Envoyer">
+		</form>
+		<a href="/html/socket.html">TEST</a>
+	</div>
+	<br>
+	<br>
+	<div>
+		<form action="/cgi_bin/upload" method="post" enctype="multipart/form-data">
+			<label for="file">S3lexioner 1 fechier :</label><br>
+			<input type="file" id="file" name="file"><br><br>
+			<input type="text" name="data"><br><br>
+			<input type="submit" value="Envoyer">
+		</form>
+	</div>
+<div class="container">
+    <h1>Hello!</h1>
+</div>
+</body>
+</html>

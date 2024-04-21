@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/21 12:01:50 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/21 13:21:28 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,12 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 			std::cout << "SERVER_BLOCK #" << std::endl;
 			for(std::vector<std::string>::const_iterator name_it = serverinfo.srvr_name.begin(); name_it != serverinfo.srvr_name.end(); name_it++)
 				std::cout << *name_it << std::endl;
-			for(std::vector<int>::const_iterator port_it = serverinfo.prtn.begin(); port_it!= serverinfo.prtn.end(); port_it++)
-				std::cout << *port_it << std::endl;
+			for(std::vector<t_prt>::const_iterator port_it = serverinfo.prt_n_default.begin(); port_it!= serverinfo.prt_n_default.end(); port_it++)
+				std::cout << (*port_it).prtn << std::endl;
 			std::cout << std::endl;
 			this->blocks.push_back(serverinfo);
 			serverinfo.srvr_name.clear();
-			serverinfo.prtn.clear();
+			serverinfo.prt_n_default.clear();
 		}
 		else if (line.find('\t') == 0)
 		{
@@ -57,14 +57,18 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 				{
 					if (sub.find_first_not_of(" 0123456789") != std::string::npos)
 						break; // TODO maybe an error
+					t_prt this_prt;
 					int sub_int = atoi(sub.c_str());
-					serverinfo.is_default = false;	
-					if (!cont_prt_of_srvr(serverinfo.prtn, sub_int))
-						serverinfo.prtn.push_back(atoi(sub.c_str()));
+					this_prt.is_deflt = false;
 					if (!cont_prt(sub_int))
 					{
-						serverinfo.is_default = true;	
+						this_prt.is_deflt = true;
 						prt_vec.push_back(sub_int);
+					}
+					if (!cont_prt_of_srvr(serverinfo.prt_n_default, sub_int))
+					{
+						this_prt.prtn = sub_int;
+						serverinfo.prt_n_default.push_back(this_prt);
 					}
 				}
 			}
@@ -105,11 +109,11 @@ std::string ConfigFile::prt_vec_print()
 	return ".";
 }
 
-bool ConfigFile::cont_prt_of_srvr(std::vector<int> vec, int cmp)
+bool ConfigFile::cont_prt_of_srvr(std::vector<t_prt> vec, int cmp)
 {
-	for(std::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+	for(std::vector<t_prt>::iterator it = vec.begin(); it != vec.end(); it++)
 	{
-		if (*it == cmp)
+		if ((*it).prtn == cmp)
 			return true;
 	}
 	return false;
