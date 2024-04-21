@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/14 16:00:38 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/21 10:00:32 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 			for(std::vector<int>::const_iterator port_it = serverinfo.prtn.begin(); port_it!= serverinfo.prtn.end(); port_it++)
 				std::cout << *port_it << std::endl;
 			std::cout << std::endl;
-			this->_map.push_back(serverinfo);
+			this->blocks.push_back(serverinfo);
 			serverinfo.srvr_name.clear();
 			serverinfo.prtn.clear();
 		}
@@ -141,12 +141,12 @@ bool ConfigFile::cont_prt(int cmp)
 {
 	int must_have_size = 4;
 	int i = -1;
-	std::map<std::string, std::string>::const_iterator it = _map.begin();
+	std::map<std::string, std::string>::const_iterator it = blocks.begin();
 	std::string must_have[4] = {"srvr", "prtn", "root", "lcbs"}; // TODO add all the must_have elements...
 
-	while (it != _map.end() && i++ < must_have_size - 1)
+	while (it != blocks.end() && i++ < must_have_size - 1)
 	{
-		if (_map.find(must_have[i]) == _map.end())
+		if (blocks.find(must_have[i]) == blocks.end())
 		{
 			std::cout << "ERR: Could'nt find " << must_have[i] << " in the config file";
 			throw ParsingException(5);

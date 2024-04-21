@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/17 08:55:05 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/21 10:00:35 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,7 +167,23 @@ int init_ws(ConfigFile& conf)
 					Req.show();
 
 					// Vérifier si le chemin de l'URI correspond à un script CGI
-					if (Req.isCGI())
+					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
+					{
+						handleFileUpload(Req.getBody());
+						std::string response = readHtmlFile("./html/upload.html", srvr_used, false);
+						send(client_socket, response.c_str(), response.size(), 0);
+						close(client_socket);
+						std::cout << BLUE << "Response upload sent." << RESET << std::endl;
+					}
+					if (Req.getVersion().compare(HTTP_VER) != 0)
+					{
+						// ERREUR 500
+						std::string response = readHtmlFile(Req.getURI().substr(1), srvr_used, true);
+						send(client_socket, response.c_str(), response.size(), 0);
+						close(client_socket);
+						std::cout << BLUE << "Response 500 sent." << RESET << std::endl;
+					}
+					else if (Req.isCGI())
 					{
 						//TODO Exécuter le script CGI dans un nouveau process
 						std::string cgi_script_path = "." + Req.getURI();
@@ -227,7 +243,7 @@ t_server	 choose_server(const ConfigFile& conf, const std::string req_host)
 {
 	std::string host_name = req_host.substr(0, req_host.find(':'));
 	int	host_port = atoi(req_host.substr(req_host.find(':') + 1).c_str());
-	std::vector<t_server> servers = conf._map;
+	std::vector<t_server> servers = conf.blocks;
 	for(std::vector<t_server>::const_iterator srvr_it = servers.begin(); srvr_it != servers.end(); srvr_it++)
 	{
 		for(std::vector<int>::const_iterator prtn_it = srvr_it->prtn.begin(); prtn_it != srvr_it->prtn.end(); prtn_it++)

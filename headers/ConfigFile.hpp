@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 18:16:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/09 14:19:40 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/21 10:00:35 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ class ConfigFile
 
 	public:
 		std::vector<int> prt_vec;
-		std::vector<t_server> _map;
+		std::vector<t_server> blocks;
 
 		ConfigFile(const std::string);
 		~ConfigFile();

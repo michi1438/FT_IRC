@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/04/17 14:39:56 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/17 17:35:36 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ std::string readHttpRequest(int client_socket) {
                 size_t content_length_end = request.find("\r\n", content_length_start);
                 if (content_length_end != std::string::npos) {
                     std::string content_length_str = request.substr(content_length_start + strlen("Content-Length: "), content_length_end - content_length_start - strlen("Content-Length: "));
-                    int content_length = std::stoi(content_length_str);
+                    int content_length = atoi(content_length_str.c_str());
                     // Vérifier si le corps de la requête est entièrement reçu
                     if (request.size() >= header_end + 4 + content_length) {
                         std::cout << "Request fully received" << std::endl;
@@ -115,7 +115,8 @@ file_data_start += 2; // Avancer jusqu'au début des données du fichier
 
 
     // Ouvrir le fichier de sortie
-    std::ofstream outfile("upload/" + filename, std::ios::binary);
+	std::string path = "upload/";
+    std::ofstream outfile(path.append(filename).c_str(), std::ios::binary);
     if (!outfile.is_open()) {
         std::cerr << "Unable to save file: " << filename << std::endl;
         return;
@@ -133,7 +134,7 @@ file_data_start += 2; // Avancer jusqu'au début des données du fichier
     outfile.close();
 
     // Vérifier la taille du fichier
-    std::ifstream infile("upload/" + filename, std::ios::binary | std::ios::ate);
+    std::ifstream infile(path.append(filename).c_str(), std::ios::binary | std::ios::ate);
     std::streamsize size = infile.tellg();
     infile.close();
 
