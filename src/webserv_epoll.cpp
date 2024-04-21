@@ -6,15 +6,23 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/21 10:00:35 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/21 10:34:00 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
 #include <sys/epoll.h>
 
-std::string readHtmlFile(std::string filename, t_server srvr)
+std::string readHtmlFile(std::string filename, t_server srvr, bool err_50x)
 {
+	if (err_50x == true)
+	{
+		std::ifstream file(ERR_500);
+		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		std::string response = "HTTP/1.1 500 OK\r\nContent-Type: text/html\r\n\r\n" + content;
+		file.close();
+		return response;
+	}
 	std::fstream file;
 	if (filename.empty() == false)
 	{
@@ -169,7 +177,7 @@ int init_ws(ConfigFile& conf)
 					// Vérifier si le chemin de l'URI correspond à un script CGI
 					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
 					{
-						handleFileUpload(Req.getBody());
+						handleFileUpload(Req);
 						std::string response = readHtmlFile("./html/upload.html", srvr_used, false);
 						send(client_socket, response.c_str(), response.size(), 0);
 						close(client_socket);
@@ -204,7 +212,7 @@ int init_ws(ConfigFile& conf)
 					else
 					{
 						// Réponse normale (non-CGI)
-						std::string response = readHtmlFile(Req.getURI().substr(1).c_str(), srvr_used);
+						std::string response = readHtmlFile(Req.getURI().substr(1).c_str(), srvr_used, false);
 
 						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
 						{
