@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:09 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/16 11:16:32 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/19 13:14:46 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ class RequestParser
 		std::string getBody() const;
 		std::string getContentType() const;
 		std::string	getBoundary() const;
+		std::string getQueryString() const;
 		size_t		getContentLength() const;
 
 		std::map<std::string, std::string>	getQueryParam() const;

@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/04/21 10:20:02 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/21 17:22:15 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 std::string readHttpRequest(int client_socket) {
     std::string request;
-    char buffer[1000024];
+    char buffer[4096] = {0};
     ssize_t bytes_read;
 
     // Lire les données du socket jusqu'à ce que la connexion soit fermée par le client
@@ -53,9 +53,7 @@ std::string readHttpRequest(int client_socket) {
             }
         }
     }
-
     std::cout << RED << request << RESET << std::endl;
-
     return request;
 }
 
@@ -93,8 +91,8 @@ void handleFileUpload(RequestParser & Req) {
 
 
     // Ouvrir le fichier de sortie
-	std::string path = "upload/";
-    std::ofstream outfile(path.append(filename).c_str(), std::ios::binary);
+    std::cout << getcwd(NULL, 0) << std::endl;
+    std::ofstream outfile(("src/upload/" + filename).c_str(), std::ios::binary);
     if (!outfile.is_open()) {
         std::cerr << "Unable to save file: " << filename << std::endl;
         return;
@@ -112,7 +110,7 @@ void handleFileUpload(RequestParser & Req) {
     outfile.close();
 
     // Vérifier la taille du fichier
-    std::ifstream infile(path.append(filename).c_str(), std::ios::binary | std::ios::ate);
+    std::ifstream infile(("src/upload/" + filename).c_str(), std::ios::binary | std::ios::ate);
     std::streamsize size = infile.tellg();
     infile.close();
 
