@@ -6,7 +6,7 @@
 /*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:09 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/21 16:27:13 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/23 11:03:08 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cstring>
 #include <map>
 
 # define MAX_HEADER_SIZE 4096

@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/21 17:23:03 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/23 11:24:08 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ RequestParser::RequestParser(const int &client_socket)
 	{
 		if (new_line.find("Content-Type: ") != std::string::npos)
 		{
-			if (new_line.substr(14) == "multipart/form-data")
+			if (new_line.substr(14).find("multipart/form-data") != std::string::npos)
 			{
 				std::istringstream new_line_stream(new_line);
 				std::getline(new_line_stream, this->_content_type, ' ');
@@ -141,12 +141,12 @@ void RequestParser::show() const
 	std::cout << RESET << std::setw(20) << "CONTENT TYPE : " << GREEN << this->getContentType() << "$" << std::endl;
 	std::cout << RESET << std::setw(20) << "CONTENT LENGTH : " << GREEN << this->getContentLength() << "$" << std::endl;
 
-//	if (!this->getBody().empty())
-//	{
-//		std::cout << RESET << std::setw(20) << "BODY : " << std::endl;
-//		std::cout << CYAN << this->getBody() << "$" << std::endl;
-//	}
-//	std::cout << std::setw(20) << std::endl;
+	if (!this->getBody().empty())
+	{
+		std::cout << RESET << std::setw(20) << "BODY : " << std::endl;
+		std::cout << CYAN << this->getBody() << "$" << std::endl;
+	}
+	std::cout << std::setw(20) << std::endl;
 
 	if (this->_query_param.empty())
 		return ;
