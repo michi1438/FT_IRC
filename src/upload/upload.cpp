@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/04/24 15:55:26 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/24 16:35:24 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,7 @@ void handleFileDownload(RequestParser & Req, int client_socket, std::string file
     send(client_socket, http_response.c_str(), http_response.size(), 0);
 }
 
-void    showUploadedFiles(int client_socket) {
+void showUploadedFiles(int client_socket) {
     // Récupérer la liste des fichiers dans le dossier "upload"
     std::vector<std::string> files;
     std::string folder_path = "src/upload/";
@@ -174,18 +174,22 @@ void    showUploadedFiles(int client_socket) {
     }
 
     // Afficher les fichiers
-    std::string response;
-    std::string http_response;
-    for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it) {
-        response += "<a href=\"/upload/" + *it + "\" download=\"" + *it + "\" target=\"_blank\">" + *it + "</a> ";
-    }
-    http_response = "HTTP/1.1 200 OK\r\n";
-    http_response += "Content-Length: " + intToString(response.size()) + "\r\n";
-    http_response += "Content-Type: text/html\r\n";
-    http_response += "\r\n";
-    http_response += response;
-    http_response += "\r\n";
-
-    send(client_socket, http_response.c_str(), http_response.size(), 0);
+ std::string response;
+std::string http_response;
+response += "<style>\r\n";
+response += "body { background-color: lavender; }\r\n"; // Définit la couleur d'arrière-plan
+response += "</style>\r\n";
+response += "<h1>Uploaded Files :</h1>\r\n"; // Ajoutez le titre
+for (std::vector<std::string>::const_reverse_iterator it = files.rbegin(); it != files.rend(); ++it) {
+    response += "<a href=\"/upload/" + *it + "\" download=\"" + *it + "\" target=\"_blank\">" + *it + "</a> ";
+    response += "<br>\r\n"; // Ajoute un saut de ligne après chaque lien de fichier
+}
+http_response = "HTTP/1.1 200 OK\r\n";
+http_response += "Content-Length: " + intToString(response.size()) + "\r\n";
+http_response += "Content-Type: text/html\r\n";
+http_response += "\r\n";
+http_response += response;
+http_response += "\r\n";
     
+    send(client_socket, http_response.c_str(), http_response.size(), 0);
 }
