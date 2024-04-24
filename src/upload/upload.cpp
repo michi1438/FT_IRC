@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/04/19 16:21:11 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/24 14:17:22 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,4 +119,47 @@ header_end += 4;
     } else {
         std::cerr << "File size mismatch: " << filename << std::endl;
     }
+}
+
+std::string intToString(int value) {
+    std::ostringstream oss;
+    oss << value;
+    return oss.str();
+}
+
+void handleFileDownload(RequestParser & Req, int client_socket) {
+    (void) Req;
+    // Récupérer la liste des fichiers dans le dossier "upload"
+    std::vector<std::string> files;
+    std::string folder_path = "src/upload/";
+    DIR* dir;
+
+    struct dirent* ent;
+
+    if ((dir = opendir(folder_path.c_str())) != NULL) {
+        while ((ent = readdir(dir)) != NULL) {
+            if (ent->d_type == DT_REG) {
+                files.push_back(ent->d_name);
+            }
+        }
+        closedir(dir);
+    } else {
+        std::cerr << "Unable to open directory: " << folder_path << std::endl;
+        return;
+    }
+
+    // Générer la réponse HTML avec les liens cliquables des fichiers et un bouton de téléchargement
+    std::string response = "<html><body>";
+    for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it) {
+        response += "<a href=\"/upload/" + *it + "\" download target=\"_blank\">" + *it + "</a> ";
+        response += "<button onclick=\"window.location.href='/upload/" + *it + "'\" download>Download</button><br>";
+    }
+    response += "</body></html>";
+
+    std::string http_response = "HTTP/1.1 200 OK\r\n";
+    http_response += "Content-Type: text/html\r\n";
+    http_response += "Content-Length: " + intToString(response.size()) + "\r\n";
+    http_response += "\r\n";
+    http_response += response;
+    send(client_socket, http_response.c_str(), http_response.size(), 0);
 }

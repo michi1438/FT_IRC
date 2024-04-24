@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/19 16:44:37 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/24 14:18:34 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,8 +254,7 @@ int init_ws(ConfigFile& conf)
 					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
 					{
 						handleFileUpload(Req);
-						std::string response = readHtmlFile("./upload.html", srvr_used, false);
-						send(client_socket, response.c_str(), response.size(), 0);
+						handleFileDownload(Req, client_socket);
 						close(client_socket);
 						std::cout << BLUE << "Response upload sent." << RESET << std::endl;
 					}

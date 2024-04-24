@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/17 16:44:53 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/24 14:18:59 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 #include <string>
 #include <sys/event.h>
 #include <iterator>
+#include <dirent.h>
 
 
 #include "ConfigFile.hpp"
@@ -55,3 +56,4 @@ int				prts_is_open(std::vector<int> server_fd, int fd);
 //upload.cpp
 std::string		readHttpRequest(int client_socket);
 void			handleFileUpload(RequestParser & Req);
+void            handleFileDownload(RequestParser & Req, int client_socket);
