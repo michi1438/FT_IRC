@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/17 17:56:10 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/24 10:05:18 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,25 +160,13 @@ int init_ws(ConfigFile& conf)
             }
             else 
 			{
-				char buffer[4096];
                 int client_socket = events[i].ident;
-				
-				// Lire la requête HTTP du client
-				int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
-				if (bytes_received <= 0)
-				{
-					perror("Error receiving request");
-					close(client_socket);
-					continue;
-				}
 
 				try
 				{
-					RequestParser Req(buffer);
+					RequestParser Req(client_socket);
 
 					t_server srvr_used = choose_server(conf, Req.getHost());
-					std::cout << buffer << std::endl;
-					std::cout << std::endl;
 					Req.show();
 
 					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
@@ -238,11 +226,6 @@ int init_ws(ConfigFile& conf)
 	 				std::cout << RED << "ERROR CODE : " << errorCode << std::endl;
 					std::cout << RESET;
 					close(client_socket);
-					//TODO clear le buffer, sinon il garde des infos des requetes precedentes
-					// faire ca plus proprement que comme ca :
-					char *begin = buffer;
-					char *end = begin + sizeof(buffer);
-					std::fill(begin, end, 0);
 				}
             }
         }
