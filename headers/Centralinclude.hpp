@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/21 16:42:49 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/24 11:22:17 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,16 +41,24 @@
 #define CYAN    "\033[36m"      // Cyan
 
 #define MAX_EVENTS 64
-#define ERR_400 "html/40x.html"
-#define ERR_500 "html/50x.html"
+#define ERR_400 "default_errpages/40x.html"
+#define ERR_404 "default_errpages/404.html"
+#define ERR_405 "default_errpages/405.html"
+#define ERR_505 "default_errpages/505.html"
+#define ERR_500 "default_errpages/50x.html"
+#define ERR_512 "default_errpages/512.html"
+
 #define HTTP_VER "HTTP/1.1"
 
 //webserv.cpp
 int				init_ws(ConfigFile& conf);
-std::string		readHtmlFile(std::string filename, t_server srvr_used, bool err_50x);
-t_server		choose_server(const ConfigFile& conf, std::string host);
-int				prts_is_open(std::vector<int> server_fd, int fd);
 
 //upload.cpp
 std::string		readHttpRequest(int client_socket);
 void			handleFileUpload(RequestParser & Req);
+
+//ws_ontheside.cpp
+std::string		readHtmlFile(std::string filename, t_server srvr_used);
+t_server		choose_server(const ConfigFile& conf, std::string host);
+int				prts_is_open(std::vector<int> server_fd, int fd);
+std::string		read_errpage(int err_code);

@@ -6,23 +6,14 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 16:42:10 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/21 16:44:57 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/24 11:21:46 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
 
-std::string readHtmlFile(std::string filename, t_server srvr, bool err_50x)
+std::string readHtmlFile(std::string filename, t_server srvr)
 {
-	if (err_50x == true)
-	{
-		std::ifstream file(ERR_500);
-		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-		std::string response = "HTTP/1.1 500 OK\r\nContent-Type: text/html\r\n\r\n" + content;
-		file.close();
-		std::cout << BLUE << "Response 500 sent." << RESET << std::endl;
-		return response;
-	}
 	std::fstream file;
 	if (filename.empty() == false)
 	{
@@ -35,14 +26,7 @@ std::string readHtmlFile(std::string filename, t_server srvr, bool err_50x)
 		file.open(filename.c_str());
 	}
     if (!file.is_open())
-	{
-		std::ifstream file(ERR_400);
-		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-		std::string response = "HTTP/1.1 400 OK\r\nContent-Type: text/html\r\n\r\n" + content;
-		file.close();
-		std::cout << BLUE << "Response 400 sent." << RESET << std::endl;
-		return response;
-    }
+		throw (404);
 	else
 	{
 		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -50,6 +34,48 @@ std::string readHtmlFile(std::string filename, t_server srvr, bool err_50x)
 		file.close();
 		std::cout << BLUE << "Response 200 sent." << RESET << std::endl;
 		return response;
+	}
+}
+
+std::string read_errpage(int err_code)
+{
+	switch (err_code)
+	{
+		case 404:
+		{
+			std::ifstream file(ERR_404);
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			std::string response = "HTTP/1.1 404 OK\r\nContent-Type: text/html\r\n\r\n" + content;
+			return response;
+		}
+		case 505:
+		{
+			std::ifstream file(ERR_505);
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			std::string response = "HTTP/1.1 505 OK\r\nContent-Type: text/html\r\n\r\n" + content;
+			return response;
+		}
+		case 405:
+		{
+			std::ifstream file(ERR_405);
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			std::string response = "HTTP/1.1 405 OK\r\nContent-Type: text/html\r\n\r\n" + content;
+			return response;
+		}
+		case 512:
+		{
+			std::ifstream file(ERR_512);
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			std::string response = "HTTP/1.1 512 OK\r\nContent-Type: text/html\r\n\r\n" + content;
+			return response;
+		}
+		default:
+		{
+			std::ifstream file(ERR_500);
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			std::string response = "HTTP/1.1 400 OK\r\nContent-Type: text/html\r\n\r\n" + content;
+			return response;
+		}
 	}
 }
 
@@ -99,6 +125,7 @@ t_server	 choose_server(const ConfigFile& conf, const std::string req_host)
 			}
 		}
 	}
+	throw (500);
 	t_server ret;
 	ret.err = true;
 	return ret;

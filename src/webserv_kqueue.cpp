@@ -6,91 +6,12 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/21 17:21:42 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/24 11:43:23 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
 #include <sys/event.h>
-
-std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser& Req)
-{
-    int pipefd[2];
-    if (pipe(pipefd) == -1)
-    {
-        perror("Error in pipe");
-        exit(EXIT_FAILURE);
-    }
-
-    pid_t pid = fork();
-    if (pid == -1)
-    {
-        perror("Error in fork");
-        exit(EXIT_FAILURE);
-    }
-
-    if (pid == 0)
-    {
-        // Child process
-        close(pipefd[0]);
-        dup2(pipefd[1], STDOUT_FILENO);
-        close(pipefd[1]);
-
-        // Set environment variables
-        setenv("REQUEST_METHOD", Req.getMethod().c_str(), 1);
-        setenv("SCRIPT_FILENAME", cgi_script_path.c_str(), 1);
-        //setenv("QUERY_STRING", Req.getQueryParam().c_str(), 1);
-        std::ostringstream oss;
-        oss << Req.getContentLength();
-        std::string contentLengthStr = oss.str();
-        setenv("CONTENT_LENGTH", contentLengthStr.c_str(), 1);
-        setenv("CONTENT_TYPE", Req.getContentType().c_str(), 1);
-        //std::cout << "getMethod : " << Req.getMethod().c_str() << "<br>" << std::endl;
-        
-        // Execute the CGI script
-        if(Req.getScriptName().find(".py") != std::string::npos){
-            std::string num1;
-            std::string num2;
-            std::string oprtr;
-            std::map<std::string, std::string> query = Req.getQueryParam();
-            std::map<std::string, std::string>::iterator it = query.begin();
-            for (it = query.begin(); it != query.end(); it++)
-            {
-                if (it->first == "number1")
-                    num1 = it->second;
-                else if (it->first == "number2")
-                    num2 = it->second;
-                else if (it->first == "operator")
-                    oprtr = it->second;
-                else
-                    std::cerr << "Invalid query parameter" << std::endl;
-            }
-            execl("/usr/bin/python3", "python3", cgi_script_path.c_str(), num1.c_str(), num2.c_str(), oprtr.c_str(), NULL);
-        }
-        else if(Req.getScriptName().find(".php") != std::string::npos)
-            execl("/usr/bin/php", "php", cgi_script_path.c_str(), NULL);
-        perror("Error in execl");
-        exit(EXIT_FAILURE);
-    }
-    else
-    {
-        // Parent process
-        close(pipefd[1]);
-
-        // Read the output of the CGI script
-        char buffer[4096];
-        ssize_t bytes_read;
-        std::string cgi_output;
-        while ((bytes_read = read(pipefd[0], buffer, sizeof(buffer))) > 0)
-        {
-            cgi_output.append(buffer, bytes_read);
-        }
-
-        close(pipefd[0]);
-        waitpid(pid, NULL, 0);
-        return cgi_output;
-    }
-}
 
 int init_ws(ConfigFile& conf)
 {
@@ -197,8 +118,12 @@ int init_ws(ConfigFile& conf)
 				try
 				{
 					RequestParser Req(buffer);
-
 					t_server srvr_used = choose_server(conf, Req.getHost());
+					if (Req.getVersion().compare(HTTP_VER) != 0)
+						throw (505);
+					if (srvr_used.method.compare("ALL") != 0 && srvr_used.method.find("." + Req.getMethod() + " ") == std::string::npos)
+						throw (405);						
+
 					// std::cout << request << std::endl;
 					// std::cout << std::endl;
 					Req.show();
@@ -206,21 +131,13 @@ int init_ws(ConfigFile& conf)
 					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
 					{
 						handleFileUpload(Req);
-						std::string response = readHtmlFile("./upload.html", srvr_used, false);
+						std::string response = readHtmlFile("./upload.html", srvr_used);
 						send(client_socket, response.c_str(), response.size(), 0);
 						close(client_socket);
 						std::cout << BLUE << "Response upload sent." << RESET << std::endl;
 					}
 
 					// Vérifier si le chemin de l'URI correspond à un script CGI
-					else if (Req.getVersion().compare(HTTP_VER) != 0)
-					{
-						// ERREUR 500
-						std::string response = readHtmlFile(Req.getURI().substr(1), srvr_used, true);
-						send(client_socket, response.c_str(), response.size(), 0);
-						close(client_socket);
-						std::cout << BLUE << "Response 500 sent." << RESET << std::endl;
-					}
 					else if (Req.isCGI())
 					{
 						// Exécuter le script CGI
@@ -230,26 +147,17 @@ int init_ws(ConfigFile& conf)
 						// Envoyer la sortie du script CGI au client
 						std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + cgi_output;
 						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
-						{
-							perror("Error in send");
-							close(client_socket);
-							continue;
-						}
-						//std::cout << BLUE <<  << RESET << std::endl;
+							throw (501);
 						close(client_socket);
+						std::cout << BLUE << "Response sent from CGI" << RESET << std::endl;
 					}
 					else
 					{
 						// Réponse normale (non-CGI)
-						std::string response = readHtmlFile(Req.getURI().substr(1), srvr_used, false);
+						std::string response = readHtmlFile(Req.getURI().substr(1), srvr_used);
 
 						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
-						{
-							perror("Error in send");
-							close(client_socket);
-							return 1;
-						}
-
+							throw (501);
 						close(client_socket);
 					}
 				}
@@ -257,8 +165,9 @@ int init_ws(ConfigFile& conf)
 				{
 					//TODO Afficher la bonne page html selon le code d'erreur
 					// switch case ?
-	 				std::cout << RED << "ERROR CODE : " << errorCode << std::endl;
-					std::cout << RESET;
+	 				std::cout << RED << "ERROR CODE : " << errorCode << RESET << std::endl;
+					std::string response = read_errpage(errorCode);
+					send(client_socket, response.c_str(), response.size(), 0);
 					close(client_socket);
 					//TODO clear le buffer, sinon il garde des infos des requetes precedentes
 					// faire ca plus proprement que comme ca :
