@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/28 11:56:33 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/24 10:05:34 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/24 12:22:17 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,14 @@ const char* ParsingException::what() const throw ()
 			return (".");
 		case 7:
 			return ("ERR: in vec_contains.");
+		case 8:
+			return ("ERR: One of the ports number is not of the right format in the .conf.");
+		case 9:
+			return ("ERR: lcbs(limit_client_body_size) is not in the right format.");
+		case 10:
+			return ("ERR: the given conffile is empty or doesn't fit the requierment given in the default example...");
+		case 11:
+			return ("ERR: No ports were given...");
 		default:
 			return ("ERR: Unspecified parsing error");
 	}

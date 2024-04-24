@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/24 09:46:11 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/24 12:23:20 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 				while(iss >> sub)
 				{
 					if (sub.find_first_not_of(" 0123456789") != std::string::npos)
-						break; // TODO maybe an error
+						throw ParsingException(8);
 					t_prt this_prt;
 					int sub_int = atoi(sub.c_str());
 					this_prt.is_deflt = false;
@@ -97,6 +97,8 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 			if (sub.find("lcbs_") == 0)
 			{
 				iss >> sub;
+				if (sub.find_first_not_of(" 0123456789") != std::string::npos)
+					throw ParsingException(9);
 				serverinfo.lcbs= atoi(sub.c_str());
 			}
 		}
@@ -104,6 +106,10 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 //	this->checker();
 	if (i >= CONFIG_FILE_MAX_SIZE)
 	   throw ParsingException(4);	
+	if (this->blocks.empty() == true)
+		throw ParsingException(10);
+	if (this->prt_vec.empty() == true)
+		throw ParsingException(11);
 	conf_file.close();
 }
 
@@ -160,21 +166,3 @@ std::vector<int> ConfigFile::getPort_vec(void) const
 {
 	return prt_vec;
 }
-
-
-/*void ConfigFile::checker(void) const
-{
-	int must_have_size = 4;
-	int i = -1;
-	std::map<std::string, std::string>::const_iterator it = blocks.begin();
-	std::string must_have[4] = {"srvr", "prtn", "root", "lcbs"}; // TODO add all the must_have elements...
-
-	while (it != blocks.end() && i++ < must_have_size - 1)
-	{
-		if (blocks.find(must_have[i]) == blocks.end())
-		{
-			std::cout << "ERR: Could'nt find " << must_have[i] << " in the config file";
-			throw ParsingException(5);
-		}
-	}
-}*/
