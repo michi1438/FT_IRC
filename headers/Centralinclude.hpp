@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/24 15:46:32 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/24 16:07:12 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,3 +58,6 @@ std::string		readHttpRequest(int client_socket);
 void			handleFileUpload(RequestParser & Req);
 void            handleFileDownload(RequestParser & Req, int client_socket, std::string filename);
 void            showUploadedFiles(int client_socket);
+
+//cgi_handler.cpp
+std::string		execute_cgi_script(const std::string& cgi_script_path, RequestParser& Req);

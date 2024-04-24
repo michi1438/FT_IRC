@@ -6,7 +6,7 @@
 #    By: robin <robin@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/27 16:42:52 by mguerga           #+#    #+#              #
-#    Updated: 2024/04/17 09:04:26 by lzito            ###   ########.fr        #
+#    Updated: 2024/04/24 16:07:38 by robin            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,8 @@ SRCS = 	src/main.cpp \
 		src/ConfigFile.cpp \
 		src/RequestParser.cpp \
 		src/ParsingException.cpp \
-		src/upload/upload.cpp
+		src/upload/upload.cpp \
+		src/cgi_handler.cpp 
 
 ifeq ($(OS), Darwin)
 SRCS2 = src/webserv_kqueue.cpp
