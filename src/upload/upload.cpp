@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/04/24 14:17:22 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/24 15:55:26 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,8 +127,33 @@ std::string intToString(int value) {
     return oss.str();
 }
 
-void handleFileDownload(RequestParser & Req, int client_socket) {
+void handleFileDownload(RequestParser & Req, int client_socket, std::string filename) {
     (void) Req;
+    std::cout << filename << std::endl;
+        // Ouvrir le fichier
+        std::ifstream infile(("src/upload/" + filename).c_str(), std::ios::binary);
+        if (!infile.is_open()) {
+            throw 404;
+            std::cerr << "Unable to open file: " << filename << std::endl;
+        }
+        // Lire le contenu du fichier
+        std::string file_content((std::istreambuf_iterator<char>(infile)), std::istreambuf_iterator<char>());
+
+        // Fermer le fichier
+        infile.close();
+
+    std::string http_response = "HTTP/1.1 200 OK\r\n";
+    http_response += "Content-Type: text/html\r\n";
+    http_response += "Content-Length: " + intToString(file_content.size()) + "\r\n";
+    http_response += "Content-Disposition: attachment; filename=\"" + filename + "\" \r\n";
+    http_response += "\r\n";
+    http_response += file_content;
+    http_response += "\r\n";
+    
+    send(client_socket, http_response.c_str(), http_response.size(), 0);
+}
+
+void    showUploadedFiles(int client_socket) {
     // Récupérer la liste des fichiers dans le dossier "upload"
     std::vector<std::string> files;
     std::string folder_path = "src/upload/";
@@ -148,18 +173,19 @@ void handleFileDownload(RequestParser & Req, int client_socket) {
         return;
     }
 
-    // Générer la réponse HTML avec les liens cliquables des fichiers et un bouton de téléchargement
-    std::string response = "<html><body>";
+    // Afficher les fichiers
+    std::string response;
+    std::string http_response;
     for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it) {
-        response += "<a href=\"/upload/" + *it + "\" download target=\"_blank\">" + *it + "</a> ";
-        response += "<button onclick=\"window.location.href='/upload/" + *it + "'\" download>Download</button><br>";
+        response += "<a href=\"/upload/" + *it + "\" download=\"" + *it + "\" target=\"_blank\">" + *it + "</a> ";
     }
-    response += "</body></html>";
-
-    std::string http_response = "HTTP/1.1 200 OK\r\n";
-    http_response += "Content-Type: text/html\r\n";
+    http_response = "HTTP/1.1 200 OK\r\n";
     http_response += "Content-Length: " + intToString(response.size()) + "\r\n";
+    http_response += "Content-Type: text/html\r\n";
     http_response += "\r\n";
     http_response += response;
+    http_response += "\r\n";
+
     send(client_socket, http_response.c_str(), http_response.size(), 0);
+    
 }

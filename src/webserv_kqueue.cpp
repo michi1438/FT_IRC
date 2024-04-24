@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/24 14:18:34 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/24 15:56:11 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,9 +254,13 @@ int init_ws(ConfigFile& conf)
 					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
 					{
 						handleFileUpload(Req);
-						handleFileDownload(Req, client_socket);
+						showUploadedFiles(client_socket);
 						close(client_socket);
 						std::cout << BLUE << "Response upload sent." << RESET << std::endl;
+					}
+					else if(Req.getMethod() == "GET" && Req.getURI().find("/upload/") != std::string::npos && !Req.isCGI()){
+						std::string filename = Req.getURI().substr(8);
+						handleFileDownload(Req, client_socket, filename);
 					}
 
 					// Vérifier si le chemin de l'URI correspond à un script CGI
