@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 18:16:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/21 13:20:00 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/24 09:43:58 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ typedef struct S_erver
 	std::vector<std::string> srvr_name;
 	std::vector<t_prt> prt_n_default;
 	std::string home;
+	std::string method;
 	int lcbs;
 } t_server;
 
@@ -60,6 +61,7 @@ class ConfigFile
 		bool cont_prt_of_srvr(std::vector<t_prt>, int);
 		bool cont_name_of_srvr(std::vector<std::string>, std::string);
 		std::string prt_vec_print();
+		void print_blocks(t_server *serverinfo);
 
 		std::vector<t_server> getBlocks(void) const;
 		std::vector<int> getPort_vec(void) const;

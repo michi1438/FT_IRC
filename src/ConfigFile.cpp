@@ -6,11 +6,29 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/21 13:21:28 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/24 09:46:11 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/ConfigFile.hpp"
+
+void ConfigFile::print_blocks(t_server *serverinfo)
+{
+	serverinfo->err = false;	
+	std::cout << "SERVER_BLOCK #" << std::endl;
+	for(std::vector<std::string>::const_iterator name_it = serverinfo->srvr_name.begin(); name_it != serverinfo->srvr_name.end(); name_it++)
+		std::cout << *name_it << std::endl;
+	for(std::vector<t_prt>::const_iterator port_it = serverinfo->prt_n_default.begin(); port_it!= serverinfo->prt_n_default.end(); port_it++)
+		std::cout << (*port_it).prtn << std::endl;
+	if (serverinfo->method.empty() == true)
+		serverinfo->method = "ALL";
+	std::cout << "Accepted methods: " << serverinfo->method << std::endl;
+	std::cout << std::endl;
+	this->blocks.push_back(*serverinfo);
+	serverinfo->srvr_name.clear();
+	serverinfo->prt_n_default.clear();
+	serverinfo->method.clear();
+}
 
 ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name) 
 {
@@ -28,18 +46,7 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 		std::istringstream iss(line);
 		std::string sub;
 		if (line.find("}") == 0)
-		{
-			serverinfo.err = false;	
-			std::cout << "SERVER_BLOCK #" << std::endl;
-			for(std::vector<std::string>::const_iterator name_it = serverinfo.srvr_name.begin(); name_it != serverinfo.srvr_name.end(); name_it++)
-				std::cout << *name_it << std::endl;
-			for(std::vector<t_prt>::const_iterator port_it = serverinfo.prt_n_default.begin(); port_it!= serverinfo.prt_n_default.end(); port_it++)
-				std::cout << (*port_it).prtn << std::endl;
-			std::cout << std::endl;
-			this->blocks.push_back(serverinfo);
-			serverinfo.srvr_name.clear();
-			serverinfo.prt_n_default.clear();
-		}
+			this->print_blocks(&serverinfo);
 		else if (line.find('\t') == 0)
 		{
 			iss >> sub;
@@ -71,6 +78,11 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 						serverinfo.prt_n_default.push_back(this_prt);
 					}
 				}
+			}
+			if (sub.find("meth_") == 0)
+			{
+				while(iss >> sub)
+					serverinfo.method.append("." + sub + " ");
 			}
 			if (sub.find("root_") == 0)
 			{
