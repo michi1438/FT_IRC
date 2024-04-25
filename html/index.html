@@ -6,7 +6,7 @@
 <!-- By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+       -->
 <!--                                              +#+#+#+#+#+   +#+          -->
 <!-- Created: 2024/04/05 13:10:51 by lzito             #+#    #+#            -->
-<!-- Updated: 2024/04/17 09:10:13 by lzito            ###   ########.fr      -->
+<!-- Updated: 2024/04/25 08:55:41 by lzito            ###   ########.fr      -->
 <!--                                                                         -->
 <!-- *********************************************************************** -->
 
@@ -23,7 +23,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
+    margin: 10;
 }
 
 .container {
@@ -45,12 +45,28 @@ h1 {
 			<input type="text" name="number1"><br><br>
 			<input type="text" name="operator"><br><br>
 			<input type="text" name="number2"><br><br>
+		<h2>POST FORM</h2>
+		<form action="/cgi_bin/simple" method="post">
+			<input type="text" name="data">
+			<br><br>
 			<input type="submit" value="Envoyer">
 		</form>
-		<a href="/html/socket.html">TEST</a>
 	</div>
 	<br>
 	<br>
+	<div>
+		<h2>GET FORM</h2>
+		<form action="/cgi_bin/simple" method="get">
+			<input type="text" name="data">
+			<br><br>
+			<input type="submit" value="Envoyer">
+		</form>
+	</div>
+	<br>
+	<br>
+	<div>
+		<a href="/html/socket.html">TEST</a>
+	</div>
 	<div>
 		<form action="/cgi_bin/upload" method="post" enctype="multipart/form-data">
 			<label for="file">S3lexioner 1 fechier :</label><br>
@@ -59,8 +75,5 @@ h1 {
 			<input type="submit" value="Envoyer">
 		</form>
 	</div>
-<div class="container">
-    <h1>Hello!</h1>
-</div>
 </body>
 </html>

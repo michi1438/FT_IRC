@@ -6,20 +6,23 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/19 13:15:31 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/25 08:56:58 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/RequestParser.hpp"
 
-RequestParser::RequestParser(const std::string &request)
+RequestParser::RequestParser(const int &client_socket)
 	: _method(""), _uri(""), _version(""), _host(""), _script_name(""),
    	_is_chunked(false),	_boundary(""), _content_type(""), _content_length(0), _body("")
 {
+	std::string req_data = getHttpRequest(client_socket);
+//	std::cout << req_data << std::endl;
+
+	std::istringstream	request_stream(req_data);
+
 	// First line (Method, URI & Version)
 	///////////////////////////////////////
-	std::istringstream	request_stream(request);
-
 	std::string	first_line;
 	std::getline(request_stream, first_line);
 
@@ -31,21 +34,21 @@ RequestParser::RequestParser(const std::string &request)
 	// Second line (Host)
 	///////////////////////////////////////
 	std::string	second_line;
-	std::getline(request_stream, second_line, '\r');
-	this->_host = second_line.substr(6);
+	std::getline(request_stream, second_line);
+	this->_host = second_line.erase(second_line.size() - 1, 1).substr(6);
 
 	// CGI
 	///////////////////////////////////////
 	if (this->isCGI())
 	{
 		std::string URI = this->getURI();
-		size_t cgiPos = URI.find("/cgi_bin/");
-		this->_script_name = URI.substr(cgiPos + 9, sizeof(URI));
+		size_t startPos = URI.find("/cgi_bin/") + 9;
+		size_t endPos = URI.find("?");
+		this->_script_name = URI.substr(startPos, endPos - startPos);
 	}
 
-	// Rest of headers
+	// QUERY
 	///////////////////////////////////////
-	// GET & DELETE METHOD
 	if (this->_method == "GET")
 	{
 		std::string URI = this->getURI();
@@ -66,24 +69,31 @@ RequestParser::RequestParser(const std::string &request)
 		}
 		return;
 	}
+
+	// DELETE ?
+	///////////////////////////////////////
 //	else if (this->_method == "DELETE")
 //		return ;
 
-	// POST METHOD
+	// REST OF HEADERS (POST)
+	///////////////////////////////////////
 	std::string	new_line;
 	std::getline(request_stream, new_line);
-	while (new_line.size() != 1)
+	while (true)
 	{
-		if (new_line.find("Content-Type: multipart/form-data") != std::string::npos)
+		if (new_line.find("Content-Type: ") != std::string::npos)
 		{
-			std::istringstream new_line_stream(new_line);
-			std::getline(new_line_stream, this->_content_type, ' ');
-			std::getline(new_line_stream, this->_content_type, ';');
-			std::getline(new_line_stream, this->_boundary, '=');
-			std::getline(new_line_stream, this->_boundary, '\r');
+			if (new_line.substr(14).find("multipart/form-data") != std::string::npos)
+			{
+				std::istringstream new_line_stream(new_line);
+				std::getline(new_line_stream, this->_content_type, ' ');
+				std::getline(new_line_stream, this->_content_type, ';');
+				std::getline(new_line_stream, this->_boundary, '=');
+				std::getline(new_line_stream, this->_boundary, '\r');
+			}
+			else
+				this->_content_type = new_line.erase(new_line.size() - 1, 1).substr(14);
 		}
-		else if (new_line.find("Content-Type: ") != std::string::npos)
-			this->_content_type = new_line.erase(new_line.size() - 1, 1).substr(14);
 		else if (new_line.find("Content-Length: ") != std::string::npos)
 		{
 			this->_content_length = std::atoi(new_line.erase(new_line.size() - 1, 1).substr(16).c_str());
@@ -95,15 +105,18 @@ RequestParser::RequestParser(const std::string &request)
 			if (new_line.find("chunked") != std::string::npos)
 				this->_is_chunked = true;
 		}
+		// fin des headers
+		else if (new_line == "\r")
+			break;
 		std::getline(request_stream, new_line);
 	}
-	// Body
-	for (std::string line; std::getline(request_stream, line);)
-	{
-		line.append("\n");
-		this->_body.append(line);
-	}
-
+	
+	// BODY
+	///////////////////////////////////////
+	//TODO gestion des requete chunked a faire
+	char currentChar;
+	while (request_stream.get(currentChar))
+		this->_body += currentChar;
 }
 
 RequestParser::~RequestParser()
@@ -127,10 +140,16 @@ void RequestParser::show() const
 	std::cout << RESET << std::setw(20) << "BOUNDARY : " << GREEN << this->getBoundary() << "$" << std::endl;
 	std::cout << RESET << std::setw(20) << "CONTENT TYPE : " << GREEN << this->getContentType() << "$" << std::endl;
 	std::cout << RESET << std::setw(20) << "CONTENT LENGTH : " << GREEN << this->getContentLength() << "$" << std::endl;
-	std::cout << RESET << std::setw(20) << "BODY : " << std::endl;
-	std::cout << CYAN << this->getBody() << "$" << std::endl;
 
+	if (!this->getBody().empty())
+	{
+		std::cout << RESET << std::setw(20) << "BODY : " << std::endl;
+		std::cout << CYAN << this->getBody() << "$" << std::endl;
+	}
 	std::cout << std::setw(20) << std::endl;
+
+	if (this->_query_param.empty())
+		return ;
 	std::cout << std::setw(20) << RESET << "QUERY" << std::endl;
 
 	std::map<std::string, std::string>::const_iterator it;

@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/25 08:52:09 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/25 09:21:35 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,19 +113,17 @@ int init_ws(ConfigFile& conf)
             else 
 			{
                 int client_socket = events[i].ident;
-                std::string buffer = readHttpRequest(client_socket);
 
 				try
 				{
-					RequestParser Req(buffer);
+					RequestParser Req(client_socket);
+
 					t_server srvr_used = choose_server(conf, Req.getHost());
 					if (Req.getVersion().compare(HTTP_VER) != 0)
 						throw (505);
 					if (srvr_used.method.compare("ALL") != 0 && srvr_used.method.find("." + Req.getMethod() + " ") == std::string::npos)
 						throw (405);						
 
-					// std::cout << request << std::endl;
-					// std::cout << std::endl;
 					Req.show();
 
 					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
@@ -149,7 +147,7 @@ int init_ws(ConfigFile& conf)
 					else if (Req.isCGI())
 					{
 						// Exécuter le script CGI
-						std::string cgi_script_path = "cgi_bin/hello.py";
+						std::string cgi_script_path = "cgi_bin/" + Req.getScriptName();
 						//std::string cgi_output = "<h1>CGI handling</h1>";//execute_cgi_script(cgi_script_path);
                         std::string cgi_output = execute_cgi_script(cgi_script_path, Req);
 						// Envoyer la sortie du script CGI au client
@@ -167,6 +165,7 @@ int init_ws(ConfigFile& conf)
 						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
 							throw (501);
 						close(client_socket);
+						std::cout << BLUE << "Response sent." << RESET << std::endl;
 					}
 				}
 				catch (int errorCode)

@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/24 11:41:49 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/25 09:21:32 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,53 +105,50 @@ int init_ws(ConfigFile& conf)
 			}
 			else
 			{
-				char buffer[4096];
-				int client_socket = events[i].data.fd;
-				
 				// Lire la requête HTTP du client
-				int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
-				if (bytes_received <= 0)
-				{
-					perror("Error receiving request");
-					close(client_socket);
-					continue;
-				}
+				int client_socket = events[i].data.fd;
+
 				try
 				{
-					RequestParser Req(buffer);
+					RequestParser Req(client_socket);
+
 					t_server srvr_used = choose_server(conf, Req.getHost());
 					if (Req.getVersion().compare(HTTP_VER) != 0)
 						throw (505);
 					if (srvr_used.method.compare("ALL") != 0 && srvr_used.method.find("." + Req.getMethod() + " ") == std::string::npos)
 						throw (405);						
 
-					// Vérifier si le chemin de l'URI correspond à un script CGI
-					std::cout << buffer << std::endl;
-					std::cout << std::endl;
 					Req.show();
-
-					// Vérifier si le chemin de l'URI correspond à un script CGI
+					
 					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
 					{
 						handleFileUpload(Req);
-						std::string response = readHtmlFile("./html/upload.html", srvr_used);
-						send(client_socket, response.c_str(), response.size(), 0);
+						showUploadedFiles(client_socket);
 						close(client_socket);
 						std::cout << BLUE << "Response upload sent." << RESET << std::endl;
 					}
+					else if(Req.getMethod() == "GET" && Req.getURI().find("/upload/") != std::string::npos && !Req.isCGI()){
+						std::string filename = Req.getURI().substr(8);
+						handleFileDownload(Req, client_socket, filename);
+					}
+					else if(Req.getMethod() == "POST" && Req.getURI().find("/delete") != std::string::npos && !Req.isCGI()){
+						std::string body = Req.getBody();
+						std::string filename = body.find("file_to_delete=") != std::string::npos ? body.erase(body.size() - 1, 1).substr(15) : "";
+						handleFileDelete(filename, client_socket);
+					}
+
+					// Vérifier si le chemin de l'URI correspond à un script CGI
 					else if (Req.isCGI())
 					{
-						//TODO Exécuter le script CGI dans un nouveau process
-						std::string cgi_script_path = "." + Req.getURI();
-						std::string cgi_output = "<h1>CGI handling</h1>";//execute_cgi_script(cgi_script_path);
-                        //std::string cgi_output = execute_cgi_script(cgi_script_path, Req);
-
+						// Exécuter le script CGI
+						std::string cgi_script_path = "cgi_bin/" + Req.getScriptName();
+						//std::string cgi_output = "<h1>CGI handling</h1>";//execute_cgi_script(cgi_script_path);
+                        std::string cgi_output = execute_cgi_script(cgi_script_path, Req);
 						// Envoyer la sortie du script CGI au client
 						std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + cgi_output;
 						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
 							throw (501);
 						close(client_socket);
-						//TODO clear le buffer, sinon il garde des infos des requetes precedentes
 						std::cout << BLUE << "Response sent from CGI" << RESET << std::endl;
 					}
 					else
@@ -162,23 +159,15 @@ int init_ws(ConfigFile& conf)
 						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
 							throw (501);
 						close(client_socket);
-						//TODO clear le buffer, sinon il garde des infos des requetes precedentes
 						std::cout << BLUE << "Response sent." << RESET << std::endl;
 					}
 				}
 				catch (int errorCode)
 				{
-					//TODO Afficher la bonne page html selon le code d'erreur
-					// switch case ?
 	 				std::cout << RED << "ERROR CODE : " << errorCode << RESET << std::endl;
 					std::string response = read_errpage(errorCode);
 					send(client_socket, response.c_str(), response.size(), 0);
 					close(client_socket);
-					//TODO clear le buffer, sinon il garde des infos des requetes precedentes
-					// faire ca plus proprement que comme ca :
-					char *begin = buffer;
-					char *end = begin + sizeof(buffer);
-					std::fill(begin, end, 0);
 				}
 			}
         }

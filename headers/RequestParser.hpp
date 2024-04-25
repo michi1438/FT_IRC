@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:09 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/19 13:14:46 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/25 08:55:15 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,17 @@
 
 #include <iostream>
 #include <iomanip>
+#include <sys/socket.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cstring>
 #include <map>
 
 # define MAX_HEADER_SIZE 4096
+# define BUFFER_SIZE 4096
 # define MAX_HEADER_FIELDS 100
 
 # define RESET   "\033[0m"
@@ -50,7 +54,7 @@ class RequestParser
 		std::map<std::string, std::string>	_query_param;
 
 	public:
-		RequestParser(const std::string &request);
+		RequestParser(const int &client_socket);
 		~RequestParser(void);
 
 		void		show() const;
@@ -73,5 +77,7 @@ class RequestParser
 
 		std::map<std::string, std::string>	getQueryParam() const;
 };
+
+std::string getHttpRequest(int client_socket);
 
 #endif
