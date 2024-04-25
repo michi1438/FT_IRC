@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/25 09:21:35 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/25 09:34:52 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,7 @@ int init_ws(ConfigFile& conf)
 					}
 					else if(Req.getMethod() == "POST" && Req.getURI().find("/delete") != std::string::npos && !Req.isCGI()){
 						std::string body = Req.getBody();
-						std::string filename = body.find("file_to_delete=") != std::string::npos ? body.erase(body.size() - 1, 1).substr(15) : "";
+						std::string filename = body.find("file_to_delete=") != std::string::npos ? body.substr(15) : "";
 						handleFileDelete(filename, client_socket);
 					}
 

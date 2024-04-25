@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/25 09:21:32 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/25 09:39:50 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,7 @@ int init_ws(ConfigFile& conf)
 						showUploadedFiles(client_socket);
 						close(client_socket);
 						std::cout << BLUE << "Response upload sent." << RESET << std::endl;
+						continue;
 					}
 					else if(Req.getMethod() == "GET" && Req.getURI().find("/upload/") != std::string::npos && !Req.isCGI()){
 						std::string filename = Req.getURI().substr(8);
@@ -133,7 +134,7 @@ int init_ws(ConfigFile& conf)
 					}
 					else if(Req.getMethod() == "POST" && Req.getURI().find("/delete") != std::string::npos && !Req.isCGI()){
 						std::string body = Req.getBody();
-						std::string filename = body.find("file_to_delete=") != std::string::npos ? body.erase(body.size() - 1, 1).substr(15) : "";
+						std::string filename = body.find("file_to_delete=") != std::string::npos ? body.substr(15) : "";
 						handleFileDelete(filename, client_socket);
 					}
 

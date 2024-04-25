@@ -6,7 +6,7 @@
 <!-- By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+       -->
 <!--                                              +#+#+#+#+#+   +#+          -->
 <!-- Created: 2024/04/05 13:10:51 by lzito             #+#    #+#            -->
-<!-- Updated: 2024/04/25 08:55:41 by lzito            ###   ########.fr      -->
+<!-- Updated: 2024/04/25 09:46:53 by lzito            ###   ########.fr      -->
 <!--                                                                         -->
 <!-- *********************************************************************** -->
 
@@ -41,39 +41,15 @@ h1 {
 </head>
 <body>
 	<div>
+		<h1>CECI EST UNE CALCULETTE TECHNOLOGIQUE</h1>
 		<form action="/cgi_bin/hello.py" method="get">
 			<input type="text" name="number1"><br><br>
 			<input type="text" name="operator"><br><br>
 			<input type="text" name="number2"><br><br>
-		<h2>POST FORM</h2>
-		<form action="/cgi_bin/simple" method="post">
-			<input type="text" name="data">
-			<br><br>
 			<input type="submit" value="Envoyer">
 		</form>
 	</div>
 	<br>
 	<br>
-	<div>
-		<h2>GET FORM</h2>
-		<form action="/cgi_bin/simple" method="get">
-			<input type="text" name="data">
-			<br><br>
-			<input type="submit" value="Envoyer">
-		</form>
-	</div>
-	<br>
-	<br>
-	<div>
-		<a href="/html/socket.html">TEST</a>
-	</div>
-	<div>
-		<form action="/cgi_bin/upload" method="post" enctype="multipart/form-data">
-			<label for="file">S3lexioner 1 fechier :</label><br>
-			<input type="file" id="file" name="file"><br><br>
-			<input type="text" name="data"><br><br>
-			<input type="submit" value="Envoyer">
-		</form>
-	</div>
 </body>
 </html>

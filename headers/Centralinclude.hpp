@@ -6,13 +6,14 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/25 08:54:44 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/25 09:24:23 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 #include <iomanip>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -28,7 +29,6 @@
 #include <string>
 #include <iterator>
 #include <dirent.h>
-
 
 #include "ConfigFile.hpp"
 #include "RequestParser.hpp"
