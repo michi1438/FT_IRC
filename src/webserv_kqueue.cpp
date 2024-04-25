@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/24 11:43:23 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/25 08:52:09 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,10 +131,18 @@ int init_ws(ConfigFile& conf)
 					if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
 					{
 						handleFileUpload(Req);
-						std::string response = readHtmlFile("./upload.html", srvr_used);
-						send(client_socket, response.c_str(), response.size(), 0);
+						showUploadedFiles(client_socket);
 						close(client_socket);
 						std::cout << BLUE << "Response upload sent." << RESET << std::endl;
+					}
+					else if(Req.getMethod() == "GET" && Req.getURI().find("/upload/") != std::string::npos && !Req.isCGI()){
+						std::string filename = Req.getURI().substr(8);
+						handleFileDownload(Req, client_socket, filename);
+					}
+					else if(Req.getMethod() == "POST" && Req.getURI().find("/delete") != std::string::npos && !Req.isCGI()){
+						std::string body = Req.getBody();
+						std::string filename = body.find("file_to_delete=") != std::string::npos ? body.erase(body.size() - 1, 1).substr(15) : "";
+						handleFileDelete(filename, client_socket);
 					}
 
 					// Vérifier si le chemin de l'URI correspond à un script CGI
@@ -163,17 +171,10 @@ int init_ws(ConfigFile& conf)
 				}
 				catch (int errorCode)
 				{
-					//TODO Afficher la bonne page html selon le code d'erreur
-					// switch case ?
 	 				std::cout << RED << "ERROR CODE : " << errorCode << RESET << std::endl;
 					std::string response = read_errpage(errorCode);
 					send(client_socket, response.c_str(), response.size(), 0);
 					close(client_socket);
-					//TODO clear le buffer, sinon il garde des infos des requetes precedentes
-					// faire ca plus proprement que comme ca :
-					// char *begin = buffer;
-					// char *end = begin + sizeof(buffer);
-					// std::fill(begin, end, 0);
 				}
             }
         }

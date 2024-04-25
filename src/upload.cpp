@@ -6,11 +6,11 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/04/21 17:22:15 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/25 08:49:25 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../headers/Centralinclude.hpp"
+#include "../headers/Centralinclude.hpp"
 
 std::string readHttpRequest(int client_socket) {
     std::string request;
@@ -92,7 +92,7 @@ void handleFileUpload(RequestParser & Req) {
 
     // Ouvrir le fichier de sortie
     std::cout << getcwd(NULL, 0) << std::endl;
-    std::ofstream outfile(("src/upload/" + filename).c_str(), std::ios::binary);
+    std::ofstream outfile(("upload/" + filename).c_str(), std::ios::binary);
     if (!outfile.is_open()) {
         std::cerr << "Unable to save file: " << filename << std::endl;
         return;
@@ -110,7 +110,7 @@ void handleFileUpload(RequestParser & Req) {
     outfile.close();
 
     // Vérifier la taille du fichier
-    std::ifstream infile(("src/upload/" + filename).c_str(), std::ios::binary | std::ios::ate);
+    std::ifstream infile(("upload/" + filename).c_str(), std::ios::binary | std::ios::ate);
     std::streamsize size = infile.tellg();
     infile.close();
 
@@ -118,5 +118,109 @@ void handleFileUpload(RequestParser & Req) {
         std::cout << "File saved successfully: " << filename << std::endl;
     } else {
         std::cerr << "File size mismatch: " << filename << std::endl;
+    }
+}
+
+std::string intToString(int value) {
+    std::ostringstream oss;
+    oss << value;
+    return oss.str();
+}
+
+void handleFileDownload(RequestParser & Req, int client_socket, std::string filename) {
+    (void) Req;
+    std::cout << filename << std::endl;
+        // Ouvrir le fichier
+        std::ifstream infile(("upload/" + filename).c_str(), std::ios::binary);
+        if (!infile.is_open()) {
+            throw 404;
+            std::cerr << "Unable to open file: " << filename << std::endl;
+        }
+        // Lire le contenu du fichier
+        std::string file_content((std::istreambuf_iterator<char>(infile)), std::istreambuf_iterator<char>());
+
+        // Fermer le fichier
+        infile.close();
+
+    std::string http_response = "HTTP/1.1 200 OK\r\n";
+    http_response += "Content-Type: text/html\r\n";
+    http_response += "Content-Length: " + intToString(file_content.size()) + "\r\n";
+    http_response += "Content-Disposition: attachment; filename=\"" + filename + "\" \r\n";
+    http_response += "\r\n";
+    http_response += file_content;
+    http_response += "\r\n";
+    
+    send(client_socket, http_response.c_str(), http_response.size(), 0);
+}
+
+void showUploadedFiles(int client_socket) {
+    // Récupérer la liste des fichiers dans le dossier "upload"
+    std::vector<std::string> files;
+    std::string folder_path = "upload/";
+    DIR* dir;
+
+    struct dirent* ent;
+
+    if ((dir = opendir(folder_path.c_str())) != NULL) {
+        while ((ent = readdir(dir)) != NULL) {
+            if (ent->d_type == DT_REG) {
+                files.push_back(ent->d_name);
+            }
+        }
+        closedir(dir);
+    } else {
+        std::cerr << "Unable to open directory: " << folder_path << std::endl;
+        return;
+    }
+
+    // Afficher les fichiers
+    std::string response;
+    std::string http_response;
+    response += "<style>\r\n";
+    response += "body { background-color: lavender; }\r\n"; // Définit la couleur d'arrière-plan
+    response += "</style>\r\n";
+    response += "<h1>Uploaded Files :</h1>\r\n"; // Ajoutez le titre
+    for (std::vector<std::string>::const_reverse_iterator it = files.rbegin(); it != files.rend(); ++it) {
+        response += *it + "<br>";
+        response += "<a href=\"/upload/" + *it + "\" download=\"" + *it + "\" target=\"_blank\">" + "<button>Download</button>" + "</a> ";
+
+        // Ajouter le bouton de suppression avec un formulaire
+        response += "<form method=\"post\" action=\"/delete\" style=\"display: inline;\">"; // Le formulaire sera envoyé à "/delete"
+        response += "<input type=\"hidden\" name=\"file_to_delete\" value=\"" + *it + "\">"; // Ajouter le nom du fichier à supprimer
+        response += "<input type=\"submit\" value=\"Delete\">"; // Bouton de suppression
+        response += "</form>";
+
+        response += "<br>\r\n"; // Ajoute un saut de ligne après chaque lien de fichier
+
+    }
+    http_response = "HTTP/1.1 200 OK\r\n";
+    http_response += "Content-Length: " + intToString(response.size()) + "\r\n";
+    http_response += "Content-Type: text/html\r\n";
+    http_response += "\r\n";
+    http_response += response;
+    http_response += "\r\n";
+    
+    send(client_socket, http_response.c_str(), http_response.size(), 0);
+}
+
+void handleFileDelete(std::string filename, int client_socket) {
+    std::string upload_dir = "upload/";
+
+    // Chemin complet du fichier à supprimer
+    std::string file_path = upload_dir + filename;
+    // Vérifie si le fichier existe
+    std::ofstream outfile(file_path.c_str(), std::ios::binary); // Use file_path instead of ("src/upload/" + filename).c_str()
+    if (outfile.is_open()) {
+        std::cout << "J'arrive a ouvrir le fichier" << std::endl;
+        outfile.close();
+        // Supprime le fichier
+        if (std::remove(file_path.c_str()) == 0) {
+            std::cout << "File deleted successfully: " << filename << std::endl;
+            showUploadedFiles(client_socket);
+        } else {
+            std::cerr << "Error deleting file: " << filename << std::endl;
+        }
+    } else {
+        std::cerr << "File not found: " << filename << std::endl;
     }
 }
