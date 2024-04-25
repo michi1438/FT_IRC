@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/24 11:41:49 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/25 15:43:35 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,6 @@ int init_ws(ConfigFile& conf)
 							throw (501);
 						close(client_socket);
 						//TODO clear le buffer, sinon il garde des infos des requetes precedentes
-						std::cout << BLUE << "Response sent." << RESET << std::endl;
 					}
 				}
 				catch (int errorCode)
