@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 16:42:10 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/25 11:33:17 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/25 15:43:01 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,12 @@
 
 std::string readHtmlFile(std::string filename, t_server srvr)
 {
-	filename.insert(0, srvr.root);
 	std::fstream file;
 	if (filename.empty() == false)
-		file.open(filename.c_str());
+		file.open(filename.insert(0, srvr.root).c_str());
 	else
 	{
-		filename.append(srvr.home);
+		filename.append(srvr.root).append(srvr.home);
 		file.open(filename.c_str());
 	}
 	struct stat buf;

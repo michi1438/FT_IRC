@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/25 09:39:50 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/25 09:49:39 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,6 @@ int init_ws(ConfigFile& conf)
 						if (send(client_socket, response.c_str(), response.size(), 0) == -1)
 							throw (501);
 						close(client_socket);
-						std::cout << BLUE << "Response sent." << RESET << std::endl;
 					}
 				}
 				catch (int errorCode)
