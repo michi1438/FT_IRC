@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/24 16:06:55 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/25 13:21:54 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,6 +182,11 @@ int init_ws(ConfigFile& conf)
 					else if(Req.getMethod() == "GET" && Req.getURI().find("/upload/") != std::string::npos && !Req.isCGI()){
 						std::string filename = Req.getURI().substr(8);
 						handleFileDownload(Req, client_socket, filename);
+					}
+					else if(Req.getMethod() == "POST" && Req.getURI().find("/delete") != std::string::npos && !Req.isCGI()){
+						std::string body = Req.getBody();
+						std::string filename = body.find("file_to_delete=") != std::string::npos ? body.erase(body.size() - 1, 1).substr(15) : "";
+						handleFileDelete(filename, client_socket);
 					}
 
 					// Vérifier si le chemin de l'URI correspond à un script CGI
