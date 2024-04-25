@@ -6,26 +6,30 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 16:42:10 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/24 11:21:46 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/25 11:33:17 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
+#include <sys/stat.h>
 
 std::string readHtmlFile(std::string filename, t_server srvr)
 {
+	filename.insert(0, srvr.root);
 	std::fstream file;
 	if (filename.empty() == false)
-	{
-		filename.insert(0, srvr.root);
 		file.open(filename.c_str());
-	}
 	else
 	{
-		filename.append(srvr.root).append(srvr.home);
+		filename.append(srvr.home);
 		file.open(filename.c_str());
 	}
-    if (!file.is_open())
+	struct stat buf;
+	stat(filename.c_str(), &buf);
+	//if (S_ISDIR(buf.st_mode) != 0 && srvr.repertor)
+	if (S_ISDIR(buf.st_mode) != 0)
+		throw (403);
+	else if (!file.is_open())
 		throw (404);
 	else
 	{
@@ -41,6 +45,13 @@ std::string read_errpage(int err_code)
 {
 	switch (err_code)
 	{
+		case 403:
+		{
+			std::ifstream file(ERR_403);
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			std::string response = "HTTP/1.1 403 OK\r\nContent-Type: text/html\r\n\r\n" + content;
+			return response;
+		}
 		case 404:
 		{
 			std::ifstream file(ERR_404);
