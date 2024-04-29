@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/25 09:24:23 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/25 10:17:17 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,6 @@
 int				init_ws(ConfigFile& conf);
 
 //upload.cpp
-std::string		readHttpRequest(int client_socket);
 void			handleFileUpload(RequestParser & Req);
 void            handleFileDownload(RequestParser & Req, int client_socket, std::string filename);
 void            handleFileDelete(std::string filename, int client_socket);
@@ -70,3 +69,11 @@ std::string		read_errpage(int err_code);
 
 //cgi_handler.cpp
 std::string		execute_cgi_script(const std::string& cgi_script_path, RequestParser& Req);
+
+//request_parser_utils.cpp
+void			readFromSocket(int client_socket, std::string &request);
+void			addBodyNotChunked(int client_socket, std::string &request, int content_length);
+std::string		getHttpRequest(int client_socket);
+
+//request_handler.cpp
+void			requestHandler(int client_socket, const ConfigFile& conf);
