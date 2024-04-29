@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/24 12:23:20 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/29 10:37:59 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,21 @@ void ConfigFile::print_blocks(t_server *serverinfo)
 	serverinfo->err = false;	
 	std::cout << "SERVER_BLOCK #" << std::endl;
 	for(std::vector<std::string>::const_iterator name_it = serverinfo->srvr_name.begin(); name_it != serverinfo->srvr_name.end(); name_it++)
-		std::cout << *name_it << std::endl;
+		std::cout << "\t" << *name_it << " ";
+	std::cout << std::endl;
 	for(std::vector<t_prt>::const_iterator port_it = serverinfo->prt_n_default.begin(); port_it!= serverinfo->prt_n_default.end(); port_it++)
-		std::cout << (*port_it).prtn << std::endl;
+		std::cout << "\t" << (*port_it).prtn << " "; 
+	std::cout << std::endl;
 	if (serverinfo->method.empty() == true)
 		serverinfo->method = "ALL";
-	std::cout << "Accepted methods: " << serverinfo->method << std::endl;
+	std::cout << "\t" << "Accepted methods: " << serverinfo->method << std::endl;
+	std::cout << "\t" << "WITHIN LOCATIONS #" << std::endl;
+	for(std::vector<t_loc>::const_iterator loc_it = serverinfo->locations.begin(); loc_it != serverinfo->locations.end(); loc_it++)
+		std::cout << "\t\t" << (*loc_it).l_path << std::endl;
+	std::cout << std::endl;
 	std::cout << std::endl;
 	this->blocks.push_back(*serverinfo);
+	serverinfo->locations.clear();
 	serverinfo->srvr_name.clear();
 	serverinfo->prt_n_default.clear();
 	serverinfo->method.clear();
@@ -58,7 +65,7 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 						serverinfo.srvr_name.push_back(sub);
 				}
 			}
-			if (sub.find("prtn_") == 0)
+			else if (sub.find("prtn_") == 0)
 			{
 				while(iss >> sub)
 				{
@@ -79,28 +86,63 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 					}
 				}
 			}
-			if (sub.find("meth_") == 0)
+			else if (sub.find("loca_") == 0)
+			{
+				t_loc this_loc;
+				iss >> sub;
+				this_loc.l_path = sub;
+				while (std::getline(conf_file, line) && i++ < CONFIG_FILE_MAX_SIZE)
+				{
+					if (line.find("\t}") == 0)
+					{
+						serverinfo.locations.push_back(this_loc);
+						break;
+					}
+					else if (line.find("\t\t") == 0)
+					{
+						iss >> sub;
+						if (sub.find("root_") == 0)
+						{
+							iss >>sub;
+							this_loc.l_root = sub;
+						}
+						if (sub.find("meth_") == 0)
+						{
+							while(iss >> sub)
+								this_loc.l_method.append("." + sub + " ");
+						}
+					}
+					else
+						throw ParsingException(12);
+				}
+				this_loc.l_cgi = "test";
+				this_loc.l_home = "test";
+				this_loc.l_lcbs = 50000;
+			}	
+			else if (sub.find("meth_") == 0)
 			{
 				while(iss >> sub)
 					serverinfo.method.append("." + sub + " ");
 			}
-			if (sub.find("root_") == 0)
+			else if (sub.find("root_") == 0)
 			{
 				iss >> sub;
 				serverinfo.root = sub;
 			}
-			if (sub.find("home_") == 0)
+			else if (sub.find("home_") == 0)
 			{
 				iss >> sub;
 				serverinfo.home = sub;
 			}
-			if (sub.find("lcbs_") == 0)
+			else if (sub.find("lcbs_") == 0)
 			{
 				iss >> sub;
 				if (sub.find_first_not_of(" 0123456789") != std::string::npos)
 					throw ParsingException(9);
 				serverinfo.lcbs= atoi(sub.c_str());
 			}
+			else
+				throw ParsingException(13);
 		}
 	}
 //	this->checker();

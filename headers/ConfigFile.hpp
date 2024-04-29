@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 18:16:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/24 09:43:58 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/29 10:05:17 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,20 @@ typedef struct S_prt
 	bool is_deflt;
 } t_prt;
 
+typedef struct S_loc
+{
+	std::string l_path;
+	std::string l_cgi;
+	std::string l_root;
+	std::string l_home;
+	std::string l_method;
+	int l_lcbs;
+} t_loc;
+
 typedef struct S_erver
 {
 	bool err;
+	std::vector<t_loc>	locations;
 	std::string root;
 	std::vector<std::string> srvr_name;
 	std::vector<t_prt> prt_n_default;
