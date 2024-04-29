@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/25 10:17:17 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/29 12:11:21 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,4 +76,5 @@ void			addBodyNotChunked(int client_socket, std::string &request, int content_le
 std::string		getHttpRequest(int client_socket);
 
 //request_handler.cpp
+t_server		update_location(t_server srvr_used, std::string uri);
 void			requestHandler(int client_socket, const ConfigFile& conf);

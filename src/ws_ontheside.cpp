@@ -6,23 +6,42 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 16:42:10 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/25 15:43:01 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/29 13:12:41 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
 #include <sys/stat.h>
 
+bool is_location(std::string filename, t_server srvr)
+{
+	for(std::vector<t_loc>::const_iterator loc_it = srvr.locations.begin(); loc_it != srvr.locations.end(); loc_it++)
+	{
+		if (loc_it->l_path.compare(1, std::string::npos, filename) == 0)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 std::string readHtmlFile(std::string filename, t_server srvr)
 {
 	std::fstream file;
-	if (filename.empty() == false)
-		file.open(filename.insert(0, srvr.root).c_str());
-	else
+	if (filename.empty() == true)
 	{
 		filename.append(srvr.root).append(srvr.home);
 		file.open(filename.c_str());
 	}
+	else if (is_location(filename, srvr) == true)
+	{
+		filename.append("/").append(srvr.home);
+		file.open(filename.insert(0, srvr.root).c_str());
+	}
+	else
+		file.open(filename.insert(0, srvr.root).c_str());
+
+	std::cout << "##### " << filename << "$" << std::endl;
 	struct stat buf;
 	stat(filename.c_str(), &buf);
 	//if (S_ISDIR(buf.st_mode) != 0 && srvr.repertor)

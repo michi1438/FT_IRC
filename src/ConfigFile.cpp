@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/29 10:37:59 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/29 12:27:28 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,7 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 				this_loc.l_path = sub;
 				while (std::getline(conf_file, line) && i++ < CONFIG_FILE_MAX_SIZE)
 				{
+					std::istringstream iss(line);
 					if (line.find("\t}") == 0)
 					{
 						serverinfo.locations.push_back(this_loc);
@@ -103,13 +104,27 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 						iss >> sub;
 						if (sub.find("root_") == 0)
 						{
-							iss >>sub;
+							iss >> sub;
 							this_loc.l_root = sub;
+						}
+						if (sub.find("home_") == 0)
+						{
+							iss >> sub;
+							this_loc.l_home = sub;
+						}
+						if (sub.find("lcbs_") == 0)
+						{
+							iss >> sub;
+							if (sub.find_first_not_of(" 0123456789") != std::string::npos)
+								throw ParsingException(9);
+							this_loc.l_lcbs= atoi(sub.c_str());
 						}
 						if (sub.find("meth_") == 0)
 						{
 							while(iss >> sub)
+							{
 								this_loc.l_method.append("." + sub + " ");
+							}
 						}
 					}
 					else

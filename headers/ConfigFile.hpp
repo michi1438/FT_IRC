@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 18:16:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/29 10:05:17 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/29 13:07:44 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,8 @@ typedef struct S_erver
 	bool err;
 	std::vector<t_loc>	locations;
 	std::string root;
+	std::string loc_root;
+	std::string cgi;
 	std::vector<std::string> srvr_name;
 	std::vector<t_prt> prt_n_default;
 	std::string home;

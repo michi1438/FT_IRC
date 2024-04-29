@@ -6,23 +6,46 @@
 /*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/25 10:17:48 by lzito            ###   ########.fr       */
+/*   Updated: 2024/04/29 13:19:42 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
 
+t_server	update_location(t_server srvr_used, std::string uri)
+{
+	t_server new_serv;
+	new_serv = srvr_used;
+	for(std::vector<t_loc>::const_iterator loc_it = new_serv.locations.begin(); loc_it != new_serv.locations.end(); loc_it++)
+	{
+		if (uri.find(loc_it->l_path) == 0)
+		{
+			new_serv.loc_root = loc_it->l_root;
+			new_serv.home = loc_it->l_home;
+			new_serv.method = loc_it->l_method;
+			new_serv.cgi = loc_it->l_cgi;
+			new_serv.lcbs = loc_it->l_lcbs;
+			std::cout << "method = " << new_serv.method << std::endl;
+			return new_serv;
+		}
+	}
+	return new_serv;
+}
+
 void	requestHandler(int client_socket, const ConfigFile &conf)
 {
 		RequestParser Req(client_socket);
-
+		Req.show();
+		
+		std::cout << RESET;
 		t_server srvr_used = choose_server(conf, Req.getHost());
+		if (!srvr_used.locations.empty())
+			srvr_used = update_location(srvr_used, Req.getURI());
 		if (Req.getVersion().compare(HTTP_VER) != 0)
 			throw (505);
 		if (srvr_used.method.compare("ALL") != 0 && srvr_used.method.find("." + Req.getMethod() + " ") == std::string::npos)
 			throw (405);						
 
-		Req.show();
 		
 		if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
 		{
