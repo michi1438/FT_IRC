@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ws_ontheside.cpp                                   :+:      :+:    :+:   */
+/*   srvrblk_n_srvrloc_logic.cpp                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/21 16:42:10 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/29 13:12:41 by mguerga          ###   ########.fr       */
+/*   Created: 2024/04/30 11:36:12 by mguerga           #+#    #+#             */
+/*   Updated: 2024/04/30 11:36:14 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
-#include <sys/stat.h>
+#include <sys/stat.h> // for the S_ISDIR() macro...
 
 bool is_location(std::string filename, t_server srvr)
 {
@@ -41,10 +41,9 @@ std::string readHtmlFile(std::string filename, t_server srvr)
 	else
 		file.open(filename.insert(0, srvr.root).c_str());
 
-	std::cout << "##### " << filename << "$" << std::endl;
 	struct stat buf;
 	stat(filename.c_str(), &buf);
-	//if (S_ISDIR(buf.st_mode) != 0 && srvr.repertor)
+	// TODO Check directory listing // if (S_ISDIR(buf.st_mode) != 0 && srvr.repo_listing)
 	if (S_ISDIR(buf.st_mode) != 0)
 		throw (403);
 	else if (!file.is_open())
@@ -56,55 +55,6 @@ std::string readHtmlFile(std::string filename, t_server srvr)
 		file.close();
 		std::cout << BLUE << "Response 200 sent." << RESET << std::endl;
 		return response;
-	}
-}
-
-std::string read_errpage(int err_code)
-{
-	switch (err_code)
-	{
-		case 403:
-		{
-			std::ifstream file(ERR_403);
-			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-			std::string response = "HTTP/1.1 403 OK\r\nContent-Type: text/html\r\n\r\n" + content;
-			return response;
-		}
-		case 404:
-		{
-			std::ifstream file(ERR_404);
-			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-			std::string response = "HTTP/1.1 404 OK\r\nContent-Type: text/html\r\n\r\n" + content;
-			return response;
-		}
-		case 505:
-		{
-			std::ifstream file(ERR_505);
-			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-			std::string response = "HTTP/1.1 505 OK\r\nContent-Type: text/html\r\n\r\n" + content;
-			return response;
-		}
-		case 405:
-		{
-			std::ifstream file(ERR_405);
-			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-			std::string response = "HTTP/1.1 405 OK\r\nContent-Type: text/html\r\n\r\n" + content;
-			return response;
-		}
-		case 512:
-		{
-			std::ifstream file(ERR_512);
-			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-			std::string response = "HTTP/1.1 512 OK\r\nContent-Type: text/html\r\n\r\n" + content;
-			return response;
-		}
-		default:
-		{
-			std::ifstream file(ERR_500);
-			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-			std::string response = "HTTP/1.1 400 OK\r\nContent-Type: text/html\r\n\r\n" + content;
-			return response;
-		}
 	}
 }
 
@@ -155,7 +105,4 @@ t_server	 choose_server(const ConfigFile& conf, const std::string req_host)
 		}
 	}
 	throw (500);
-	t_server ret;
-	ret.err = true;
-	return ret;
 }

@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/28 11:56:33 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/29 10:38:37 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/30 10:32:35 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,8 @@ const char* ParsingException::what() const throw ()
 			return ("ERR: One of the location block was not well formated...");
 		case 13:
 			return ("ERR: One of the server blocks was not well formated...");
+		case 14:
+			return ("ERR: It appears you are trying to redefine one of your locations in a block server, check your .conf...");
 		default:
 			return ("ERR: Unspecified parsing error");
 	}

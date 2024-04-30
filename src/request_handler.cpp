@@ -6,7 +6,7 @@
 /*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/29 13:19:42 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/30 11:31:55 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ t_server	update_location(t_server srvr_used, std::string uri)
 			new_serv.method = loc_it->l_method;
 			new_serv.cgi = loc_it->l_cgi;
 			new_serv.lcbs = loc_it->l_lcbs;
-			std::cout << "method = " << new_serv.method << std::endl;
+			//std::cout << "method = " << new_serv.method << std::endl;
 			return new_serv;
 		}
 	}
@@ -45,6 +45,10 @@ void	requestHandler(int client_socket, const ConfigFile &conf)
 			throw (505);
 		if (srvr_used.method.compare("ALL") != 0 && srvr_used.method.find("." + Req.getMethod() + " ") == std::string::npos)
 			throw (405);						
+		if (static_cast<size_t>(srvr_used.lcbs) <= Req.getContentLength())
+			throw (413);
+		if (Req.getURI().size() >= BUFFER_SIZE)
+			throw (414);
 
 		
 		if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 

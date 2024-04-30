@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/29 12:27:28 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/30 10:30:48 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,11 +91,16 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 				t_loc this_loc;
 				iss >> sub;
 				this_loc.l_path = sub;
+				for (std::vector<t_loc>::iterator loc_it = serverinfo.locations.begin(); loc_it != serverinfo.locations.end(); loc_it++)
+					if (loc_it->l_path.compare(sub) == 0)
+						throw ParsingException(14);
 				while (std::getline(conf_file, line) && i++ < CONFIG_FILE_MAX_SIZE)
 				{
 					std::istringstream iss(line);
 					if (line.find("\t}") == 0)
 					{
+						if (this_loc.l_method.empty() == true)
+							this_loc.l_method = "ALL";
 						serverinfo.locations.push_back(this_loc);
 						break;
 					}
@@ -130,9 +135,6 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 					else
 						throw ParsingException(12);
 				}
-				this_loc.l_cgi = "test";
-				this_loc.l_home = "test";
-				this_loc.l_lcbs = 50000;
 			}	
 			else if (sub.find("meth_") == 0)
 			{

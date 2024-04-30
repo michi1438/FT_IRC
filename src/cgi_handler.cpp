@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 16:06:26 by robin             #+#    #+#             */
-/*   Updated: 2024/04/24 16:06:36 by robin            ###   ########.fr       */
+/*   Updated: 2024/04/30 10:58:42 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
         close(pipefd[1]);
 
         // Read the output of the CGI script
-        char buffer[4096];
+        char buffer[BUFFER_SIZE];
         ssize_t bytes_read;
         std::string cgi_output;
         while ((bytes_read = read(pipefd[0], buffer, sizeof(buffer))) > 0)
