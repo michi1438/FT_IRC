@@ -6,7 +6,7 @@
 /*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/30 11:31:55 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/01 13:39:25 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,11 @@ t_server	update_location(t_server srvr_used, std::string uri)
 	{
 		if (uri.find(loc_it->l_path) == 0)
 		{
-			new_serv.loc_root = loc_it->l_root;
+			new_serv.loc_root = loc_it->l_root; // TODO For now, does not overide the server's root, and is put in other attribute loc_root not put to any use...
 			new_serv.home = loc_it->l_home;
 			new_serv.method = loc_it->l_method;
-			new_serv.cgi = loc_it->l_cgi;
+			new_serv.cgi_wl = loc_it->l_cgi_wl;
 			new_serv.lcbs = loc_it->l_lcbs;
-			//std::cout << "method = " << new_serv.method << std::endl;
 			return new_serv;
 		}
 	}
@@ -37,10 +36,11 @@ void	requestHandler(int client_socket, const ConfigFile &conf)
 		RequestParser Req(client_socket);
 		Req.show();
 		
-		std::cout << RESET;
+		std::cout << RESET << std::endl;
 		t_server srvr_used = choose_server(conf, Req.getHost());
 		if (!srvr_used.locations.empty())
 			srvr_used = update_location(srvr_used, Req.getURI());
+		//std::cout << "cgi_wl = " << srvr_used.cgi_wl << std::endl;
 		if (Req.getVersion().compare(HTTP_VER) != 0)
 			throw (505);
 		if (srvr_used.method.compare("ALL") != 0 && srvr_used.method.find("." + Req.getMethod() + " ") == std::string::npos)
@@ -50,7 +50,7 @@ void	requestHandler(int client_socket, const ConfigFile &conf)
 		if (Req.getURI().size() >= BUFFER_SIZE)
 			throw (414);
 
-		
+		// TODO for the next 3 if/elseif make the directory be "srvr_used.load_dir".
 		if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
 		{
 			handleFileUpload(Req);
@@ -68,7 +68,7 @@ void	requestHandler(int client_socket, const ConfigFile &conf)
 			handleFileDelete(filename, client_socket);
 		}
 
-		// Vérifier si le chemin de l'URI correspond à un script CGI
+		// TODO check for "server_used.cgi_wl" allows the right extension.
 		else if (Req.isCGI())
 		{
 			// Exécuter le script CGI
@@ -84,7 +84,6 @@ void	requestHandler(int client_socket, const ConfigFile &conf)
 		}
 		else
 		{
-			// Réponse normale (non-CGI)
 			std::string response = readHtmlFile(Req.getURI().substr(1).c_str(), srvr_used);
 
 			if (send(client_socket, response.c_str(), response.size(), 0) == -1)
