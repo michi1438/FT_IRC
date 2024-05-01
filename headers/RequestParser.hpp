@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:09 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/25 08:55:15 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/01 15:01:26 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,7 @@ class RequestParser
 		size_t		getContentLength() const;
 
 		std::map<std::string, std::string>	getQueryParam() const;
+		std::string toString() const;
 };
 
 std::string getHttpRequest(int client_socket);

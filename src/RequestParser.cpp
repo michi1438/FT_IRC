@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/25 08:56:58 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/01 15:01:47 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,4 +250,60 @@ std::string RequestParser::getQueryString() const
 		query_string.append("&");
 	}
 	return (query_string);
+}
+
+std::string RequestParser::toString() const
+{
+	std::string req_str = "";
+
+	req_str.append("Method: ");
+	req_str.append(this->_method);
+	req_str.append("\n");
+
+	req_str.append("URI: ");
+	req_str.append(this->_uri);
+	req_str.append("\n");
+
+	req_str.append("Version: ");
+	req_str.append(this->_version);
+	req_str.append("\n");
+
+	req_str.append("Host: ");
+	req_str.append(this->_host);
+	req_str.append("\n");
+
+	req_str.append("Script Name: ");
+	req_str.append(this->_script_name);
+	req_str.append("\n");
+
+	req_str.append("Is Chunked: ");
+	req_str.append(this->_is_chunked ? "true" : "false");
+	req_str.append("\n");
+
+	req_str.append("Boundary: ");
+	req_str.append(this->_boundary);
+	req_str.append("\n");
+
+	req_str.append("Content Type: ");
+	req_str.append(this->_content_type);
+	req_str.append("\n");
+
+	req_str.append("Content Length: ");
+	req_str.append(std::to_string(this->_content_length));
+	req_str.append("\n");
+
+	req_str.append("Body: ");
+	req_str.append(this->_body);
+	req_str.append("\n");
+
+	std::map<std::string, std::string>::const_iterator it;
+	for (it = this->_query_param.begin(); it != this->_query_param.end(); ++it)
+	{
+		req_str.append("Query Param: ");
+		req_str.append(it->first);
+		req_str.append("=");
+		req_str.append(it->second);
+		req_str.append("\n");
+	}
+	return (req_str);
 }
