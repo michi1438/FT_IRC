@@ -6,11 +6,46 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 16:06:26 by robin             #+#    #+#             */
-/*   Updated: 2024/05/01 14:58:30 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/02 16:02:30 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
+
+//crée une fonction qui récupere l'env dans une map
+std::map<std::string, std::string> getEnv(const RequestParser &Req)
+{
+    std::map<std::string, std::string> envMap;
+    envMap["SERVER_PROTOCOL"] = Req.getVersion();
+    envMap["REQUEST_METHOD"] = Req.getMethod();
+    envMap["REQUEST_URI"] = Req.getURI();
+    envMap["QUERY_STRING"] = Req.getQueryString();
+    envMap["SCRIPT_NAME"] = Req.getScriptName();
+    envMap["CONTENT_LENGTH"] = Req.getContentLength();
+    envMap["CONTENT_TYPE"] = Req.getContentType();
+    envMap["HTTP_HOST"] = Req.getHost();
+    envMap["BODY"] = Req.getBody();
+    envMap["BOUNDARY"] = Req.getBoundary();
+
+    return envMap;
+}
+
+//crée une fonction char **map_to_env(std::map<std::string, std::string> envMap)
+char **map_to_env(std::map<std::string, std::string> envMap)
+{
+    char **env = new char *[envMap.size() + 1];
+    int i = 0;
+    for (std::map<std::string, std::string>::iterator it = envMap.begin(); it != envMap.end(); it++)
+    {
+        std::string envVar = it->first + "=" + it->second;
+        env[i] = new char[envVar.size() + 1];
+        strcpy(env[i], envVar.c_str());
+        env[i][envVar.size()] = '\0';
+        i++;
+    }
+    env[i] = NULL;
+    return env;
+}
 
 std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser& Req)
 {
@@ -34,58 +69,24 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[1]);
 
-        // Set environment variables
-        setenv("REQUEST_METHOD", Req.getMethod().c_str(), 1);
-        setenv("SCRIPT_FILENAME", cgi_script_path.c_str(), 1);
-        std::ostringstream oss;
-        oss << Req.getContentLength();
-        std::string contentLengthStr = oss.str();
-        setenv("CONTENT_LENGTH", contentLengthStr.c_str(), 1);
-        setenv("CONTENT_TYPE", Req.getContentType().c_str(), 1);
+        // recupere l'env dans envTmp
+        std::map<std::string, std::string> envMap = getEnv(Req);
+        char **envTmp = map_to_env(envMap);
 
         // Execute the CGI script
-        if(Req.getScriptName().find(".py") != std::string::npos){
-            std::string num1;
-            std::string num2;
-            std::string oprtr;
-            std::map<std::string, std::string> query = Req.getQueryParam();
-            std::map<std::string, std::string>::iterator it = query.begin();
-            for (it = query.begin(); it != query.end(); it++)
-            {
-                if (it->first == "number1")
-                    num1 = it->second;
-                else if (it->first == "number2")
-                    num2 = it->second;
-                else if (it->first == "operator")
-                    oprtr = it->second;
-                else
-                    std::cerr << "Invalid query parameter" << std::endl;
-            }
-            execl("/usr/bin/python3", "python3", cgi_script_path.c_str(), num1.c_str(), num2.c_str(), oprtr.c_str(), NULL);
-        }
-        else if(Req.getScriptName().find(".cpp") != std::string::npos)
-        {
-            // Convert Req to a string
-            std::string req_str = Req.toString();
+        char *const argv[] = {
+                        new char [cgi_script_path.size() + 1],
+                        new char [Req.getURI().size() + 1],
+                        NULL
+                        };
+        strcpy(const_cast<char*>(argv[0]), cgi_script_path.c_str());
+        argv[0][cgi_script_path.size()] = '\0';
+        strcpy(const_cast<char*>(argv[1]), Req.getURI().c_str());
+        argv[1][Req.getURI().size()] = '\0';
+        
+        execve(cgi_script_path.c_str(), argv, envTmp);
 
-            // Write req_str to a temporary file
-            std::string temp_file_path = "/tmp/req_data.txt";
-            std::ofstream temp_file(temp_file_path);
-            if (temp_file.is_open()) {
-                temp_file << req_str;
-                temp_file.close();
-            } else {
-                std::cerr << "Unable to open file";
-                exit(EXIT_FAILURE);
-            }
-
-            // Execute the CGI script with the path to the temporary file as an argument
-            execl(cgi_script_path.c_str(), cgi_script_path.c_str(), temp_file_path.c_str(), NULL);
-        }
-        else if(Req.getScriptName().find(".php") != std::string::npos)
-            execl("/usr/bin/php", "php", cgi_script_path.c_str(), NULL);
-
-        perror("Error in execl");
+        perror("Error in execve");
         exit(EXIT_FAILURE);
     }
     else // This is the parent process

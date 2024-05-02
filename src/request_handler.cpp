@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/01 14:33:28 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/02 16:16:19 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	requestHandler(int client_socket, const ConfigFile &conf)
 		if (srvr_used.method.compare("ALL") != 0 && srvr_used.method.find("." + Req.getMethod() + " ") == std::string::npos)
 			throw (405);						
 
-		Req.show();
+		//Req.show();
 		
 		// if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
 		// {

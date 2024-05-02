@@ -6,11 +6,16 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/01 15:01:47 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/01 15:25:19 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/RequestParser.hpp"
+
+RequestParser::RequestParser(){
+	return ;
+}
+
 
 RequestParser::RequestParser(const int &client_socket)
 	: _method(""), _uri(""), _version(""), _host(""), _script_name(""),
@@ -306,4 +311,32 @@ std::string RequestParser::toString() const
 		req_str.append("\n");
 	}
 	return (req_str);
+}
+
+RequestParser RequestParser::fromString(const std::string& req_str)
+{
+    RequestParser req;
+    std::istringstream ss(req_str);
+    std::string line;
+
+    while (std::getline(ss, line))
+    {
+        if (line.substr(0, 5) == "Body: ")
+        {
+            req._body = line.substr(6);
+        }
+        else if (line.substr(0, 12) == "Query Param: ")
+        {
+            std::string param = line.substr(13);
+            size_t pos = param.find('=');
+            if (pos != std::string::npos)
+            {
+                std::string key = param.substr(0, pos);
+                std::string value = param.substr(pos + 1);
+                req._query_param[key] = value;
+            }
+        }
+    }
+
+    return req;
 }
