@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 18:16:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/01 13:00:40 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/01 18:54:36 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ typedef struct S_loc
 typedef struct S_erver
 {
 	bool err;
+	bool list_repo;
 	std::vector<t_loc>	locations;
 	std::string root;
 	std::string loc_root;

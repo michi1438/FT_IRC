@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/01 13:30:27 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/01 19:39:08 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ void ConfigFile::print_blocks(t_server *serverinfo)
 	std::cout << "\t" << "Accepted cgi_extension: " << serverinfo->cgi_wl << std::endl;
 	std::cout << "\t" << "Up/Down/Del directory: " << serverinfo->load_dir << std::endl;
 	std::cout << "\t" << "(lcbs)limit_client_body_size: " << serverinfo->lcbs << std::endl;
+	if (serverinfo->list_repo == true) 
+		std::cout << "\t" << "directory listing: ENABLED" << std::endl;
 	if (serverinfo->locations.empty() == false)
 		this->print_loc(serverinfo->locations);
 	std::cout << std::endl;
@@ -70,6 +72,8 @@ void ConfigFile::finalize_blocks(t_server *serverinfo)
 	serverinfo->method.clear();
 	serverinfo->cgi_wl.clear();
 	serverinfo->load_dir.clear();
+	serverinfo->list_repo = false;
+	serverinfo->lcbs = INT_MAX;
 }
 
 ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name) 
@@ -84,6 +88,7 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 	std::string line;
 	t_server serverinfo;
 	serverinfo.lcbs = INT_MAX;
+	serverinfo.list_repo = false;
 	while (std::getline(conf_file, line) && i++ < CONFIG_FILE_MAX_SIZE)
 	{
 		std::istringstream iss(line);
@@ -204,6 +209,12 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 			{
 				while(iss >> sub)
 					serverinfo.cgi_wl.append("." + sub + " ");
+			}
+			else if (sub.find("list_") == 0)
+			{
+				iss >> sub;
+				if (sub.compare("TRUE") == 0)
+					serverinfo.list_repo = true;
 			}
 			else if (sub.find("lcbs_") == 0)
 			{
