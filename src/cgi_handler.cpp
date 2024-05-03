@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 16:06:26 by robin             #+#    #+#             */
-/*   Updated: 2024/05/02 16:02:30 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/03 13:16:07 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ char **map_to_env(std::map<std::string, std::string> envMap)
     int i = 0;
     for (std::map<std::string, std::string>::iterator it = envMap.begin(); it != envMap.end(); it++)
     {
+        //std::cout << "OOOOOOOOOO" << it->second << std::endl;
         std::string envVar = it->first + "=" + it->second;
         env[i] = new char[envVar.size() + 1];
         strcpy(env[i], envVar.c_str());
@@ -73,6 +74,8 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
         std::map<std::string, std::string> envMap = getEnv(Req);
         char **envTmp = map_to_env(envMap);
 
+        
+        
         // Execute the CGI script
         char *const argv[] = {
                         new char [cgi_script_path.size() + 1],

@@ -33,6 +33,12 @@ int main(){
     std::string body = std::getenv("BODY");
     std::string boundary = std::getenv("BOUNDARY");
 
+    // if (body.length() > 10500) {
+    // std::cout << "Last 100 characters of body: " << body.substr(body.length() - 10500) << std::endl;
+    // } 
+    // else {
+    // std::cout << "Body: " << body << std::endl;
+    // }
     std::string filename;
     size_t filename_start = body.find("filename=\"", 0);
     if (filename_start != std::string::npos) {
@@ -48,28 +54,28 @@ int main(){
 
     // Trouver la position de départ des données du fichier
     size_t header_end = body.find("\r\n\r\n");
-    std::cout << "header_end: " << header_end << std::endl;
+    //std::cout << "header_end: " << header_end << std::endl;
     if (header_end == std::string::npos) {
         std::cerr << "Invalid file data format0" << std::endl;
         return 1;
     }
     header_end += 4;
 
-    
+
     // Trouver la fin des données du fichier
     size_t boundary_end = body.find(boundary, header_end);
-    std::cout << "boundary_end: " << boundary_end << std::endl;
+    //std::cout << "boundary_end: " << boundary_end << std::endl;
     if (boundary_end == std::string::npos) {
         std::cerr << "Invalid file data format4" << std::endl;
         return 1;
     }
     boundary_end -= 4;
 
-    // Vérifier si la requête est complète
-    // if (boundary_end != body.length() - 4) {
-    //     std::cerr << "Incomplete request" << std::endl;
-    //     return 1;
-    // }
+    //Vérifier si la requête est complète
+    if (boundary_end != body.length() - 4) {
+        std::cerr << "Incomplete request" << std::endl;
+        return 1;
+    }
 
     // Ouvrir le fichier de sortie
     std::ofstream outfile(("upload/" + filename).c_str(), std::ios::binary);

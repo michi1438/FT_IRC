@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/01 15:25:19 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/03 12:18:46 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,8 +102,8 @@ RequestParser::RequestParser(const int &client_socket)
 		else if (new_line.find("Content-Length: ") != std::string::npos)
 		{
 			this->_content_length = std::atoi(new_line.erase(new_line.size() - 1, 1).substr(16).c_str());
-			if (this->_content_length > 100000000) //TODO get body limit from ConfigFile
-				throw 413;
+			// if (this->_content_length > 100000000) //TODO get body limit from ConfigFile
+			// 	throw 413;
 		}
 		else if (new_line.find("Transfer-Encoding: ") != std::string::npos)
 		{
@@ -257,86 +257,86 @@ std::string RequestParser::getQueryString() const
 	return (query_string);
 }
 
-std::string RequestParser::toString() const
-{
-	std::string req_str = "";
+// std::string RequestParser::toString() const
+// {
+// 	std::string req_str = "";
 
-	req_str.append("Method: ");
-	req_str.append(this->_method);
-	req_str.append("\n");
+// 	req_str.append("Method: ");
+// 	req_str.append(this->_method);
+// 	req_str.append("\n");
 
-	req_str.append("URI: ");
-	req_str.append(this->_uri);
-	req_str.append("\n");
+// 	req_str.append("URI: ");
+// 	req_str.append(this->_uri);
+// 	req_str.append("\n");
 
-	req_str.append("Version: ");
-	req_str.append(this->_version);
-	req_str.append("\n");
+// 	req_str.append("Version: ");
+// 	req_str.append(this->_version);
+// 	req_str.append("\n");
 
-	req_str.append("Host: ");
-	req_str.append(this->_host);
-	req_str.append("\n");
+// 	req_str.append("Host: ");
+// 	req_str.append(this->_host);
+// 	req_str.append("\n");
 
-	req_str.append("Script Name: ");
-	req_str.append(this->_script_name);
-	req_str.append("\n");
+// 	req_str.append("Script Name: ");
+// 	req_str.append(this->_script_name);
+// 	req_str.append("\n");
 
-	req_str.append("Is Chunked: ");
-	req_str.append(this->_is_chunked ? "true" : "false");
-	req_str.append("\n");
+// 	req_str.append("Is Chunked: ");
+// 	req_str.append(this->_is_chunked ? "true" : "false");
+// 	req_str.append("\n");
 
-	req_str.append("Boundary: ");
-	req_str.append(this->_boundary);
-	req_str.append("\n");
+// 	req_str.append("Boundary: ");
+// 	req_str.append(this->_boundary);
+// 	req_str.append("\n");
 
-	req_str.append("Content Type: ");
-	req_str.append(this->_content_type);
-	req_str.append("\n");
+// 	req_str.append("Content Type: ");
+// 	req_str.append(this->_content_type);
+// 	req_str.append("\n");
 
-	req_str.append("Content Length: ");
-	req_str.append(std::to_string(this->_content_length));
-	req_str.append("\n");
+// 	req_str.append("Content Length: ");
+// 	req_str.append(std::to_string(this->_content_length));
+// 	req_str.append("\n");
 
-	req_str.append("Body: ");
-	req_str.append(this->_body);
-	req_str.append("\n");
+// 	req_str.append("Body: ");
+// 	req_str.append(this->_body);
+// 	req_str.append("\n");
 
-	std::map<std::string, std::string>::const_iterator it;
-	for (it = this->_query_param.begin(); it != this->_query_param.end(); ++it)
-	{
-		req_str.append("Query Param: ");
-		req_str.append(it->first);
-		req_str.append("=");
-		req_str.append(it->second);
-		req_str.append("\n");
-	}
-	return (req_str);
-}
+// 	std::map<std::string, std::string>::const_iterator it;
+// 	for (it = this->_query_param.begin(); it != this->_query_param.end(); ++it)
+// 	{
+// 		req_str.append("Query Param: ");
+// 		req_str.append(it->first);
+// 		req_str.append("=");
+// 		req_str.append(it->second);
+// 		req_str.append("\n");
+// 	}
+// 	return (req_str);
+// }
 
-RequestParser RequestParser::fromString(const std::string& req_str)
-{
-    RequestParser req;
-    std::istringstream ss(req_str);
-    std::string line;
+// RequestParser RequestParser::fromString(const std::string& req_str)
+// {
+//     RequestParser req;
+//     std::istringstream ss(req_str);
+//     std::string line;
 
-    while (std::getline(ss, line))
-    {
-        if (line.substr(0, 5) == "Body: ")
-        {
-            req._body = line.substr(6);
-        }
-        else if (line.substr(0, 12) == "Query Param: ")
-        {
-            std::string param = line.substr(13);
-            size_t pos = param.find('=');
-            if (pos != std::string::npos)
-            {
-                std::string key = param.substr(0, pos);
-                std::string value = param.substr(pos + 1);
-                req._query_param[key] = value;
-            }
-        }
-    }
+//     while (std::getline(ss, line))
+//     {
+//         if (line.substr(0, 5) == "Body: ")
+//         {
+//             req._body = line.substr(6);
+//         }
+//         else if (line.substr(0, 12) == "Query Param: ")
+//         {
+//             std::string param = line.substr(13);
+//             size_t pos = param.find('=');
+//             if (pos != std::string::npos)
+//             {
+//                 std::string key = param.substr(0, pos);
+//                 std::string value = param.substr(pos + 1);
+//                 req._query_param[key] = value;
+//             }
+//         }
+//     }
 
-    return req;
-}
+//     return req;
+// }
