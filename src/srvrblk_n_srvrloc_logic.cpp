@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 11:36:12 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/30 11:36:14 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/03 14:47:05 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,25 @@ std::string readHtmlFile(std::string filename, t_server srvr)
 	struct stat buf;
 	stat(filename.c_str(), &buf);
 	// TODO Check directory listing // if (S_ISDIR(buf.st_mode) != 0 && srvr.repo_listing)
-	if (S_ISDIR(buf.st_mode) != 0)
+	if (S_ISDIR(buf.st_mode) != 0 && srvr.list_repo == true)
+	{
+		int pid;
+		int wstatus;
+		if ((pid = fork()) == 0)
+		{
+			if (execl("cgi_bin/dir_listing.cgi", "dir_listing.cgi", filename.c_str(), NULL) == -1) 	
+				perror("execl");
+		}
+		WIFEXITED(wstatus);
+		waitpid(pid, &wstatus, 0);
+		file.open("cgi_bin/dir_listing.html");
+		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + content;
+		file.close();
+		std::cout << BLUE << "Response 200 sent." << RESET << std::endl;
+		return response;
+	}
+	else if (S_ISDIR(buf.st_mode) != 0)
 		throw (403);
 	else if (!file.is_open())
 		throw (404);
@@ -56,6 +74,7 @@ std::string readHtmlFile(std::string filename, t_server srvr)
 		std::cout << BLUE << "Response 200 sent." << RESET << std::endl;
 		return response;
 	}
+	//return "crap";
 }
 
 int prts_is_open(std::vector<int> server_fd, int fd)
