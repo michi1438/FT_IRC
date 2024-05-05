@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/01 19:39:08 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/04 10:35:14 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,8 @@ void ConfigFile::finalize_blocks(t_server *serverinfo)
 	this->blocks.push_back(*serverinfo);
 	this->print_blocks(serverinfo);
 	serverinfo->locations.clear();
+	serverinfo->root.clear();
+	serverinfo->home.clear();
 	serverinfo->srvr_name.clear();
 	serverinfo->prt_n_default.clear();
 	serverinfo->method.clear();

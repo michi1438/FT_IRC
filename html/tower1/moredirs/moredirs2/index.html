@@ -1,0 +1,58 @@
+<!-- *********************************************************************** -->
+<!--                                                                         -->
+<!--                                                      :::      ::::::::  -->
+<!-- index.html                                         :+:      :+:    :+:  -->
+<!--                                                  +:+ +:+         +:+    -->
+<!-- By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+       -->
+<!--                                              +#+#+#+#+#+   +#+          -->
+<!-- Created: 2024/04/05 13:10:51 by lzito             #+#    #+#            -->
+<!-- Updated: 2024/04/25 11:14:35 by lzito            ###   ########.fr      -->
+<!--                                                                         -->
+<!-- *********************************************************************** -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello Page</title>
+<style>
+body {
+    background-color: lavender; /* Fond mauve pastel */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 10;
+}
+
+.container {
+    text-align: center;
+}
+
+h1 {
+    font-size: 36px; /* Taille de police plus grande */
+    color: white; /* Texte en blanc */
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
+    border-radius: 10px; /* Coins arrondis */
+}
+</style>
+</head>
+<body>
+	<div>
+		<h1>CECI EST UNE CALCULETTE TECHNOLOGIQUE</h1>
+		<form action="/cgi_bin/hello.py" method="get">
+			<label for="number1"> Nombre 1 :</label><br>
+			<input type="text" name="number1"><br><br>
+			<label for="operator"> Operateur :</label><br>
+			<input type="text" name="operator"><br><br>
+			<label for="number2"> Nombre 2 :</label><br>
+			<input type="text" name="number2"><br><br>
+			<input type="submit" value="Envoyer">
+		</form>
+	</div>
+	<br>
+	<br>
+</body>
+</html>

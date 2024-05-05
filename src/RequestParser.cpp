@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/29 11:29:08 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/05 13:36:50 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,7 +180,7 @@ bool RequestParser::isCGI() const
 	std::string URI = this->getURI();
 	size_t cgiPos = URI.find("/cgi_bin/");
 
-	if (cgiPos != std::string::npos)
+	if (cgiPos != std::string::npos && cgiPos + 9 <  URI.size()) // XXX Should not break anything, it allows me to print cgi_bin directory...
 		return (true);
 	return (false);
 }

@@ -6,7 +6,7 @@
 /*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/01 13:39:25 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/05 10:16:56 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ void	requestHandler(int client_socket, const ConfigFile &conf)
 		RequestParser Req(client_socket);
 		Req.show();
 		
+		std::cout << "PASSED3 " << Req.getURI().substr(1).c_str() << std::endl; 
 		std::cout << RESET << std::endl;
 		t_server srvr_used = choose_server(conf, Req.getHost());
 		if (!srvr_used.locations.empty())

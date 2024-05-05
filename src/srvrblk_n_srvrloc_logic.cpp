@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 11:36:12 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/03 14:47:05 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/05 13:53:25 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,24 +28,35 @@ bool is_location(std::string filename, t_server srvr)
 std::string readHtmlFile(std::string filename, t_server srvr)
 {
 	std::fstream file;
-	if (filename.empty() == true)
+	file.open(filename.c_str());
+	if (file.is_open() == false)
 	{
-		filename.append(srvr.root).append(srvr.home);
-		file.open(filename.c_str());
+		if (filename.empty() == true && srvr.root.empty() == true && srvr.home.empty() == true) 
+		{
+			filename = ".";
+		}
+		if (filename.empty() == true )
+		{
+			filename.append(srvr.root).append(srvr.home);
+			file.open(filename.c_str());
+		}
+		else if (is_location(filename, srvr) == true)
+		{
+			filename.append("/").append(srvr.home);
+			file.open(filename.insert(0, srvr.root).c_str());
+		}
+		else
+		{
+			file.open(filename.insert(0, srvr.root).c_str());
+		}
 	}
-	else if (is_location(filename, srvr) == true)
-	{
-		filename.append("/").append(srvr.home);
-		file.open(filename.insert(0, srvr.root).c_str());
-	}
-	else
-		file.open(filename.insert(0, srvr.root).c_str());
 
 	struct stat buf;
 	stat(filename.c_str(), &buf);
-	// TODO Check directory listing // if (S_ISDIR(buf.st_mode) != 0 && srvr.repo_listing)
 	if (S_ISDIR(buf.st_mode) != 0 && srvr.list_repo == true)
 	{
+		if (filename[filename.size() - 1] != '/')
+			filename.append("/");
 		int pid;
 		int wstatus;
 		if ((pid = fork()) == 0)
@@ -59,7 +70,7 @@ std::string readHtmlFile(std::string filename, t_server srvr)
 		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 		std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + content;
 		file.close();
-		std::cout << BLUE << "Response 200 sent." << RESET << std::endl;
+		std::cout << BLUE << "Response 200 from dir_listing.cgi" << RESET << std::endl;
 		return response;
 	}
 	else if (S_ISDIR(buf.st_mode) != 0)
