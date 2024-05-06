@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/06 13:37:12 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/06 15:03:50 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 #include <vector>
 #include <string>
 #include <iterator>
+#include <dirent.h>
 
 #include "ConfigFile.hpp"
 #include "RequestParser.hpp"
