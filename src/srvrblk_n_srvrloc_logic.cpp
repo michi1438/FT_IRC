@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 11:36:12 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/05 13:53:25 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/06 14:52:21 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ std::string readHtmlFile(std::string filename, t_server srvr)
 	{
 		if (filename.empty() == true && srvr.root.empty() == true && srvr.home.empty() == true) 
 		{
-			filename = ".";
+			filename = "./";
 		}
 		if (filename.empty() == true )
 		{
@@ -56,17 +56,20 @@ std::string readHtmlFile(std::string filename, t_server srvr)
 	if (S_ISDIR(buf.st_mode) != 0 && srvr.list_repo == true)
 	{
 		if (filename[filename.size() - 1] != '/')
-			filename.append("/");
+			throw (301);
 		int pid;
 		int wstatus;
 		if ((pid = fork()) == 0)
 		{
-			if (execl("cgi_bin/dir_listing.cgi", "dir_listing.cgi", filename.c_str(), NULL) == -1) 	
-				perror("execl");
+			if (execl("cgi_bin/dir_listing.cgi", "dir_listing.cgi", filename.c_str(), NULL) == -1)
+				exit (-1);	
 		}
-		WIFEXITED(wstatus);
 		waitpid(pid, &wstatus, 0);
+		if (WIFEXITED(wstatus) && WEXITSTATUS(wstatus))
+			throw (501);
 		file.open("cgi_bin/dir_listing.html");
+		if (file.is_open() == false)
+			throw (501);
 		std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 		std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + content;
 		file.close();
@@ -85,7 +88,6 @@ std::string readHtmlFile(std::string filename, t_server srvr)
 		std::cout << BLUE << "Response 200 sent." << RESET << std::endl;
 		return response;
 	}
-	//return "crap";
 }
 
 int prts_is_open(std::vector<int> server_fd, int fd)

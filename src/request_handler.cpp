@@ -6,7 +6,7 @@
 /*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/05 10:16:56 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/06 11:29:24 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,10 @@ t_server	update_location(t_server srvr_used, std::string uri)
 	return new_serv;
 }
 
-void	requestHandler(int client_socket, const ConfigFile &conf)
+void	requestHandler(int client_socket, const ConfigFile &conf, RequestParser &Req)
 {
-		RequestParser Req(client_socket);
 		Req.show();
 		
-		std::cout << "PASSED3 " << Req.getURI().substr(1).c_str() << std::endl; 
 		std::cout << RESET << std::endl;
 		t_server srvr_used = choose_server(conf, Req.getHost());
 		if (!srvr_used.locations.empty())

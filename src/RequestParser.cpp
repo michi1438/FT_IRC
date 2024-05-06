@@ -6,11 +6,14 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/05 13:36:50 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/06 13:03:28 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/RequestParser.hpp"
+
+RequestParser::RequestParser()
+{}
 
 RequestParser::RequestParser(const int &client_socket)
 	: _method(""), _uri(""), _version(""), _host(""), _script_name(""),

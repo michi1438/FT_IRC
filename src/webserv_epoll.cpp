@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/25 10:16:35 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/06 13:11:59 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,14 +108,17 @@ int init_ws(ConfigFile& conf)
 				// Lire la requête HTTP du client
 				int client_socket = events[i].data.fd;
 
+				RequestParser Req;
 				try
 				{
-					requestHandler(client_socket, conf);
+					RequestParser R(client_socket);
+					Req = R;
+					requestHandler(client_socket, conf, Req);
 				}
 				catch (int errorCode)
 				{
 	 				std::cout << RED << "ERROR CODE : " << errorCode << RESET << std::endl;
-					std::string response = read_errpage(errorCode);
+					std::string response = read_errpage(errorCode, Req);
 					send(client_socket, response.c_str(), response.size(), 0);
 					close(client_socket);
 				}

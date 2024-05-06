@@ -6,16 +6,23 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 11:06:25 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/30 11:32:41 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/06 14:27:28 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
 
-std::string read_errpage(int err_code)
+std::string read_errpage(int err_code, RequestParser& Req)
 {
 	switch (err_code)
 	{
+		case 301:
+		{
+			std::ifstream file(ERR_301);
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			std::string response = "HTTP/1.1 301 OK\r\nContent-Type: text/html\r\nLocation: " + Req.getURI() + "/\r\n\r\n" + content;
+			return response;
+		}
 		case 403:
 		{
 			std::ifstream file(ERR_403);
@@ -37,6 +44,14 @@ std::string read_errpage(int err_code)
 			std::string response = "HTTP/1.1 405 OK\r\nContent-Type: text/html\r\n\r\n" + content;
 			return response;
 		}
+		case 408:
+		{
+			// XXX This response is used much more since some browsers, like Chrome, Firefox 27+, and IE9, use HTTP pre-connection mechanisms to speed up surfing. 
+			std::ifstream file(ERR_408);
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			std::string response = "HTTP/1.1 408 OK\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n" + content;
+			return response;
+		}
 		case 413:
 		{
 			std::ifstream file(ERR_413);
@@ -49,6 +64,13 @@ std::string read_errpage(int err_code)
 			std::ifstream file(ERR_414);
 			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 			std::string response = "HTTP/1.1 414 OK\r\nContent-Type: text/html\r\n\r\n" + content;
+			return response;
+		}
+		case 501:
+		{
+			std::ifstream file(ERR_501);
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			std::string response = "HTTP/1.1 501 OK\r\nContent-Type: text/html\r\n\r\n" + content;
 			return response;
 		}
 		case 505:
@@ -69,7 +91,7 @@ std::string read_errpage(int err_code)
 		{
 			std::ifstream file(ERR_500);
 			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-			std::string response = "HTTP/1.1 400 OK\r\nContent-Type: text/html\r\n\r\n" + content;
+			std::string response = "HTTP/1.1 500 OK\r\nContent-Type: text/html\r\n\r\n" + content;
 			return response;
 		}
 	}

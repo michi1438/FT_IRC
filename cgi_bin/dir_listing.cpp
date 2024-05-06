@@ -2,6 +2,7 @@
 #include <iostream>
 #include <dirent.h>
 #include <unistd.h>
+#include <sys/stat.h> // for the S_ISDIR() macro...
 
 int main(int ac, char **av)
 {
@@ -22,9 +23,11 @@ int main(int ac, char **av)
 		{
 			std::string dir_name = diread->d_name;
 			if (diread->d_type == DT_DIR)
-				outfile << "<a href=\"" << dir_name + "/" << "\">" << dir_name << "</a>" << diread->d_reclen << std::endl;
+				outfile << "<a href=\"" << dir_name + "/" << "\">" << dir_name + "/" << "</a>" << std::endl;
 			else
-				outfile << "<a href=\"" << dir_name << "\">" << dir_name << "</a>" << diread->d_reclen << std::endl;
+			{
+				outfile << "<a href=\"" << dir_name << "\">" << dir_name << "</a>" << std::endl;
+			}
 		}
 		outfile << "</pre><hr></body>" << "</html>" << std::endl;
 		closedir(dir);
