@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi_handler.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 16:06:26 by robin             #+#    #+#             */
-/*   Updated: 2024/05/03 13:16:07 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/09 13:25:12 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,12 +100,14 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
         int status;
         waitpid(pid, &status, 0);
 
-        // Read the output of the CGI script from the pipe
-        char buffer[4096];
-        read(pipefd[0], buffer, sizeof(buffer));
-
-        // Convert the output to a string
-        std::string output(buffer);
+        // Read the output of the CGI script
+        char buffer[BUFFER_SIZE];
+        ssize_t bytes_read;
+        std::string cgi_output;
+        while ((bytes_read = read(pipefd[0], buffer, sizeof(buffer))) > 0)
+        {
+            cgi_output.append(buffer, bytes_read);
+        }
 
         return output;
     }

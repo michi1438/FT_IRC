@@ -1,18 +1,42 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <dirent.h>
+#include <unistd.h>
+#include <sys/stat.h> // for the S_ISDIR() macro...
 
 int main(int ac, char **av)
 {
-	
-	std::c 
-
-<html>
-<head><title>Index of /iso/2024.04.01/arch/</title></head>
-<body>
-<h1>Index of /iso/2024.04.01/arch/</h1><hr><pre><a href="../">../</a>
-<a href="boot/">boot/</a>                                              01-Apr-2024 17:59                   -
-<a href="x86_64/">x86_64/</a>                                            01-Apr-2024 17:59                   -
-<a href="pkglist.x86_64.txt">pkglist.x86_64.txt</a>                                 01-Apr-2024 17:58                8084
-<a href="version">version</a>                                            01-Apr-2024 17:58                  11
-</pre><hr></body>
-</html>
+	if (ac != 2)
+	{
+		std::cout << "You have not send the right number of arguments..." << std::endl;	
+		return 1;
+	}
+	DIR *dir;
+	struct dirent *diread;
+	if ((dir = opendir(av[1])) != NULL)
+	{
+		std::ofstream outfile("cgi_bin/dir_listing.html", std::ios::out);
+		outfile << "<!doctype html><html location=\"" << "127.0.0.1:8080/" << av[1] << "\">" << std::endl; // FIXME trying to add things to the response header...
+		outfile << "<head><title>Index of " << av[1] << "</title></head>" << std::endl;
+		outfile << "<body>" << std::endl << "<h1>Index of " << av[1] << "</h1><hr><pre>" << std::endl;
+		while ((diread = readdir(dir)) != NULL)
+		{
+			std::string dir_name = diread->d_name;
+			if (diread->d_type == DT_DIR)
+				outfile << "<a href=\"" << dir_name + "/" << "\">" << dir_name + "/" << "</a>" << std::endl;
+			else
+			{
+				outfile << "<a href=\"" << dir_name << "\">" << dir_name << "</a>" << std::endl;
+			}
+		}
+		outfile << "</pre><hr></body>" << "</html>" << std::endl;
+		closedir(dir);
+		outfile.close();
+	}
+	else
+	{
+		std::cout << "Could not open dir..." << std::endl;	
+		return 1;
+	}
+	return 0;
+}

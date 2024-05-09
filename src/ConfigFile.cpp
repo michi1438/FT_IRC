@@ -6,28 +6,76 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/24 12:23:20 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/04 10:35:14 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/ConfigFile.hpp"
+#include <climits>
 
 void ConfigFile::print_blocks(t_server *serverinfo)
 {
-	serverinfo->err = false;	
 	std::cout << "SERVER_BLOCK #" << std::endl;
+	std::cout << "\tSrvr_name:";
 	for(std::vector<std::string>::const_iterator name_it = serverinfo->srvr_name.begin(); name_it != serverinfo->srvr_name.end(); name_it++)
-		std::cout << *name_it << std::endl;
+		std::cout << " " << *name_it;
+	std::cout << std::endl;
+	std::cout << "\tPrtn:";
 	for(std::vector<t_prt>::const_iterator port_it = serverinfo->prt_n_default.begin(); port_it!= serverinfo->prt_n_default.end(); port_it++)
-		std::cout << (*port_it).prtn << std::endl;
+	{
+		std::cout << " " << port_it->prtn; 
+		if (port_it->is_deflt == true)
+			std::cout << "(d)"; 
+	}
+	std::cout << std::endl;
+	std::cout << "\t" << "Root: " << serverinfo->root << std::endl;
+	std::cout << "\t" << "Home/Index: " << serverinfo->home << std::endl;
+	std::cout << "\t" << "Accepted methods: " << serverinfo->method << std::endl;
+	std::cout << "\t" << "Accepted cgi_extension: " << serverinfo->cgi_wl << std::endl;
+	std::cout << "\t" << "Up/Down/Del directory: " << serverinfo->load_dir << std::endl;
+	std::cout << "\t" << "(lcbs)limit_client_body_size: " << serverinfo->lcbs << std::endl;
+	if (serverinfo->list_repo == true) 
+		std::cout << "\t" << "directory listing: ENABLED" << std::endl;
+	if (serverinfo->locations.empty() == false)
+		this->print_loc(serverinfo->locations);
+	std::cout << std::endl;
+	std::cout << std::endl;
+}
+
+void ConfigFile::print_loc(std::vector<t_loc> loc)
+{
+	for(std::vector<t_loc>::const_iterator loc_it = loc.begin(); loc_it != loc.end(); loc_it++)
+	{
+		std::cout << "\t" << "# LOCATION_BLOCK " << (*loc_it).l_path << std::endl;
+		std::cout << "\t\t" << "l_root(unused/ununderstood): " << (*loc_it).l_root << std::endl;
+		std::cout << "\t\t" << "l_home: " << (*loc_it).l_home << std::endl;
+		std::cout << "\t\t" << "l_method: " << (*loc_it).l_method << std::endl;
+		std::cout << "\t\t" << "l_cgi_wl: " << (*loc_it).l_cgi_wl << std::endl;
+		std::cout << "\t\t" << "l_lcbs: " << (*loc_it).l_lcbs << std::endl;
+	}
+}
+
+void ConfigFile::finalize_blocks(t_server *serverinfo)
+{
+	serverinfo->err = false;	
 	if (serverinfo->method.empty() == true)
 		serverinfo->method = "ALL";
-	std::cout << "Accepted methods: " << serverinfo->method << std::endl;
-	std::cout << std::endl;
+	if (serverinfo->cgi_wl.empty() == true)
+		serverinfo->cgi_wl = "ALL";
+	if (serverinfo->load_dir.empty() == true)
+		serverinfo->load_dir = "upload/";
 	this->blocks.push_back(*serverinfo);
+	this->print_blocks(serverinfo);
+	serverinfo->locations.clear();
+	serverinfo->root.clear();
+	serverinfo->home.clear();
 	serverinfo->srvr_name.clear();
 	serverinfo->prt_n_default.clear();
 	serverinfo->method.clear();
+	serverinfo->cgi_wl.clear();
+	serverinfo->load_dir.clear();
+	serverinfo->list_repo = false;
+	serverinfo->lcbs = INT_MAX;
 }
 
 ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name) 
@@ -41,12 +89,14 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 		throw ParsingException(2);
 	std::string line;
 	t_server serverinfo;
+	serverinfo.lcbs = INT_MAX;
+	serverinfo.list_repo = false;
 	while (std::getline(conf_file, line) && i++ < CONFIG_FILE_MAX_SIZE)
 	{
 		std::istringstream iss(line);
 		std::string sub;
 		if (line.find("}") == 0)
-			this->print_blocks(&serverinfo);
+			this->finalize_blocks(&serverinfo);
 		else if (line.find('\t') == 0)
 		{
 			iss >> sub;
@@ -58,7 +108,7 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 						serverinfo.srvr_name.push_back(sub);
 				}
 			}
-			if (sub.find("prtn_") == 0)
+			else if (sub.find("prtn_") == 0)
 			{
 				while(iss >> sub)
 				{
@@ -79,28 +129,104 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 					}
 				}
 			}
-			if (sub.find("meth_") == 0)
+			else if (sub.find("loca_") == 0)
+			{
+				t_loc this_loc;
+				this_loc.l_lcbs = INT_MAX;
+				iss >> sub;
+				this_loc.l_path = sub;
+				for (std::vector<t_loc>::iterator loc_it = serverinfo.locations.begin(); loc_it != serverinfo.locations.end(); loc_it++)
+					if (loc_it->l_path.compare(sub) == 0)
+						throw ParsingException(14);
+				while (std::getline(conf_file, line) && i++ < CONFIG_FILE_MAX_SIZE)
+				{
+					std::istringstream iss(line);
+					if (line.find("\t}") == 0)
+					{
+						if (this_loc.l_method.empty() == true)
+							this_loc.l_method = "ALL";
+						if (this_loc.l_cgi_wl.empty() == true)
+							this_loc.l_cgi_wl = "ALL";
+						serverinfo.locations.push_back(this_loc);
+						break;
+					}
+					else if (line.find("\t\t") == 0)
+					{
+						iss >> sub;
+						if (sub.find("root_") == 0)
+						{
+							iss >> sub;
+							this_loc.l_root = sub;
+						}
+						else if (sub.find("cgi_") == 0)
+						{
+							while(iss >> sub)
+								this_loc.l_cgi_wl.append("." + sub + " ");
+						}
+						if (sub.find("home_") == 0)
+						{
+							iss >> sub;
+							this_loc.l_home = sub;
+						}
+						if (sub.find("lcbs_") == 0)
+						{
+							iss >> sub;
+							if (sub.find_first_not_of(" 0123456789") != std::string::npos)
+								throw ParsingException(9);
+							this_loc.l_lcbs= atoi(sub.c_str());
+						}
+						if (sub.find("meth_") == 0)
+						{
+							while(iss >> sub)
+							{
+								this_loc.l_method.append("." + sub + " ");
+							}
+						}
+					}
+					else
+						throw ParsingException(12);
+				}
+			}	
+			else if (sub.find("meth_") == 0)
 			{
 				while(iss >> sub)
 					serverinfo.method.append("." + sub + " ");
 			}
-			if (sub.find("root_") == 0)
+			else if (sub.find("load_") == 0) // TODO implement in the rest of upload...
+			{
+				iss >> sub;
+				serverinfo.load_dir = sub;
+			}
+			else if (sub.find("root_") == 0)
 			{
 				iss >> sub;
 				serverinfo.root = sub;
 			}
-			if (sub.find("home_") == 0)
+			else if (sub.find("home_") == 0)
 			{
 				iss >> sub;
 				serverinfo.home = sub;
 			}
-			if (sub.find("lcbs_") == 0)
+			else if (sub.find("cgi_") == 0)
+			{
+				while(iss >> sub)
+					serverinfo.cgi_wl.append("." + sub + " ");
+			}
+			else if (sub.find("list_") == 0)
+			{
+				iss >> sub;
+				if (sub.compare("TRUE") == 0)
+					serverinfo.list_repo = true;
+			}
+			else if (sub.find("lcbs_") == 0)
 			{
 				iss >> sub;
 				if (sub.find_first_not_of(" 0123456789") != std::string::npos)
 					throw ParsingException(9);
 				serverinfo.lcbs= atoi(sub.c_str());
 			}
+			else
+				throw ParsingException(13);
 		}
 	}
 //	this->checker();

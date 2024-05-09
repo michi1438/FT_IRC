@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:09 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/01 15:27:19 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/09 13:24:13 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ class RequestParser
 	public:
 		RequestParser(void);
 		RequestParser(const int &client_socket);
+		RequestParser(void);
 		~RequestParser(void);
 
 		void		show() const;

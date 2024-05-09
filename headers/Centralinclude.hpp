@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/25 10:17:17 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/06 15:03:50 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,15 @@
 #define CYAN    "\033[36m"      // Cyan
 
 #define MAX_EVENTS 64
+#define ERR_301 "default_errpages/301.html"
 #define ERR_400 "default_errpages/40x.html"
 #define ERR_403 "default_errpages/403.html"
 #define ERR_404 "default_errpages/404.html"
 #define ERR_405 "default_errpages/405.html"
+#define ERR_408 "default_errpages/408.html"
+#define ERR_413 "default_errpages/413.html"
+#define ERR_414 "default_errpages/414.html"
+#define ERR_501 "default_errpages/501.html"
 #define ERR_505 "default_errpages/505.html"
 #define ERR_500 "default_errpages/50x.html"
 #define ERR_512 "default_errpages/512.html"
@@ -53,27 +58,31 @@
 #define HTTP_VER "HTTP/1.1"
 
 //webserv.cpp
-int				init_ws(ConfigFile& conf);
+int				init_ws(ConfigFile&);
 
 //upload.cpp
-void			handleFileUpload(RequestParser & Req);
-void            handleFileDownload(RequestParser & Req, int client_socket, std::string filename);
-void            handleFileDelete(std::string filename, int client_socket);
-void            showUploadedFiles(int client_socket);
+void			handleFileUpload(RequestParser&);
+void            handleFileDownload(RequestParser&, int, std::string);
+void            handleFileDelete(std::string, int);
+void            showUploadedFiles(int);
 
-//ws_ontheside.cpp
-std::string		readHtmlFile(std::string filename, t_server srvr_used);
-t_server		choose_server(const ConfigFile& conf, std::string host);
-int				prts_is_open(std::vector<int> server_fd, int fd);
-std::string		read_errpage(int err_code);
+//srvrblk_n_srvrloc_logic.cpp
+bool			is_location(std::string, t_server);
+std::string		readHtmlFile(std::string, t_server);
+int				prts_is_open(std::vector<int>, int);
+t_server		choose_server(const ConfigFile&, std::string);
+
+//Err_page_switch.cpp
+std::string		read_errpage(int, RequestParser&);
 
 //cgi_handler.cpp
-std::string		execute_cgi_script(const std::string& cgi_script_path, RequestParser& Req);
+std::string		execute_cgi_script(const std::string&, RequestParser&);
 
 //request_parser_utils.cpp
-void			readFromSocket(int client_socket, std::string &request);
-void			addBodyNotChunked(int client_socket, std::string &request, int content_length);
-std::string		getHttpRequest(int client_socket);
+void			readFromSocket(int, std::string);
+void			addBodyNotChunked(int, std::string& , int);
+std::string		getHttpRequest(int);
 
 //request_handler.cpp
-void			requestHandler(int client_socket, const ConfigFile& conf);
+t_server		update_location(t_server, std::string);
+void			requestHandler(int, const ConfigFile&, RequestParser&);

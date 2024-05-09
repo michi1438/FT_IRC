@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/28 11:56:33 by mguerga           #+#    #+#             */
-/*   Updated: 2024/04/24 12:22:17 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/04/30 10:32:35 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,12 @@ const char* ParsingException::what() const throw ()
 			return ("ERR: the given conffile is empty or doesn't fit the requierment given in the default example...");
 		case 11:
 			return ("ERR: No ports were given...");
+		case 12:
+			return ("ERR: One of the location block was not well formated...");
+		case 13:
+			return ("ERR: One of the server blocks was not well formated...");
+		case 14:
+			return ("ERR: It appears you are trying to redefine one of your locations in a block server, check your .conf...");
 		default:
 			return ("ERR: Unspecified parsing error");
 	}

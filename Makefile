@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: robin <robin@student.42.fr>                +#+  +:+       +#+         #
+#    By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/27 16:42:52 by mguerga           #+#    #+#              #
-#    Updated: 2024/05/01 15:33:21 by robin            ###   ########.fr        #
+#    Updated: 2024/05/09 13:23:45 by rgodtsch         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,11 +22,12 @@ SRCS = 	src/main.cpp \
 		src/ConfigFile.cpp \
 		src/RequestParser.cpp \
 		src/ParsingException.cpp \
-		src/ws_ontheside.cpp \
+		src/srvrblk_n_srvrloc_logic.cpp \
 		src/upload.cpp \
 		src/cgi_handler.cpp \
 		src/request_handler.cpp \
-		src/request_parser_utils.cpp \
+		src/Err_page_switch.cpp \
+		src/request_parser_utils.cpp
 
 ifeq ($(OS), Darwin)
 SRCS2 = src/webserv_kqueue.cpp
