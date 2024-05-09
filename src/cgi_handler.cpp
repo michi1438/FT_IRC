@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 16:06:26 by robin             #+#    #+#             */
-/*   Updated: 2024/05/09 13:25:12 by rgodtsch         ###   ########.fr       */
+/*   Updated: 2024/05/09 13:28:09 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,6 +109,6 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
             cgi_output.append(buffer, bytes_read);
         }
 
-        return output;
+        return cgi_output;
     }
 }

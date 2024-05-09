@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv_kqueue.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/25 10:23:54 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/09 13:30:56 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,14 +114,17 @@ int init_ws(ConfigFile& conf)
 			{
                 int client_socket = events[i].ident;
 
+				RequestParser Req;
 				try
 				{
-					requestHandler(client_socket, conf);
+					RequestParser R(client_socket);
+					Req = R;
+					requestHandler(client_socket, conf, Req);
 				}
 				catch (int errorCode)
 				{
 	 				std::cout << RED << "ERROR CODE : " << errorCode << RESET << std::endl;
-					std::string response = read_errpage(errorCode);
+					std::string response = read_errpage(errorCode, Req);
 					send(client_socket, response.c_str(), response.size(), 0);
 					close(client_socket);
 				}
