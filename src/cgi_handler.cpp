@@ -6,11 +6,47 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 16:06:26 by robin             #+#    #+#             */
-/*   Updated: 2024/04/24 16:06:36 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/03 13:16:07 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
+
+//crée une fonction qui récupere l'env dans une map
+std::map<std::string, std::string> getEnv(const RequestParser &Req)
+{
+    std::map<std::string, std::string> envMap;
+    envMap["SERVER_PROTOCOL"] = Req.getVersion();
+    envMap["REQUEST_METHOD"] = Req.getMethod();
+    envMap["REQUEST_URI"] = Req.getURI();
+    envMap["QUERY_STRING"] = Req.getQueryString();
+    envMap["SCRIPT_NAME"] = Req.getScriptName();
+    envMap["CONTENT_LENGTH"] = Req.getContentLength();
+    envMap["CONTENT_TYPE"] = Req.getContentType();
+    envMap["HTTP_HOST"] = Req.getHost();
+    envMap["BODY"] = Req.getBody();
+    envMap["BOUNDARY"] = Req.getBoundary();
+
+    return envMap;
+}
+
+//crée une fonction char **map_to_env(std::map<std::string, std::string> envMap)
+char **map_to_env(std::map<std::string, std::string> envMap)
+{
+    char **env = new char *[envMap.size() + 1];
+    int i = 0;
+    for (std::map<std::string, std::string>::iterator it = envMap.begin(); it != envMap.end(); it++)
+    {
+        //std::cout << "OOOOOOOOOO" << it->second << std::endl;
+        std::string envVar = it->first + "=" + it->second;
+        env[i] = new char[envVar.size() + 1];
+        strcpy(env[i], envVar.c_str());
+        env[i][envVar.size()] = '\0';
+        i++;
+    }
+    env[i] = NULL;
+    return env;
+}
 
 std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser& Req)
 {
@@ -28,65 +64,49 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
         exit(EXIT_FAILURE);
     }
 
-    if (pid == 0)
+    if (pid == 0) // This is the child process
     {
-        // Child process
-        close(pipefd[0]);
+        close(pipefd[0]); // Close the read end of the pipe in the child
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[1]);
 
-        // Set environment variables
-        setenv("REQUEST_METHOD", Req.getMethod().c_str(), 1);
-        setenv("SCRIPT_FILENAME", cgi_script_path.c_str(), 1);
-        //setenv("QUERY_STRING", Req.getQueryParam().c_str(), 1);
-        std::ostringstream oss;
-        oss << Req.getContentLength();
-        std::string contentLengthStr = oss.str();
-        setenv("CONTENT_LENGTH", contentLengthStr.c_str(), 1);
-        setenv("CONTENT_TYPE", Req.getContentType().c_str(), 1);
-        //std::cout << "getMethod : " << Req.getMethod().c_str() << "<br>" << std::endl;
+        // recupere l'env dans envTmp
+        std::map<std::string, std::string> envMap = getEnv(Req);
+        char **envTmp = map_to_env(envMap);
+
+        
         
         // Execute the CGI script
-        if(Req.getScriptName().find(".py") != std::string::npos){
-            std::string num1;
-            std::string num2;
-            std::string oprtr;
-            std::map<std::string, std::string> query = Req.getQueryParam();
-            std::map<std::string, std::string>::iterator it = query.begin();
-            for (it = query.begin(); it != query.end(); it++)
-            {
-                if (it->first == "number1")
-                    num1 = it->second;
-                else if (it->first == "number2")
-                    num2 = it->second;
-                else if (it->first == "operator")
-                    oprtr = it->second;
-                else
-                    std::cerr << "Invalid query parameter" << std::endl;
-            }
-            execl("/usr/bin/python3", "python3", cgi_script_path.c_str(), num1.c_str(), num2.c_str(), oprtr.c_str(), NULL);
-        }
-        else if(Req.getScriptName().find(".php") != std::string::npos)
-            execl("/usr/bin/php", "php", cgi_script_path.c_str(), NULL);
-        perror("Error in execl");
+        char *const argv[] = {
+                        new char [cgi_script_path.size() + 1],
+                        new char [Req.getURI().size() + 1],
+                        NULL
+                        };
+        strcpy(const_cast<char*>(argv[0]), cgi_script_path.c_str());
+        argv[0][cgi_script_path.size()] = '\0';
+        strcpy(const_cast<char*>(argv[1]), Req.getURI().c_str());
+        argv[1][Req.getURI().size()] = '\0';
+        
+        execve(cgi_script_path.c_str(), argv, envTmp);
+
+        perror("Error in execve");
         exit(EXIT_FAILURE);
     }
-    else
+    else // This is the parent process
     {
-        // Parent process
-        close(pipefd[1]);
+        close(pipefd[1]); // Close the write end of the pipe in the parent
 
-        // Read the output of the CGI script
+        // Wait for the child to finish
+        int status;
+        waitpid(pid, &status, 0);
+
+        // Read the output of the CGI script from the pipe
         char buffer[4096];
-        ssize_t bytes_read;
-        std::string cgi_output;
-        while ((bytes_read = read(pipefd[0], buffer, sizeof(buffer))) > 0)
-        {
-            cgi_output.append(buffer, bytes_read);
-        }
+        read(pipefd[0], buffer, sizeof(buffer));
 
-        close(pipefd[0]);
-        waitpid(pid, NULL, 0);
-        return cgi_output;
+        // Convert the output to a string
+        std::string output(buffer);
+
+        return output;
     }
 }

@@ -1,7 +1,7 @@
+#!/usr/bin/env python3
 import os
 import sys
 
-#!/usr/bin/env python3
 
 # print("REQUEST_METHOD: ", os.environ.get('REQUEST_METHOD'))
 # print("SCRIPT_FILENAME: ", os.environ.get('SCRIPT_FILENAME'))
@@ -10,10 +10,10 @@ import sys
 # print("CONTENT_TYPE: ", os.environ.get('CONTENT_TYPE'))
 # print("<br>")
 
-# Get the command line arguments
-num1 = int(sys.argv[1])
-num2 = int(sys.argv[2])
-oprtr = sys.argv[3]
+# Get the numbers from the environment
+num1 = int(os.environ.get('QUERY_STRING').split('&')[0].split('=')[1])
+num2 = int(os.environ.get('QUERY_STRING').split('&')[1].split('=')[1])
+oprtr = os.environ.get('QUERY_STRING').split('&')[2].split('=')[1]
 
 if num1 == 0 and num2 == 0 and oprtr == '%2B':
     b = "La tete a Toto"
