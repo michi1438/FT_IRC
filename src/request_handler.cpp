@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/16 17:50:50 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/22 11:28:00 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,10 @@ void	requestHandler(int client_socket, const ConfigFile &conf, RequestParser &Re
 			throw (505);
 		if (srvr_used.method.compare("ALL") != 0 && srvr_used.method.find("." + Req.getMethod() + " ") == std::string::npos)
 			throw (405);						
+		if (static_cast<size_t>(srvr_used.lcbs) <= Req.getContentLength())
+			throw (413);
+		if (Req.getURI().size() >= BUFFER_SIZE)
+			throw (414);
 		
 		// TODO for the next 3 if/elseif make the directory be "srvr_used.load_dir".
 		if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
@@ -73,11 +77,16 @@ void	requestHandler(int client_socket, const ConfigFile &conf, RequestParser &Re
 		// TODO check for "server_used.cgi_wl" allows the right extension.
 		else if (Req.isCGI())
 		{
-			// Exécuter le script CGI
 			std::string cgi_script_path = "cgi_bin/" + Req.getScriptName();
 			std::string cgi_output = execute_cgi_script(cgi_script_path, Req);
 			std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + cgi_output;
-			if (send(client_socket, response.c_str(), response.size(), 0) == -1)
+			int bytes_sent = send(client_socket, response.c_str(), response.size(), 0);
+			if (bytes_sent == 0)
+			{
+				std::cout << "Zero bytes were sent, this ain't normal" << std::endl; // TODO find better message...
+				throw (500);
+			}
+			if (bytes_sent == -1)
 				throw (501);
 			close(client_socket);
 			std::cout << BLUE << "Response sent from CGI" << RESET << std::endl;
@@ -86,7 +95,13 @@ void	requestHandler(int client_socket, const ConfigFile &conf, RequestParser &Re
 		{
 			std::string response = readHtmlFile(Req.getURI().substr(1).c_str(), srvr_used);
 
-			if (send(client_socket, response.c_str(), response.size(), 0) == -1)
+			int bytes_sent = send(client_socket, response.c_str(), response.size(), 0);
+			if (bytes_sent == 0)
+			{
+				std::cout << "Zero bytes were sent, this ain't normal" << std::endl; // TODO find better message...
+				throw (500);
+			}
+			if (bytes_sent == -1)
 				throw (501);
 			close(client_socket);
 		}

@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/10 13:38:59 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/22 11:30:31 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,14 @@ int init_ws(ConfigFile& conf)
 				{
 	 				std::cout << RED << "ERROR CODE : " << errorCode << RESET << std::endl;
 					std::string response = read_errpage(errorCode, Req);
-					send(client_socket, response.c_str(), response.size(), 0);
+					int bytes_sent = send(client_socket, response.c_str(), response.size(), 0);
+					if (bytes_sent == 0)
+					{
+						std::cout << "Zero bytes were sent, this ain't normal" << std::endl; // TODO find better message...
+						throw (500);
+					}
+					if (bytes_sent == -1)
+						throw (501);
 					close(client_socket);
 				}
             }

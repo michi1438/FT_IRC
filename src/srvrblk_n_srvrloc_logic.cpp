@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 11:36:12 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/06 14:52:21 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/10 08:38:16 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,8 @@ t_server	 choose_server(const ConfigFile& conf, const std::string req_host)
 				{
 					if (*name_it == host_name)
 					{
-						std::cout << host_name << ":" << host_port << " was passed to (" << srvr_it->srvr_name[0] << ")server-block, for its name/port matched." << std::endl;
+						// XXX Maybe do a debug version, to print stuff like this...
+						//std::cout << host_name << ":" << host_port << " was passed to (" << srvr_it->srvr_name[0] << ")server-block, for its name/port matched." << std::endl;
 						return *srvr_it;
 					}
 				}
@@ -129,9 +130,9 @@ t_server	 choose_server(const ConfigFile& conf, const std::string req_host)
 			if ((*prtn_it).prtn == host_port && (*prtn_it).is_deflt == true)
 			{
 				if (!srvr_it->srvr_name.empty())
-					std::cout << host_name << ":" << host_port << " was passed to the default-tagged server-block (" << srvr_it->srvr_name[0] << ") with its port number." << std::endl;
+					//std::cout << host_name << ":" << host_port << " was passed to the default-tagged server-block (" << srvr_it->srvr_name[0] << ") with its port number." << std::endl;
 				else
-					std::cout << host_name << ":" << host_port << " went to the default block of this prtn with no srvr_name defined" << std::endl;
+					//std::cout << host_name << ":" << host_port << " went to the default block of this prtn with no srvr_name defined" << std::endl;
 				return *srvr_it;
 			}
 		}
