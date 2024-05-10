@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/04 10:35:14 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/10 12:15:43 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@ void ConfigFile::print_blocks(t_server *serverinfo)
 	std::cout << "\t" << "Root: " << serverinfo->root << std::endl;
 	std::cout << "\t" << "Home/Index: " << serverinfo->home << std::endl;
 	std::cout << "\t" << "Accepted methods: " << serverinfo->method << std::endl;
+	if (serverinfo->err_dir.empty() == false)
+		std::cout << "\t" << "err_dir: " << serverinfo->err_dir << std::endl;
 	std::cout << "\t" << "Accepted cgi_extension: " << serverinfo->cgi_wl << std::endl;
 	std::cout << "\t" << "Up/Down/Del directory: " << serverinfo->load_dir << std::endl;
 	std::cout << "\t" << "(lcbs)limit_client_body_size: " << serverinfo->lcbs << std::endl;
@@ -70,6 +72,7 @@ void ConfigFile::finalize_blocks(t_server *serverinfo)
 	serverinfo->root.clear();
 	serverinfo->home.clear();
 	serverinfo->srvr_name.clear();
+	serverinfo->err_dir.clear();
 	serverinfo->prt_n_default.clear();
 	serverinfo->method.clear();
 	serverinfo->cgi_wl.clear();
@@ -191,6 +194,11 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 			{
 				while(iss >> sub)
 					serverinfo.method.append("." + sub + " ");
+			}
+			else if (sub.find("err_dir") == 0)
+			{
+				iss >> sub;
+				serverinfo.err_dir = sub;
 			}
 			else if (sub.find("load_") == 0) // TODO implement in the rest of upload...
 			{
