@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/06 13:11:59 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/10 08:35:16 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ int init_ws(ConfigFile& conf)
 				RequestParser Req;
 				try
 				{
-					RequestParser R(client_socket);
+					RequestParser R(client_socket, conf);
 					Req = R;
 					requestHandler(client_socket, conf, Req);
 				}

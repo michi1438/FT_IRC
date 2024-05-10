@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:09 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/09 13:27:50 by rgodtsch         ###   ########.fr       */
+/*   Updated: 2024/05/10 10:25:54 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,11 @@
 #include <string>
 #include <cstring>
 #include <map>
+
+#include "ConfigFile.hpp"
+t_server		choose_server(const ConfigFile&, std::string);
+t_server		update_location(t_server, std::string);
+std::string		decodeUri(const std::string &uri);
 
 # define MAX_HEADER_SIZE 4096
 # define BUFFER_SIZE 4096
@@ -45,7 +50,6 @@ class RequestParser
 		std::string							_host;
 		std::string							_script_name;
 
-		bool								_is_chunked;
 		std::string							_boundary;
 		std::string							_content_type;
 		size_t								_content_length;
@@ -55,15 +59,11 @@ class RequestParser
 
 	public:
 		RequestParser(void);
-		RequestParser(const int &client_socket);
+		RequestParser(const int &client_socket, const ConfigFile &conf);
 		~RequestParser(void);
 
 		void		show() const;
-		std::string unchunk(std::string body) const;
-
-		bool		isChunked() const;
 		bool		isCGI() const;
-
 		std::string	getMethod() const;
 		std::string	getURI() const;
 		std::string	getVersion() const;

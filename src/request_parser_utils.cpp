@@ -6,11 +6,35 @@
 /*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 16:18:54 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/25 08:21:24 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/10 11:47:35 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/RequestParser.hpp"
+
+std::string decodeUri(const std::string &uri)
+{
+	std::stringstream decoded;
+	decoded << std::hex << std::setfill('0');
+	for (size_t i = 0; i < uri.length(); ++i)
+	{
+        if (uri[i] == '%')
+		{
+            if (i + 2 < uri.length())
+			{
+                int value;
+                std::istringstream(uri.substr(i + 1, 2)) >> std::hex >> value;
+                decoded << static_cast<char>(value);
+                i += 2;
+            }
+        }
+		else if (uri[i] == '+')
+            decoded << ' ';
+		else
+			decoded << uri[i];
+    }
+    return (decoded.str());
+}
 
 void	readFromSocket(int client_socket, std::string &request)
 {

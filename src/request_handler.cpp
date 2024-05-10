@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/09 14:50:11 by rgodtsch         ###   ########.fr       */
+/*   Updated: 2024/05/10 12:15:31 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,12 +44,8 @@ void	requestHandler(int client_socket, const ConfigFile &conf, RequestParser &Re
 			throw (505);
 		if (srvr_used.method.compare("ALL") != 0 && srvr_used.method.find("." + Req.getMethod() + " ") == std::string::npos)
 			throw (405);						
-		if (static_cast<size_t>(srvr_used.lcbs) <= Req.getContentLength())
-			throw (413);
 		if (Req.getURI().size() >= BUFFER_SIZE)
 			throw (414);
-
-		//Req.show();
 		
 		// TODO for the next 3 if/elseif make the directory be "srvr_used.load_dir".
 		if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
@@ -66,7 +62,7 @@ void	requestHandler(int client_socket, const ConfigFile &conf, RequestParser &Re
 		else if(Req.getMethod() == "POST" && Req.getURI().find("/delete") != std::string::npos && !Req.isCGI()){
 			std::string body = Req.getBody();
 			std::string filename = body.find("file_to_delete=") != std::string::npos ? body.substr(15) : "";
-			handleFileDelete(filename, client_socket);
+			handleFileDelete(decodeUri(filename), client_socket);
 		}
 
 		// TODO check for "server_used.cgi_wl" allows the right extension.

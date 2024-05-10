@@ -3,34 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hello Page</title>
+<title>CALCULETTE</title>
 <style>
 body {
-    background-color: lavender; /* Fond mauve pastel */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 10;
+	background-color: lavender; /* Fond mauve pastel */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	margin: 10;
 }
 
 .container {
-    text-align: center;
+	text-align: center;
 }
 
 h1 {
-    font-size: 36px; /* Taille de police plus grande */
-    color: white; /* Texte en blanc */
-    padding: 20px;
-    background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
-    border-radius: 10px; /* Coins arrondis */
+	font-size: 36px; /* Taille de police plus grande */
+	color: white; /* Texte en blanc */
+	padding: 20px;
+	background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
+	border-radius: 10px; /* Coins arrondis */
 }
+
+h2 {
+	font-size: 20px;
+	color: red;
+	padding: 10px;
+	background-color: rgba(255, 0, 0, 0.5);
+	border-radius: 10px;
+	text-align: center;
+	justify-content: center;
+	align-items: center;
+	width: 200px;
+}
+
 </style>
 </head>
 <body>
-	<div>
+	<div align=center>
 		<h1>CECI EST UNE CALCULETTE TECHNOLOGIQUE</h1>
-		<form action="/cgi_bin/hello.py" method="get">
+		<form action="/cgi_bin/calc.py" method="get">
 			<label for="number1"> Nombre 1 :</label><br>
 			<input type="text" name="number1"><br><br>
 			<label for="operator"> Operateur :</label><br>
@@ -39,6 +52,7 @@ h1 {
 			<input type="text" name="number2"><br><br>
 			<input type="submit" value="Envoyer">
 		</form>
+		<!-- contenu dynamique -->
 	</div>
 	<br>
 	<br>

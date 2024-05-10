@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/09 13:26:32 by rgodtsch         ###   ########.fr       */
+/*   Updated: 2024/05/10 12:01:01 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,12 @@
 RequestParser::RequestParser()
 {}
 
-RequestParser::RequestParser(const int &client_socket)
+RequestParser::RequestParser(const int &client_socket, const ConfigFile &conf)
 	: _method(""), _uri(""), _version(""), _host(""), _script_name(""),
-   	_is_chunked(false),	_boundary(""), _content_type(""), _content_length(0), _body("")
+   	_boundary(""), _content_type(""), _content_length(0), _body("")
 {
 	std::string req_data = getHttpRequest(client_socket);
-//	std::cout << req_data << std::endl;
+	std::cout << req_data << std::endl;
 
 	std::istringstream	request_stream(req_data);
 
@@ -40,7 +40,7 @@ RequestParser::RequestParser(const int &client_socket)
 	std::getline(request_stream, second_line);
 	this->_host = second_line.erase(second_line.size() - 1, 1).substr(6);
 
-	// CGI
+	// SCRIPT NAME
 	///////////////////////////////////////
 	if (this->isCGI())
 	{
@@ -50,11 +50,11 @@ RequestParser::RequestParser(const int &client_socket)
 		this->_script_name = URI.substr(startPos, endPos - startPos);
 	}
 
-	// QUERY
+	// QUERY STRING
 	///////////////////////////////////////
 	if (this->_method == "GET")
 	{
-		std::string URI = this->getURI();
+		std::string URI = decodeUri(this->getURI());
 		size_t queryPos = URI.find("?");
 		if (queryPos != std::string::npos)
 		{
@@ -72,11 +72,6 @@ RequestParser::RequestParser(const int &client_socket)
 		}
 		return;
 	}
-
-	// DELETE ?
-	///////////////////////////////////////
-//	else if (this->_method == "DELETE")
-//		return ;
 
 	// REST OF HEADERS (POST)
 	///////////////////////////////////////
@@ -99,14 +94,12 @@ RequestParser::RequestParser(const int &client_socket)
 		}
 		else if (new_line.find("Content-Length: ") != std::string::npos)
 		{
+			t_server srvr_used = choose_server(conf, this->getHost());
+			if (!srvr_used.locations.empty())
+				srvr_used = update_location(srvr_used, this->getURI());
 			this->_content_length = std::atoi(new_line.erase(new_line.size() - 1, 1).substr(16).c_str());
-			// if (this->_content_length > 100000000) //TODO get body limit from ConfigFile
-			// 	throw 413;
-		}
-		else if (new_line.find("Transfer-Encoding: ") != std::string::npos)
-		{
-			if (new_line.find("chunked") != std::string::npos)
-				this->_is_chunked = true;
+			if (this->_content_length > (size_t)srvr_used.lcbs)
+				throw 413;
 		}
 		// fin des headers
 		else if (new_line == "\r")
@@ -116,7 +109,6 @@ RequestParser::RequestParser(const int &client_socket)
 	
 	// BODY
 	///////////////////////////////////////
-	//TODO gestion des requete chunked a faire
 	char currentChar;
 	while (request_stream.get(currentChar))
 		this->_body += currentChar;
@@ -135,9 +127,9 @@ void RequestParser::show() const
 	std::cout << std::setw(50) << "----------------------------------------" << std::endl;
 	std::cout << RESET << std::setw(20) << "METHOD : " << GREEN << this->getMethod() << "$" << std::endl;
 	std::cout << RESET << std::setw(20) << "URI : " << GREEN << this->getURI() << "$" << std::endl;
+	std::cout << RESET << std::setw(20) << "DECODED URI : " << GREEN << decodeUri(this->getURI()) << "$" << std::endl;
 	std::cout << RESET << std::setw(20) << "VERSION : " << GREEN << this->getVersion() << "$" << std::endl;
 	std::cout << RESET << std::setw(20) << "HOST : " << GREEN << this->getHost() << "$" << std::endl;
-	std::cout << RESET << std::setw(20) << "IS CHUNKED : " << GREEN << this->_is_chunked << "$" << std::endl;
 	std::cout << RESET << std::setw(20) << "IS CGI : " << GREEN << this->isCGI() << "$" << std::endl;
 	std::cout << RESET << std::setw(20) << "SCRIPT NAME : " << GREEN << this->getScriptName() << "$" << std::endl;
 	std::cout << RESET << std::setw(20) << "BOUNDARY : " << GREEN << this->getBoundary() << "$" << std::endl;
@@ -167,23 +159,12 @@ void RequestParser::show() const
 	std::cout << std::setw(20) << std::endl;
 }
 
-std::string RequestParser::unchunk(std::string body) const
-{
-	// TODO do the actual unchunk
-	return (body);
-}
-
-bool RequestParser::isChunked() const
-{
-	return (this->_is_chunked);
-}
-
 bool RequestParser::isCGI() const
 {
 	std::string URI = this->getURI();
 	size_t cgiPos = URI.find("/cgi_bin/");
 
-	if (cgiPos != std::string::npos && cgiPos + 9 <  URI.size()) // XXX Should not break anything, it allows me to print cgi_bin directory...
+	if (cgiPos != std::string::npos && cgiPos + 9 < URI.size())
 		return (true);
 	return (false);
 }
@@ -220,8 +201,6 @@ std::string RequestParser::getBoundary() const
 
 std::string RequestParser::getBody() const
 {
-	if (this->_is_chunked == true)
-		return (this->unchunk(this->_body));
 	return (this->_body);
 }
 

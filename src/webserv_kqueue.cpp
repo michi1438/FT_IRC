@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/09 13:30:56 by rgodtsch         ###   ########.fr       */
+/*   Updated: 2024/05/10 13:38:59 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ int init_ws(ConfigFile& conf)
 				RequestParser Req;
 				try
 				{
-					RequestParser R(client_socket);
+					RequestParser R(client_socket, conf);
 					Req = R;
 					requestHandler(client_socket, conf, Req);
 				}
