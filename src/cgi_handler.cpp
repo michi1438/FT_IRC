@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 16:06:26 by robin             #+#    #+#             */
-/*   Updated: 2024/05/10 15:01:16 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/10 15:47:40 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,7 @@
 void handle_alarm(int sig)
 {
     (void) sig;
-    // Terminer le processus avec un code d'erreur
-    // std::cerr << "CGI script execution timed out" << std::endl;
-    // exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 //crée une fonction qui récupere l'env dans une map
@@ -111,12 +109,18 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
         // Wait for the child to finish
         int status;
         waitpid(pid, &status, 0);
-        // std::cout << "WEXITSTATUS(status) :" << WEXITSTATUS(status) << std::endl;
-        // std::cout << "WIFEXITED(status) :" << WIFEXITED(status) << std::endl;
+        std::cout << "WEXITSTATUS(status) :" << WEXITSTATUS(status) << std::endl;
+        std::cout << "WIFEXITED(status) :" << WIFEXITED(status) << std::endl;
+        std::cout << "WIFSIGNALED(status) :" << WIFSIGNALED(status) << std::endl;
+        std::cout << "WTERMSIG(status) :" << WTERMSIG(status) << std::endl;
         alarm(0);
-        if(WIFEXITED(status) == 0)
+        if(WTERMSIG(status) == 14)
         {
             throw (504);
+        }
+        else if(WTERMSIG(status) == 11)
+        {
+            throw (500);
         }
         // Read the output of the CGI script
         char buffer[BUFFER_SIZE];
