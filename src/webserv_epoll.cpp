@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv_epoll.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/15 13:52:06 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/22 15:30:13 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,14 @@ int init_ws(ConfigFile& conf)
 				{
 	 				std::cout << RED << "ERROR CODE : " << errorCode << RESET << std::endl;
 					std::string response = read_errpage(errorCode, Req);
-					send(client_socket, response.c_str(), response.size(), 0);
+					int bytes_sent = send(client_socket, response.c_str(), response.size(), 0);
+					if (bytes_sent == 0)
+					{
+						std::cout << "Zero bytes were sent, this ain't normal" << std::endl; // TODO find better message...
+						throw (500);
+					}
+					if (bytes_sent == -1)
+						throw (501);
 					close(client_socket);
 				}
 			}
