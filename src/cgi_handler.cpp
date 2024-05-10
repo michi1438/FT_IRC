@@ -3,14 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   cgi_handler.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 16:06:26 by robin             #+#    #+#             */
-/*   Updated: 2024/05/09 13:28:09 by rgodtsch         ###   ########.fr       */
+/*   Updated: 2024/05/10 12:19:45 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
+
+void handle_alarm(int sig)
+{
+    (void) sig;
+    // Terminer le processus avec un code d'erreur
+    std::cerr << "CGI script execution timed out" << std::endl;
+    throw (504);
+    //exit(EXIT_FAILURE);
+}
 
 //crée une fonction qui récupere l'env dans une map
 std::map<std::string, std::string> getEnv(const RequestParser &Req)
@@ -87,6 +96,9 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
         strcpy(const_cast<char*>(argv[1]), Req.getURI().c_str());
         argv[1][Req.getURI().size()] = '\0';
         
+        signal(SIGALRM, handle_alarm);
+        alarm(4);
+        
         execve(cgi_script_path.c_str(), argv, envTmp);
 
         perror("Error in execve");
@@ -99,6 +111,8 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
         // Wait for the child to finish
         int status;
         waitpid(pid, &status, 0);
+
+        alarm(0);
 
         // Read the output of the CGI script
         char buffer[BUFFER_SIZE];

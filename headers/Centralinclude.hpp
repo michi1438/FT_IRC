@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/06 15:03:50 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/10 12:22:04 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@
 #include <string>
 #include <iterator>
 #include <dirent.h>
+#include <signal.h>
 
 #include "ConfigFile.hpp"
 #include "RequestParser.hpp"
@@ -51,6 +52,7 @@
 #define ERR_413 "default_errpages/413.html"
 #define ERR_414 "default_errpages/414.html"
 #define ERR_501 "default_errpages/501.html"
+#define ERR_504 "default_errpages/504.html"
 #define ERR_505 "default_errpages/505.html"
 #define ERR_500 "default_errpages/50x.html"
 #define ERR_512 "default_errpages/512.html"

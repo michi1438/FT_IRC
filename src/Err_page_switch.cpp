@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Err_page_switch.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 11:06:25 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/09 13:50:20 by rgodtsch         ###   ########.fr       */
+/*   Updated: 2024/05/10 12:21:41 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,13 @@ std::string read_errpage(int err_code, RequestParser& Req)
 			std::ifstream file(ERR_501);
 			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 			std::string response = "HTTP/1.1 501 OK\r\nContent-Type: text/html\r\n\r\n" + content;
+			return response;
+		}
+		case 504:
+		{
+			std::ifstream file(ERR_504);
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			std::string response = "HTTP/1.1 504 OK\r\nContent-Type: text/html\r\n\r\n" + content;
 			return response;
 		}
 		case 505:
