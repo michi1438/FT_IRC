@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/22 15:29:55 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/22 15:35:50 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,20 +31,19 @@ t_server	update_location(t_server srvr_used, std::string uri)
 	return new_serv;
 }
 
-void	requestHandler(int client_socket, const ConfigFile &conf, RequestParser &Req)
+void	requestHandler(int client_socket, t_server *srvr_used, RequestParser &Req)
 {
 		//Req.show();
 		
 		std::cout << RESET << std::endl;
-		t_server srvr_used = choose_server(conf, Req.getHost());
-		if (!srvr_used.locations.empty())
-			srvr_used = update_location(srvr_used, Req.getURI());
+		if (!srvr_used->locations.empty())
+			*srvr_used = update_location(*srvr_used, Req.getURI());
 		if (Req.getVersion().compare(HTTP_VER) != 0)
 			throw (505);
-		if (srvr_used.method.compare("ALL") != 0 && srvr_used.method.find("." + Req.getMethod() + " ") == std::string::npos)
+		if (srvr_used->method.compare("ALL") != 0 && srvr_used->method.find("." + Req.getMethod() + " ") == std::string::npos)
 			throw (405);						
 		
-		// TODO for the next 3 if/elseif make the directory be "srvr_used.load_dir".
+		// TODO for the next 3 if/elseif make the directory be "srvr_used->load_dir".
 		if (Req.getMethod() == "POST" && Req.getScriptName() == "upload") 
 		{
 			handleFileUpload(Req);
@@ -89,7 +88,7 @@ void	requestHandler(int client_socket, const ConfigFile &conf, RequestParser &Re
 		}
 		else
 		{
-			std::string response = readHtmlFile(Req.getURI().substr(1).c_str(), srvr_used);
+			std::string response = readHtmlFile(Req.getURI().substr(1).c_str(), *srvr_used);
 
 			int bytes_sent = send(client_socket, response.c_str(), response.size(), 0);
 			if (bytes_sent == 0)
