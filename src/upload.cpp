@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/04/25 09:00:04 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/11 16:12:33 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,18 +163,19 @@ void handleFileDelete(std::string filename, int client_socket) {
     // Chemin complet du fichier à supprimer
     std::string file_path = upload_dir + filename;
     // Vérifie si le fichier existe
-    std::ofstream outfile(file_path.c_str(), std::ios::binary); // Use file_path instead of ("src/upload/" + filename).c_str()
-    if (outfile.is_open()) {
-        std::cout << "J'arrive a ouvrir le fichier" << std::endl;
-        outfile.close();
+    std::ifstream infile(file_path.c_str(), std::ios::binary);
+    if (infile.is_open()) {
+        infile.close();
         // Supprime le fichier
         if (std::remove(file_path.c_str()) == 0) {
             std::cout << "File deleted successfully: " << filename << std::endl;
             showUploadedFiles(client_socket);
         } else {
             std::cerr << "Error deleting file: " << filename << std::endl;
+            throw 500;
         }
     } else {
         std::cerr << "File not found: " << filename << std::endl;
+        throw 404;
     }
 }
