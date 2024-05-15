@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:09 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/10 10:25:54 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/15 13:04:16 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@
 t_server		choose_server(const ConfigFile&, std::string);
 t_server		update_location(t_server, std::string);
 std::string		decodeUri(const std::string &uri);
+std::string		getHttpRequest(int client_socket, const ConfigFile &conf);
+int				checkSizes(const std::string &request, const ConfigFile &conf);
 
 # define MAX_HEADER_SIZE 4096
 # define BUFFER_SIZE 4096
@@ -80,7 +82,5 @@ class RequestParser
 		std::string toString() const;
 		static RequestParser fromString(const std::string &req_str);
 };
-
-std::string getHttpRequest(int client_socket);
 
 #endif

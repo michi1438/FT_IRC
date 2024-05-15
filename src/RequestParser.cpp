@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/10 12:01:01 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/15 12:20:20 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ RequestParser::RequestParser(const int &client_socket, const ConfigFile &conf)
 	: _method(""), _uri(""), _version(""), _host(""), _script_name(""),
    	_boundary(""), _content_type(""), _content_length(0), _body("")
 {
-	std::string req_data = getHttpRequest(client_socket);
+	std::string req_data = getHttpRequest(client_socket, conf);
 	std::cout << req_data << std::endl;
 
 	std::istringstream	request_stream(req_data);
@@ -93,14 +93,7 @@ RequestParser::RequestParser(const int &client_socket, const ConfigFile &conf)
 				this->_content_type = new_line.erase(new_line.size() - 1, 1).substr(14);
 		}
 		else if (new_line.find("Content-Length: ") != std::string::npos)
-		{
-			t_server srvr_used = choose_server(conf, this->getHost());
-			if (!srvr_used.locations.empty())
-				srvr_used = update_location(srvr_used, this->getURI());
 			this->_content_length = std::atoi(new_line.erase(new_line.size() - 1, 1).substr(16).c_str());
-			if (this->_content_length > (size_t)srvr_used.lcbs)
-				throw 413;
-		}
 		// fin des headers
 		else if (new_line == "\r")
 			break;
