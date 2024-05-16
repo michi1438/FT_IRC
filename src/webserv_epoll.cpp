@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/06 13:11:59 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/15 13:52:06 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,17 +101,20 @@ int init_ws(ConfigFile& conf)
 				// Add client socket to epoll
 				change_event.events = EPOLLIN | EPOLLET;
 				change_event.data.fd = client_fd;
-				epoll_ctl(ep, EPOLL_CTL_ADD, client_fd, &change_event);
+				if (epoll_ctl(ep, EPOLL_CTL_ADD, client_fd, &change_event) == -1)
+				{
+                    perror("Error in epoll");
+                    exit(EXIT_FAILURE);
+				}
 			}
 			else
 			{
-				// Lire la requête HTTP du client
 				int client_socket = events[i].data.fd;
 
 				RequestParser Req;
 				try
 				{
-					RequestParser R(client_socket);
+					RequestParser R(client_socket, conf);
 					Req = R;
 					requestHandler(client_socket, conf, Req);
 				}

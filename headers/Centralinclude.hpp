@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/16 15:25:45 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/16 17:22:13 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,8 +81,9 @@ std::string		read_errpage(int, RequestParser&);
 std::string		execute_cgi_script(const std::string&, RequestParser&);
 
 //request_parser_utils.cpp
+std::string		decodeUri(const std::string &uri);
 void			readFromSocket(int, std::string);
-void			addBodyNotChunked(int, std::string& , int);
+void			addBody(int, std::string& , int);
 std::string		getHttpRequest(int);
 
 //request_handler.cpp
