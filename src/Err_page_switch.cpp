@@ -6,11 +6,13 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 11:06:25 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/09 13:50:20 by rgodtsch         ###   ########.fr       */
+/*   Updated: 2024/05/16 08:06:51 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
+
+//TODO find the real errors descriptions instead of "OK"
 
 std::string read_errpage(int err_code, RequestParser& Req)
 {
@@ -56,7 +58,9 @@ std::string read_errpage(int err_code, RequestParser& Req)
 		{
 			std::ifstream file(ERR_413);
 			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-			std::string response = "HTTP/1.1 413 OK\r\nContent-Type: text/html\r\n\r\n" + content;
+			std::string length = "300"; //TODO temporary, seems to make the response taken better by the client (??)
+										//make it dynamic if it also works better on mac (avec ma vm je peux pas tester l upload de fichier > quelques ko)
+			std::string response = "HTTP/1.1 413 Payload Too Large\r\nConnection: close\r\nContent-Length: " + length + "\r\nContent-Type: text/html\r\n\r\n" + content;
 			return response;
 		}
 		case 414:
