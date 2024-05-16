@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/10 12:22:04 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/16 15:25:45 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@
 
 #define MAX_EVENTS 64
 #define ERR_301 "default_errpages/301.html"
-#define ERR_400 "default_errpages/40x.html"
+#define ERR_400 "default_errpages/400.html"
 #define ERR_403 "default_errpages/403.html"
 #define ERR_404 "default_errpages/404.html"
 #define ERR_405 "default_errpages/405.html"

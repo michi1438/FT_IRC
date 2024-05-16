@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/05/11 16:12:33 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/16 15:48:18 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,14 +24,16 @@ void handleFileUpload(RequestParser & Req) {
         }
     } else {
         std::cerr << "Filename not found in request" << std::endl;
+        throw 400;
         return;
     }
-
+    
     // Trouver la position de départ des données du fichier
 	size_t header_end = Req.getBody().find("\r\n\r\n");
 	if (header_end == std::string::npos) {
-    std::cerr << "Invalid file data format0" << std::endl;
-    return;
+        std::cerr << "Invalid file data format0" << std::endl;
+        throw 400;
+        return;
 	}
 	header_end += 4;
 
@@ -40,6 +42,7 @@ void handleFileUpload(RequestParser & Req) {
     size_t boundary_end = Req.getBody().find(Req.getBoundary(), header_end);
     if (boundary_end == std::string::npos) {
         std::cerr << "Invalid file data format4" << std::endl;
+        throw 400;
         return;
     }
     boundary_end -= 4;
@@ -49,6 +52,7 @@ void handleFileUpload(RequestParser & Req) {
     std::ofstream outfile(("upload/" + filename).c_str(), std::ios::binary);
     if (!outfile.is_open()) {
         std::cerr << "Unable to save file: " << filename << std::endl;
+        throw 500;
         return;
     }
 
@@ -72,6 +76,7 @@ void handleFileUpload(RequestParser & Req) {
         std::cout << "File saved successfully: " << filename << std::endl;
     } else {
         std::cerr << "File size mismatch: " << filename << std::endl;
+        throw 500;
     }
 }
 
@@ -87,8 +92,9 @@ void handleFileDownload(RequestParser & Req, int client_socket, std::string file
         // Ouvrir le fichier
         std::ifstream infile(("upload/" + filename).c_str(), std::ios::binary);
         if (!infile.is_open()) {
-            throw 404;
+            //showUploadedFiles(client_socket);
             std::cerr << "Unable to open file: " << filename << std::endl;
+            throw 404;
         }
         // Lire le contenu du fichier
         std::string file_content((std::istreambuf_iterator<char>(infile)), std::istreambuf_iterator<char>());
@@ -124,6 +130,7 @@ void showUploadedFiles(int client_socket) {
         closedir(dir);
     } else {
         std::cerr << "Unable to open directory: " << folder_path << std::endl;
+        throw 500;
         return;
     }
 
@@ -176,6 +183,7 @@ void handleFileDelete(std::string filename, int client_socket) {
         }
     } else {
         std::cerr << "File not found: " << filename << std::endl;
+        //showUploadedFiles(client_socket);
         throw 404;
     }
 }

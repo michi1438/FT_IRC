@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 11:06:25 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/10 12:21:41 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/16 15:22:22 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,13 @@ std::string read_errpage(int err_code, RequestParser& Req)
 			std::ifstream file(ERR_301);
 			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 			std::string response = "HTTP/1.1 301 OK\r\nContent-Type: text/html\r\nLocation: " + Req.getURI() + "/\r\n\r\n" + content;
+			return response;
+		}
+		case 400:
+		{
+			std::ifstream file(ERR_400);
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			std::string response = "HTTP/1.1 400 OK\r\nContent-Type: text/html\r\n\r\n" + content;
 			return response;
 		}
 		case 403:
