@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/05/16 15:48:18 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/16 17:49:46 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ void handleFileUpload(RequestParser & Req) {
     } else {
         std::cerr << "Filename not found in request" << std::endl;
         throw 400;
-        return;
     }
     
     // Trouver la position de départ des données du fichier
@@ -33,7 +32,6 @@ void handleFileUpload(RequestParser & Req) {
 	if (header_end == std::string::npos) {
         std::cerr << "Invalid file data format0" << std::endl;
         throw 400;
-        return;
 	}
 	header_end += 4;
 
@@ -43,7 +41,6 @@ void handleFileUpload(RequestParser & Req) {
     if (boundary_end == std::string::npos) {
         std::cerr << "Invalid file data format4" << std::endl;
         throw 400;
-        return;
     }
     boundary_end -= 4;
 
@@ -53,7 +50,6 @@ void handleFileUpload(RequestParser & Req) {
     if (!outfile.is_open()) {
         std::cerr << "Unable to save file: " << filename << std::endl;
         throw 500;
-        return;
     }
 
     // Écrire les données du fichier dans un nouveau fichier avec le nom dynamique
@@ -183,7 +179,6 @@ void handleFileDelete(std::string filename, int client_socket) {
         }
     } else {
         std::cerr << "File not found: " << filename << std::endl;
-        //showUploadedFiles(client_socket);
         throw 404;
     }
 }

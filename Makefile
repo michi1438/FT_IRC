@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+         #
+#    By: robin <robin@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/27 16:42:52 by mguerga           #+#    #+#              #
-#    Updated: 2024/05/09 13:23:45 by rgodtsch         ###   ########.fr        #
+#    Updated: 2024/05/16 17:46:49 by robin            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -44,10 +44,12 @@ OBJS2 = $(SRCS2:cpp=o)
 all: $(NAME)
 
 $(NAME): $(OBJS) $(OBJS2)
-	$(CXX) $(CXXFLAGS) $(OBJS) $(OBJS2) -o $(NAME)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(OBJS2) -o $(NAME) 
+	mkdir -p upload
 
 clean:
 	rm -f $(OBJS) $(OBJS2)
+	@$(RM)r upload
 
 fclean: clean
 	rm -f $(NAME)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request_parser_utils.cpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 16:18:54 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/16 07:38:53 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/16 17:33:05 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,10 +63,10 @@ void	addBody(int client_socket, std::string &request, int content_length)
     while (true)
 	{
 		readFromSocket(client_socket, request);
-		std::cout << "client_socket : " << client_socket << std::endl;
-		std::cout << "content length : " << content_length << std::endl;
-		std::cout << "request size : " << request.size() << std::endl;
-		std::cout << "request : " << request << std::endl;
+		// std::cout << "client_socket : " << client_socket << std::endl;
+		// std::cout << "content length : " << content_length << std::endl;
+		// std::cout << "request size : " << request.size() << std::endl;
+		// std::cout << "request : " << request << std::endl;
 
 		// Vérifier si le corps de la requête est entièrement reçu
 		if ((int)request.size() >= 4 + content_length)
