@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/09 13:26:32 by rgodtsch         ###   ########.fr       */
+/*   Updated: 2024/05/20 16:25:26 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ RequestParser::RequestParser(const int &client_socket)
    	_is_chunked(false),	_boundary(""), _content_type(""), _content_length(0), _body("")
 {
 	std::string req_data = getHttpRequest(client_socket);
-//	std::cout << req_data << std::endl;
 
 	std::istringstream	request_stream(req_data);
 

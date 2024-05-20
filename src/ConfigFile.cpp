@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:49:23 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/10 12:15:43 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/20 17:17:16 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void ConfigFile::print_blocks(t_server *serverinfo)
 			std::cout << "(d)"; 
 	}
 	std::cout << std::endl;
-	std::cout << "\t" << "Root: " << serverinfo->root << std::endl;
+	std::cout << "\t" << "Root: " << (serverinfo->root)[KEY] << "[" << (serverinfo->root)[VALUE] << "]" << std::endl;
 	std::cout << "\t" << "Home/Index: " << serverinfo->home << std::endl;
 	std::cout << "\t" << "Accepted methods: " << serverinfo->method << std::endl;
 	if (serverinfo->err_dir.empty() == false)
@@ -49,7 +49,7 @@ void ConfigFile::print_loc(std::vector<t_loc> loc)
 	for(std::vector<t_loc>::const_iterator loc_it = loc.begin(); loc_it != loc.end(); loc_it++)
 	{
 		std::cout << "\t" << "# LOCATION_BLOCK " << (*loc_it).l_path << std::endl;
-		std::cout << "\t\t" << "l_root(unused/ununderstood): " << (*loc_it).l_root << std::endl;
+		std::cout << "\t\t" << "l_root: "  << (loc_it->l_root)[KEY] << "[" << (loc_it->l_root)[VALUE] << "]" << std::endl;
 		std::cout << "\t\t" << "l_home: " << (*loc_it).l_home << std::endl;
 		std::cout << "\t\t" << "l_method: " << (*loc_it).l_method << std::endl;
 		std::cout << "\t\t" << "l_cgi_wl: " << (*loc_it).l_cgi_wl << std::endl;
@@ -69,7 +69,8 @@ void ConfigFile::finalize_blocks(t_server *serverinfo)
 	this->blocks.push_back(*serverinfo);
 	this->print_blocks(serverinfo);
 	serverinfo->locations.clear();
-	serverinfo->root.clear();
+	serverinfo->root[KEY].clear();
+	serverinfo->root[VALUE].clear();
 	serverinfo->home.clear();
 	serverinfo->srvr_name.clear();
 	serverinfo->err_dir.clear();
@@ -159,7 +160,9 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 						if (sub.find("root_") == 0)
 						{
 							iss >> sub;
-							this_loc.l_root = sub;
+							this_loc.l_root[KEY] = sub;
+							iss >> sub;
+							this_loc.l_root[VALUE] = sub;
 						}
 						else if (sub.find("cgi_") == 0)
 						{
@@ -208,7 +211,9 @@ ConfigFile::ConfigFile(const std::string _file_name) : file_name(_file_name)
 			else if (sub.find("root_") == 0)
 			{
 				iss >> sub;
-				serverinfo.root = sub;
+				serverinfo.root[KEY] = sub;
+				iss >> sub;
+				serverinfo.root[VALUE] = sub;
 			}
 			else if (sub.find("home_") == 0)
 			{

@@ -6,7 +6,7 @@
 /*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 16:18:54 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/25 08:21:24 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/20 19:55:08 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,10 @@ void	readFromSocket(int client_socket, std::string &request)
 
         bytes_read = recv(client_socket, buffer, sizeof(buffer), 0);
         if (bytes_read < 0)
-		{
-			std::cerr << "Error reading from socket" << std::endl;
-			throw (500);
-        }
+			return ;
 		else if (bytes_read == 0)
 		{
-			std::cout << "Connection closed by client" << std::endl;
-			throw (408);
+			throw 408;
 		}
 
         request.append(buffer, bytes_read);
@@ -47,7 +43,7 @@ void	addBodyNotChunked(int client_socket, std::string &request, int content_leng
 		// Vérifier si le corps de la requête est entièrement reçu
 		if ((int)request.size() >= 4 + content_length)
 		{
-			std::cout << "Request fully received" << std::endl;
+			std::cout << "Request fully received 1" << std::endl;
 			break;
 		}
 	}
@@ -84,14 +80,14 @@ std::string getHttpRequest(int client_socket)
                     // Vérifier si le corps de la requête est entièrement reçu
                     if (request.size() >= header_end + 4 + content_length)
 					{
-                        std::cout << "Request fully received" << std::endl;
+                        std::cout << "Request fully received 2" << std::endl;
                         break;
                     }
                 }
             }
 			else
 			{
-                std::cout << "Request fully received" << std::endl;
+                std::cout << "Request fully received 3" << std::endl;
                 break;
             }
 		}

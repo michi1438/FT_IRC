@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/10 10:17:12 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/20 17:04:57 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@
 #include "ConfigFile.hpp"
 #include "RequestParser.hpp"
 
+#define KEY		0
+#define VALUE	1
 #define RESET   "\033[0m"
 #define RED     "\033[31m"      // Rouge
 #define GREEN   "\033[32m"      // Vert
