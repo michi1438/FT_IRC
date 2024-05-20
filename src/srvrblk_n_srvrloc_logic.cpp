@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 11:36:12 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/10 08:58:50 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/20 19:46:03 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,28 +28,31 @@ bool is_location(std::string filename, t_server srvr)
 std::string readHtmlFile(std::string filename, t_server srvr)
 {
 	std::fstream file;
-	file.open(filename.c_str());
-	if (file.is_open() == false)
+	if (srvr.root[KEY].compare("/") == 0 && filename.empty() == false)
+		filename.insert(0, srvr.root[VALUE] + "/");
+	else if (srvr.root[KEY].compare("/") == 0)
+		filename.insert(0, srvr.root[VALUE]);
+	else if (filename.find(srvr.root[KEY]) != std::string::npos)
+		filename.replace(filename.find(srvr.root[KEY]), srvr.root[KEY].size(), srvr.root[VALUE]);
+	if (filename.empty() == true && srvr.root[KEY].empty() == true && srvr.home.empty() == true) 
 	{
-		if (filename.empty() == true && srvr.root.empty() == true && srvr.home.empty() == true) 
-		{
-			filename = "./";
-		}
-		if (filename.empty() == true )
-		{
-			filename.append(srvr.root).append(srvr.home);
-			file.open(filename.c_str());
-		}
-		else if (is_location(filename, srvr) == true)
-		{
-			filename.append("/").append(srvr.home);
-			file.open(filename.insert(0, srvr.root).c_str());
-		}
-		else
-		{
-			file.open(filename.insert(0, srvr.root).c_str());
-		}
+		filename = "./";
 	}
+	else if (filename.compare(srvr.root[VALUE]) == 0 && srvr.root[VALUE].empty() == false) 
+	{
+		filename.append("/").append(srvr.home);
+	}
+	else if (filename.empty() == true)
+	{
+		filename.append(srvr.home);
+	}
+	file.open(filename.c_str());
+	if (file.is_open() == false && srvr.list_repo == false)
+	{
+		filename.append("/").append(srvr.home);
+		file.open(filename.c_str());
+	}
+	std::cout << "FILENAME = " << filename << std::endl;
 
 	struct stat buf;
 	stat(filename.c_str(), &buf);

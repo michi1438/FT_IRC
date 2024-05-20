@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/22 15:35:50 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/22 15:43:14 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ t_server	update_location(t_server srvr_used, std::string uri)
 	{
 		if (uri.find(loc_it->l_path) == 0)
 		{
-			new_serv.loc_root = loc_it->l_root; // TODO For now, does not overide the server's root, and is put in other attribute loc_root not put to any use...
+			new_serv.root[KEY] = loc_it->l_root[KEY];
+			new_serv.root[VALUE] = loc_it->l_root[VALUE]; 
 			new_serv.home = loc_it->l_home;
 			new_serv.method = loc_it->l_method;
 			new_serv.cgi_wl = loc_it->l_cgi_wl;

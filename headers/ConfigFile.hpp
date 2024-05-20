@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 18:16:04 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/10 11:49:20 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/20 17:24:35 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 # define __ConfigFile_hpp__
 
 # define CONFIG_FILE_MAX_SIZE 100
+# define KEY		0
+# define VALUE	1
 
 # include <iostream>
 # include <fstream>
@@ -34,7 +36,7 @@ typedef struct S_loc
 {
 	std::string l_path;
 	std::string l_cgi_wl;
-	std::string l_root;
+	std::string l_root[2];
 	std::string l_home;
 	std::string l_method;
 	int l_lcbs;
@@ -45,9 +47,8 @@ typedef struct S_erver
 	bool err;
 	bool list_repo;
 	std::vector<t_loc>	locations;
-	std::string root;
+	std::string root[2];
 	std::string err_dir;
-	std::string loc_root;
 	std::string cgi_wl;
 	std::vector<std::string> srvr_name;
 	std::vector<t_prt> prt_n_default;

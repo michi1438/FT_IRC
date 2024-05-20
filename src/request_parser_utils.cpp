@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 16:18:54 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/22 15:16:23 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/22 15:44:10 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,14 +43,10 @@ void	readFromSocket(int client_socket, std::string &request)
 
         bytes_read = recv(client_socket, buffer, sizeof(buffer), 0);
         if (bytes_read < 0)
-		{
-			std::cerr << "Error reading from socket" << std::endl;
-			throw (500);
-        }
+			return ;
 		else if (bytes_read == 0)
 		{
-			std::cout << "Connection closed by client" << std::endl;
-			throw (408);
+			throw 408;
 		}
 
         request.append(buffer, bytes_read);
@@ -71,7 +67,7 @@ void	addBody(int client_socket, std::string &request, int content_length)
 		// Vérifier si le corps de la requête est entièrement reçu
 		if ((int)request.size() >= 4 + content_length)
 		{
-			std::cout << "Request fully received" << std::endl;
+			std::cout << "Request fully received 1" << std::endl;
 			break;
 		}
 	}

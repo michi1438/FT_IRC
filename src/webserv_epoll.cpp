@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/22 15:35:59 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/22 15:45:08 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,7 @@ int init_ws(ConfigFile& conf)
 				{
 					RequestParser R(client_socket, conf);
 					Req = R;
+					Req.show();
 					srvr_used = choose_server(conf, Req.getHost());
 					requestHandler(client_socket, &srvr_used, Req);
 				}
@@ -124,14 +125,17 @@ int init_ws(ConfigFile& conf)
 				{
 	 				std::cout << RED << "ERROR CODE : " << errorCode << RESET << std::endl;
 					std::string response = read_errpage(errorCode, Req, srvr_used);
-					int bytes_sent = send(client_socket, response.c_str(), response.size(), 0);
-					if (bytes_sent == 0)
+					if (errorCode != 408) 
 					{
-						std::cout << "Zero bytes were sent, this ain't normal" << std::endl; // TODO find better message...
-						throw (500);
+						int bytes_sent = send(client_socket, response.c_str(), response.size(), 0);
+						if (bytes_sent == 0)
+						{
+							std::cout << "Zero bytes were sent, this ain't normal" << std::endl; // TODO find better message...
+							throw (500);
+						}
+						if (bytes_sent == -1)
+							throw (501);
 					}
-					if (bytes_sent == -1)
-						throw (501);
 					close(client_socket);
 				}
 			}
