@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/04/25 09:00:04 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/10 08:18:44 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,14 @@ void handleFileDownload(RequestParser & Req, int client_socket, std::string file
     http_response += file_content;
     http_response += "\r\n";
     
-    send(client_socket, http_response.c_str(), http_response.size(), 0);
+	int bytes_sent = send(client_socket, http_response.c_str(), http_response.size(), 0);
+	if (bytes_sent == 0)
+	{
+		std::cout << "Zero bytes were sent, this ain't normal" << std::endl; // TODO find better message...
+		throw (500);
+	}
+	if (bytes_sent == -1)
+		throw (501);
 }
 
 void showUploadedFiles(int client_socket) {
@@ -154,7 +161,14 @@ void showUploadedFiles(int client_socket) {
     http_response += response;
     http_response += "\r\n";
     
-    send(client_socket, http_response.c_str(), http_response.size(), 0);
+	int bytes_sent = send(client_socket, response.c_str(), response.size(), 0);
+	if (bytes_sent == 0)
+	{
+		std::cout << "Zero bytes were sent, this ain't normal" << std::endl; // TODO find better message...
+		throw (500);
+	}
+	if (bytes_sent == -1)
+		throw (501);
 }
 
 void handleFileDelete(std::string filename, int client_socket) {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv_kqueue.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/04/25 10:23:54 by lzito            ###   ########.fr       */
+/*   Updated: 2024/05/10 08:17:13 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,15 +114,25 @@ int init_ws(ConfigFile& conf)
 			{
                 int client_socket = events[i].ident;
 
+				RequestParser Req;
 				try
 				{
-					requestHandler(client_socket, conf);
+					RequestParser R(client_socket);
+					Req = R;
+					requestHandler(client_socket, conf, Req);
 				}
 				catch (int errorCode)
 				{
 	 				std::cout << RED << "ERROR CODE : " << errorCode << RESET << std::endl;
-					std::string response = read_errpage(errorCode);
-					send(client_socket, response.c_str(), response.size(), 0);
+					std::string response = read_errpage(errorCode, Req);
+					int bytes_sent = send(client_socket, response.c_str(), response.size(), 0);
+					if (bytes_sent == 0)
+					{
+						std::cout << "Zero bytes were sent, this ain't normal" << std::endl; // TODO find better message...
+						throw (500);
+					}
+					if (bytes_sent == -1)
+						throw (501);
 					close(client_socket);
 				}
             }

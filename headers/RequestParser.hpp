@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:09 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/06 13:02:14 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/09 13:27:50 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,8 +54,8 @@ class RequestParser
 		std::map<std::string, std::string>	_query_param;
 
 	public:
-		RequestParser(const int &client_socket);
 		RequestParser(void);
+		RequestParser(const int &client_socket);
 		~RequestParser(void);
 
 		void		show() const;
@@ -77,6 +77,8 @@ class RequestParser
 		size_t		getContentLength() const;
 
 		std::map<std::string, std::string>	getQueryParam() const;
+		std::string toString() const;
+		static RequestParser fromString(const std::string &req_str);
 };
 
 std::string getHttpRequest(int client_socket);
