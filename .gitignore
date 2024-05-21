@@ -34,3 +34,7 @@
 # OTHER (vs code bs)
 .vscode
 .DS_Store
+
+# dependent binaries
+*cgi_tester
+*_tester

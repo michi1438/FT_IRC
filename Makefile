@@ -6,7 +6,7 @@
 #    By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/27 16:42:52 by mguerga           #+#    #+#              #
-#    Updated: 2024/05/09 13:23:45 by rgodtsch         ###   ########.fr        #
+#    Updated: 2024/05/21 11:32:36 by mguerga          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -45,12 +45,15 @@ all: $(NAME)
 
 $(NAME): $(OBJS) $(OBJS2)
 	$(CXX) $(CXXFLAGS) $(OBJS) $(OBJS2) -o $(NAME)
+	make -C cgi_bin/
 
 clean:
 	rm -f $(OBJS) $(OBJS2)
+	make clean -C cgi_bin/
 
 fclean: clean
 	rm -f $(NAME)
+	make fclean -C cgi_bin/
 
 re: fclean all
 

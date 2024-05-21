@@ -6,7 +6,7 @@
 /*   By: lzito <lzito@student.42lausanne.ch>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 16:18:54 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/20 19:55:08 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/21 09:56:50 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ void	readFromSocket(int client_socket, std::string &request)
 			return ;
 		else if (bytes_read == 0)
 		{
-			throw 408;
+			std::cout << "Connection closed by client" << std::endl;
+			throw (408);
 		}
 
         request.append(buffer, bytes_read);
