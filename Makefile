@@ -6,7 +6,7 @@
 #    By: robin <robin@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/27 16:42:52 by mguerga           #+#    #+#              #
-#    Updated: 2024/05/16 17:46:49 by robin            ###   ########.fr        #
+#    Updated: 2024/05/22 11:45:32 by mguerga          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -44,15 +44,18 @@ OBJS2 = $(SRCS2:cpp=o)
 all: $(NAME)
 
 $(NAME): $(OBJS) $(OBJS2)
-	$(CXX) $(CXXFLAGS) $(OBJS) $(OBJS2) -o $(NAME) 
+	$(CXX) $(CXXFLAGS) $(OBJS) $(OBJS2) -o $(NAME)
 	mkdir -p upload
+	make -C cgi_bin/
 
 clean:
 	rm -f $(OBJS) $(OBJS2)
 	@$(RM)r upload
+	make clean -C cgi_bin/
 
 fclean: clean
 	rm -f $(NAME)
+	make fclean -C cgi_bin/
 
 re: fclean all
 

@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 16:18:54 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/22 11:40:06 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/22 11:46:22 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,8 @@ void	readFromSocket(int client_socket, std::string &request)
 			return ; // TODO check it out !!!
 		else if (bytes_read == 0)
 		{
-			throw 408;
+			std::cout << "Connection closed by client" << std::endl;
+			throw (408);
 		}
 
         request.append(buffer, bytes_read);
