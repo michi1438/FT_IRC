@@ -6,13 +6,13 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/16 17:50:50 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/22 13:57:47 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/Centralinclude.hpp"
 
-t_server	update_location(t_server srvr_used, std::string uri)
+t_server 	update_location(t_server srvr_used, std::string uri)
 {
 	t_server new_serv;
 	new_serv = srvr_used;
