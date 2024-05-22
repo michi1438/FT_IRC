@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 11:45:34 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/22 11:41:39 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/22 12:08:19 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ RequestParser::RequestParser(const int &client_socket, const ConfigFile &conf)
    	_boundary(""), _content_type(""), _content_length(0), _body("")
 {
 	std::string req_data = getHttpRequest(client_socket, conf);
-	std::cout << req_data << std::endl;
+	//std::cout << req_data << std::endl;
 
 	std::istringstream	request_stream(req_data);
 
