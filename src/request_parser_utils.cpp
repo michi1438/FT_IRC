@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 16:18:54 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/16 17:33:05 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/22 15:16:23 by lzito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,8 @@ int	checkSizes(const std::string &request, const ConfigFile &conf)
 			t_server srvr_used = choose_server(conf, host);
 			if (!srvr_used.locations.empty())
 				srvr_used = update_location(srvr_used, uri);
-			content_length = std::atoi(new_line.erase(new_line.size() - 1, 1).substr(16).c_str());
+			std::stringstream ss(new_line.erase(new_line.size() - 1, 1).substr(16));
+			ss >> content_length;
 			if (content_length > srvr_used.lcbs)
 				throw (413);
 		}
