@@ -6,7 +6,7 @@
 /*   By: mguerga <mguerga@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 11:36:12 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/20 19:46:03 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/22 12:00:47 by mguerga          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ std::string readHtmlFile(std::string filename, t_server srvr)
 		filename.append("/").append(srvr.home);
 		file.open(filename.c_str());
 	}
-	std::cout << "FILENAME = " << filename << std::endl;
+//	std::cout << "FILENAME = " << filename << std::endl;
 
 	struct stat buf;
 	stat(filename.c_str(), &buf);
