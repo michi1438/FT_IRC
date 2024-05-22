@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 11:06:25 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/22 12:06:19 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/22 13:36:30 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,9 +76,9 @@ std::string read_errpage(int err_code, RequestParser& Req, t_server srvr_used)
 			if (file.is_open() == false)
 				file.open(d_err_dir.append(ERR_413).c_str());
 			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-			std::string length = "300"; //TODO temporary, seems to make the response taken better by the client (??)
-										//make it dynamic if it also works better on mac (avec ma vm je peux pas tester l upload de fichier > quelques ko)
-			std::string response = "HTTP/1.1 413 Payload Too Large\r\nConnection: close\r\nContent-Length: " + length + "\r\nContent-Type: text/html\r\n\r\n" + content;
+//			std::string length = "300"; //TODO temporary, seems to make the response taken better by the client (??)
+//										//make it dynamic if it also works better on mac (avec ma vm je peux pas tester l upload de fichier > quelques ko)
+			std::string response = "HTTP/1.1 413 Payload Too Large\r\nContent-Type: text/html\r\n\r\n" + content;
 			return response;
 		}
 		case 414:
