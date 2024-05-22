@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 11:06:25 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/22 15:42:25 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/22 15:51:36 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,9 @@ std::string read_errpage(int err_code, RequestParser& Req, t_server srvr_used)
 		}
 		case 504:
 		{
-			std::ifstream file(ERR_504);
+			std::ifstream file(srvr_used.err_dir.append(ERR_504).c_str());
+			if (file.is_open() == false)
+				file.open(d_err_dir.append(ERR_504).c_str());
 			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 			std::string response = "HTTP/1.1 504 OK\r\nContent-Type: text/html\r\n\r\n" + content;
 			return response;

@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/22 15:30:20 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/22 15:55:48 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,16 +115,19 @@ int init_ws(ConfigFile& conf)
                 int client_socket = events[i].ident;
 
 				RequestParser Req;
+				t_server srvr_used;
 				try
 				{
 					RequestParser R(client_socket, conf);
 					Req = R;
-					requestHandler(client_socket, conf, Req);
+					//Req.show();
+					srvr_used = choose_server(conf, Req.getHost());
+					requestHandler(client_socket, &srvr_used, Req);
 				}
 				catch (int errorCode)
 				{
 	 				std::cout << RED << "ERROR CODE : " << errorCode << RESET << std::endl;
-					std::string response = read_errpage(errorCode, Req);
+					std::string response = read_errpage(errorCode, Req, srvr_used);
 					int bytes_sent = send(client_socket, response.c_str(), response.size(), 0);
 					if (bytes_sent == 0)
 					{

@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 11:18:54 by robin             #+#    #+#             */
-/*   Updated: 2024/05/22 15:30:06 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/22 16:18:09 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,6 +140,7 @@ void showUploadedFiles(int client_socket) {
     // Afficher les fichiers
     std::string response;
     std::string http_response;
+    
     response += "<style>\r\n";
     response += "body { background-color: lavender; }\r\n"; // Définit la couleur d'arrière-plan
     response += "</style>\r\n";
@@ -164,7 +165,7 @@ void showUploadedFiles(int client_socket) {
     http_response += response;
     http_response += "\r\n";
     
-	int bytes_sent = send(client_socket, response.c_str(), response.size(), 0);
+	int bytes_sent = send(client_socket, http_response.c_str(), http_response.size(), 0);
 	if (bytes_sent == 0)
 	{
 		std::cout << "Zero bytes were sent, this ain't normal" << std::endl; // TODO find better message...

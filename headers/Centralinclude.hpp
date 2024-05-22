@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/03 11:14:39 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/22 15:43:05 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/22 15:52:08 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@
 #define ERR_413 "413.html"
 #define ERR_414 "414.html"
 #define ERR_501 "501.html"
+#define ERR_504 "504.html"
 #define ERR_505 "505.html"
 #define ERR_500 "50x.html"
 #define ERR_512 "512.html"
