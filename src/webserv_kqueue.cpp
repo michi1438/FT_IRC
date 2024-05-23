@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/23 14:35:56 by rgodtsch         ###   ########.fr       */
+/*   Updated: 2024/05/23 16:27:10 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,13 +47,13 @@ int init_ws(ConfigFile& conf)
 			exit(EXIT_FAILURE);
 		}
 
-		if (listen(server_fd.back(), 10) == -1)
+		if (listen(server_fd.back(), 100) == -1)
 		{
 			std::cout << "Error in listen" << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
-		EV_SET(&change_event, server_fd.back(), EVFILT_READ, EV_ADD, 0, 0, NULL);
+		EV_SET(&change_event, server_fd.back(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 
 		if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1)
 		{
@@ -86,24 +86,24 @@ int init_ws(ConfigFile& conf)
                     std::cout << "Error in accept" << std::endl;
                     exit(EXIT_FAILURE);
                 }
+				int flags = fcntl(client_fd, F_GETFL, 0);
+				
+                if (fcntl(client_fd, F_SETFL, O_NONBLOCK | flags) == -1)
+				{
+				
+					exit(EXIT_FAILURE);
+				}
 
-                // Set client socket to non-blocking
-                if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1)
-                {
-                    std::cout << "Error in fcntl" << std::endl;
-                    exit(EXIT_FAILURE);
-                }
-
-                if (fcntl(client_fd, F_SETFL, FD_CLOEXEC) == -1)
-                {
-                    std::cout << "Error in fcntl" << std::endl;
-                    exit(EXIT_FAILURE);
-                }
+				if (fcntl(client_fd, F_SETFD, FD_CLOEXEC) == -1)
+				{
+				
+					exit(EXIT_FAILURE);
+				}
 
                 std::cout << "New connection accepted" << std::endl;
 
                 // Add client socket to kqueue
-                EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+                EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
                 if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1)
                 {
                     std::cout << "Error in kevent" << std::endl;
