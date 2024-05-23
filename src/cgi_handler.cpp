@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 16:06:26 by robin             #+#    #+#             */
-/*   Updated: 2024/05/23 13:38:05 by rgodtsch         ###   ########.fr       */
+/*   Updated: 2024/05/23 14:33:43 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
     int pipefd[2];
     if (pipe(pipefd) == -1)
     {
-        perror("Error in pipe");
+        std::cout << "Error in pipe" << std::endl;
         //throw 500;
         exit(EXIT_FAILURE);
     }
@@ -67,7 +67,7 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
     pid_t pid = fork();
     if (pid == -1)
     {
-        perror("Error in fork");
+        std::cout << "Error in fork" << std::endl;
         //throw 500;
         exit(EXIT_FAILURE);
     }
@@ -101,8 +101,8 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
         execve(cgi_script_path.c_str(), argv, envTmp);
         delete[] argv[0];
         delete[] argv[1];
-        perror("Error in execve");
-        throw 500;
+        std::cout << "Error in execve" << std::endl;
+        // throw 500;
         exit(EXIT_FAILURE);
     }
     else // This is the parent process

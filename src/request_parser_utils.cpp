@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request_parser_utils.cpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/21 16:18:54 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/22 17:17:46 by mguerga          ###   ########.fr       */
+/*   Updated: 2024/05/23 14:24:16 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	readFromSocket(int client_socket, std::string &request)
 
         bytes_read = recv(client_socket, buffer, sizeof(buffer), 0);
         if (bytes_read < 0)
-			return ;
+			throw 500;
 		else if (bytes_read == 0)
 		{
 			std::cout << "Connection closed by client" << std::endl;

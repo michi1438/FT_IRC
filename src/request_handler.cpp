@@ -6,7 +6,7 @@
 /*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/23 13:57:44 by rgodtsch         ###   ########.fr       */
+/*   Updated: 2024/05/23 14:22:16 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,16 +55,19 @@ void	requestHandler(int client_socket, t_server *srvr_used, RequestParser &Req)
 		else if(Req.getMethod() == "GET" && Req.getURI().find("/upload/") != std::string::npos && !Req.isCGI()){
 			std::string filename = Req.getURI().substr(8);
 			handleFileDownload(Req, client_socket, filename);
+			close(client_socket);
 		}
 		else if(Req.getMethod() == "POST" && Req.getURI().find("/delete") != std::string::npos && !Req.isCGI()){
 			std::string body = Req.getBody();
 			std::string filename = body.find("file_to_delete=") != std::string::npos ? body.substr(15) : "";
 			handleFileDelete(decodeUri(filename), client_socket);
+			close(client_socket);
 		}
 		else if(Req.getMethod() == "DELETE" && !Req.isCGI()){
 			if(Req.getURI().find("/upload") != std::string::npos){
 				std::string filename = Req.getURI().substr(8);
 				handleFileDelete(filename, client_socket);
+				close(client_socket);
 			}
 			else
 				throw 405;

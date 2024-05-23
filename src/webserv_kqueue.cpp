@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv_kqueue.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:55:00 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/22 17:51:39 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/23 14:35:56 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int init_ws(ConfigFile& conf)
 	std::vector<int> prt_vec = conf.getPort_vec(); 
     if (kq == -1)
     {
-        perror("Error in kqueue");
+        std::cout << "Error in kqueue" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -32,7 +32,7 @@ int init_ws(ConfigFile& conf)
 		server_fd.push_back(socket(AF_INET, SOCK_STREAM, 0));
 		if (server_fd.back() == -1)
 		{
-			perror("Error in socket");
+			std::cout << "Error in soccet" << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -43,13 +43,13 @@ int init_ws(ConfigFile& conf)
 		setsockopt(server_fd.back(), SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)); // TODO cleanup
 		if (bind(server_fd.back(), (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
 		{
-			perror("Error in bind");
+			std::cout << "Error in bind" << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
 		if (listen(server_fd.back(), 10) == -1)
 		{
-			perror("Error in listen");
+			std::cout << "Error in listen" << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -57,7 +57,7 @@ int init_ws(ConfigFile& conf)
 
 		if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1)
 		{
-			perror("Error in kevent");
+			std::cout << "Error in kevent" << std::endl;
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -68,7 +68,7 @@ int init_ws(ConfigFile& conf)
         int num_events = kevent(kq, NULL, 0, events, MAX_EVENTS, NULL);
         if (num_events == -1)
         {
-            perror("Error in kevent");
+            std::cout << "Error in kevent" << std::endl;
             exit(EXIT_FAILURE);
         }
 
@@ -83,20 +83,20 @@ int init_ws(ConfigFile& conf)
                 int client_fd = accept(cur_srv_fd, (struct sockaddr*)&client_addr, &client_len);
                 if (client_fd == -1)
                 {
-                    perror("Error in accept");
+                    std::cout << "Error in accept" << std::endl;
                     exit(EXIT_FAILURE);
                 }
 
                 // Set client socket to non-blocking
                 if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1)
                 {
-                    perror("Error in fcntl");
+                    std::cout << "Error in fcntl" << std::endl;
                     exit(EXIT_FAILURE);
                 }
 
                 if (fcntl(client_fd, F_SETFL, FD_CLOEXEC) == -1)
                 {
-                    perror("Error in fcntl");
+                    std::cout << "Error in fcntl" << std::endl;
                     exit(EXIT_FAILURE);
                 }
 
@@ -106,7 +106,7 @@ int init_ws(ConfigFile& conf)
                 EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
                 if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1)
                 {
-                    perror("Error in kevent");
+                    std::cout << "Error in kevent" << std::endl;
                     exit(EXIT_FAILURE);
                 }
             }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv_epoll.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 09:41:31 by mguerga           #+#    #+#             */
-/*   Updated: 2024/05/22 15:45:08 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/23 14:36:54 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ int init_ws(ConfigFile& conf)
 	change_event.events = EPOLLIN;
     if (ep == -1)
 	{
-        perror("Error in epoll");
+        std::cout << "Error in epoll" << std::endl;
         exit(EXIT_FAILURE);
     }
 	std::vector<int> server_fd; 
@@ -32,7 +32,7 @@ int init_ws(ConfigFile& conf)
 		server_fd.push_back(socket(AF_INET, SOCK_STREAM, 0));
 		if (server_fd.back() == -1)
 		{
-			perror("Error in socket");
+		
 			exit(EXIT_FAILURE);
 		}
 		struct sockaddr_in server_addr;
@@ -42,18 +42,18 @@ int init_ws(ConfigFile& conf)
 		setsockopt(server_fd.back(), SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)); // TODO cleanup
 		if (bind(server_fd.back(), (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
 		{
-			perror("Error in bind");
+	
 			exit(EXIT_FAILURE);
 		}
 		if (listen(server_fd.back(), 10) == -1)
 		{
-			perror("Error in listen");
+		
 			exit(EXIT_FAILURE);
 		}
 		change_event.data.fd = server_fd.back();
 		if (epoll_ctl(ep, EPOLL_CTL_ADD, server_fd.back(), &change_event) == -1)
 		{
-			perror("Error in epoll");
+		
 			exit(EXIT_FAILURE);
 		}
 
@@ -65,7 +65,7 @@ int init_ws(ConfigFile& conf)
         int num_events = epoll_wait(ep, events, MAX_EVENTS, -1);
         if (num_events == -1)
 		{
-            perror("Error in epoll");
+        
             exit(EXIT_FAILURE);
         }
         for (int i = 0; i < num_events; ++i)
@@ -79,20 +79,20 @@ int init_ws(ConfigFile& conf)
 				int client_fd = accept(cur_srv_fd, (struct sockaddr*)&client_addr, &client_len);
 				if (client_fd == -1)
 				{
-					perror("Error in accept");
+					
 					exit(EXIT_FAILURE);
 				}
 
 				// Set client socket to non-blocking and close on exec
 				if (fcntl(client_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
 				{
-					perror("Error in fcntl");
+				
 					exit(EXIT_FAILURE);
 				}
 
 				if (fcntl(client_fd, F_SETFD, FD_CLOEXEC) == -1)
 				{
-					perror("Error in fcntl");
+				
 					exit(EXIT_FAILURE);
 				}
 				//std::cout << "GETFL " << fcntl(client_fd, F_GETFL, FD_CLOEXEC) << std::endl; TODO check the nonblock and cloexec is on SETFD or SETFL
@@ -103,7 +103,7 @@ int init_ws(ConfigFile& conf)
 				change_event.data.fd = client_fd;
 				if (epoll_ctl(ep, EPOLL_CTL_ADD, client_fd, &change_event) == -1)
 				{
-                    perror("Error in epoll");
+                  
                     exit(EXIT_FAILURE);
 				}
 			}
