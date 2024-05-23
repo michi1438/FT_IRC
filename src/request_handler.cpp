@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request_handler.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 10:13:12 by lzito             #+#    #+#             */
-/*   Updated: 2024/05/22 17:39:54 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/23 13:57:44 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,9 @@ void	requestHandler(int client_socket, t_server *srvr_used, RequestParser &Req)
 		else if (Req.isCGI())
 		{
 			std::string cgi_script_path = "cgi_bin/" + Req.getScriptName();
+			std::ifstream cgi_script (cgi_script_path.c_str(), std::ios::binary | std::ios::ate);
+			if(!cgi_script.is_open())
+				throw 404;
 			std::string cgi_output = execute_cgi_script(cgi_script_path, Req);
 			std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + cgi_output;
 			int bytes_sent = send(client_socket, response.c_str(), response.size(), 0);

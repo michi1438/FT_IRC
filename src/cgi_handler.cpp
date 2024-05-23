@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi_handler.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: rgodtsch <rgodtsch@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 16:06:26 by robin             #+#    #+#             */
-/*   Updated: 2024/05/16 17:23:45 by robin            ###   ########.fr       */
+/*   Updated: 2024/05/23 13:38:05 by rgodtsch         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
     if (pipe(pipefd) == -1)
     {
         perror("Error in pipe");
-        throw 500;
+        //throw 500;
         exit(EXIT_FAILURE);
     }
 
@@ -68,7 +68,7 @@ std::string execute_cgi_script(const std::string& cgi_script_path, RequestParser
     if (pid == -1)
     {
         perror("Error in fork");
-        throw 500;
+        //throw 500;
         exit(EXIT_FAILURE);
     }
 
